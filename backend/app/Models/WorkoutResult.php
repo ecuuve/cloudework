@@ -77,7 +77,7 @@ class WorkoutResult extends Model
         return $query->where('rx_or_scaled', 'rx');
     }
 
-    public function scopeCompleted Between($query, $startDate, $endDate)
+	public function scopeCompletedBetween($query, $startDate, $endDate)
     {
         return $query->whereBetween('completed_at', [$startDate, $endDate]);
     }
