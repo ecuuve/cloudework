@@ -3,6 +3,11 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AthleteController;
+use App\Http\Controllers\Api\WorkoutController;
+use App\Http\Controllers\Api\AssignmentController;
+use App\Http\Controllers\Api\ResultController;
+use App\Http\Controllers\Api\AnalyticsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,20 +39,27 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
     
-    // Athletes routes (coming next)
-    // Route::apiResource('athletes', AthleteController::class);
+    // Athletes
+    Route::apiResource('athletes', AthleteController::class);
     
-    // Workouts routes (coming next)
-    // Route::apiResource('workouts', WorkoutController::class);
+    // Workouts
+    Route::apiResource('workouts', WorkoutController::class);
+    Route::get('/benchmarks', [WorkoutController::class, 'benchmarks']);
     
-    // Assignments routes (coming next)
-    // Route::apiResource('assignments', AssignmentController::class);
+    // Assignments
+    Route::apiResource('assignments', AssignmentController::class);
+    Route::post('/assignments/bulk', [AssignmentController::class, 'bulkAssign']);
+    Route::get('/calendar', [AssignmentController::class, 'calendar']);
     
-    // Results routes (coming next)
-    // Route::apiResource('results', ResultController::class);
+    // Results
+    Route::apiResource('results', ResultController::class)->only(['index', 'store', 'update']);
+    Route::get('/results/workout/{workoutId}/history', [ResultController::class, 'workoutHistory']);
+    Route::get('/personal-records', [ResultController::class, 'personalRecords']);
     
-    // Analytics routes (coming next)
-    // Route::get('/analytics/dashboard', [AnalyticsController::class, 'dashboard']);
+    // Analytics
+    Route::get('/analytics/dashboard', [AnalyticsController::class, 'dashboard']);
+    Route::get('/analytics/athlete/{athleteId}/progress', [AnalyticsController::class, 'athleteProgress']);
+    Route::get('/analytics/workout/{workoutId}/leaderboard', [AnalyticsController::class, 'workoutLeaderboard']);
 });
 
 // Fallback route
