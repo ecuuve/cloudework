@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atletas - CloudEwork</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #E85A2A;
+            --secondary: #004E89;
+            --dark: #1A1A2E;
+            --dark-light: #252541;
+            --accent: #FFD23F;
+            --text-light: #E8E8E8;
+            --text-gray: #A0A0B0;
+            --success: #2ECC71;
+            --danger: #E74C3C;
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, #16213E 100%);
+            min-height: 100vh;
+            color: var(--text-light);
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem 0;
+            z-index: 100;
+        }
+
+        .logo {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1.5rem;
+            color: var(--text-gray);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255, 107, 53, 0.1);
+            color: var(--primary);
+            border-left: 3px solid var(--primary);
+        }
+
+        .nav-icon {
+            margin-right: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        .header {
+            position: fixed;
+            left: 260px;
+            top: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 90;
+        }
+
+        .header-title h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.5rem;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn {
+            padding: 0.5rem 1rem;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            margin-top: 70px;
+            padding: 2rem;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-gray);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        tbody tr {
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .athlete-name {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .athlete-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(46, 204, 113, 0.2);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(255, 215, 63, 0.2);
+            color: var(--accent);
+        }
+
+        .badge-danger {
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            border-radius: 6px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--dark-light);
+            border-radius: 12px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-gray);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-gray);
+            font-size: 0.875rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: rgba(46, 204, 113, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .alert-error {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .page-btn {
+            padding: 0.5rem 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        .page-btn.active {
+            background: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <h1>CLOUDEWORK</h1>
+        </div>
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashboard-connected.html" class="nav-link">
+                        <span class="nav-icon">📊</span>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="athletes.html" class="nav-link active">
+                        <span class="nav-icon">👥</span>
+                        Atletas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="workouts.html" class="nav-link">
+                        <span class="nav-icon">💪</span>
+                        Workouts
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="programming.html" class="nav-link">
+                        <span class="nav-icon">📅</span>
+                        Programación
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="results.html" class="nav-link">
+                        <span class="nav-icon">🏆</span>
+                        Resultados
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="analytics.html" class="nav-link">
+                        <span class="nav-icon">📈</span>
+                        Analytics
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-title">
+            <h2>Atletas</h2>
+        </div>
+        <div class="user-menu">
+            <div class="user-info">
+                <div class="user-name" id="userName">Cargando...</div>
+            </div>
+            <button class="logout-btn" onclick="logout()">Salir</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div id="alert" class="alert" style="display: none;"></div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Buscar atleta por nombre o email...">
+            </div>
+            <button class="btn" onclick="openCreateModal()">+ Nuevo Atleta</button>
+        </div>
+
+        <!-- Athletes Table -->
+        <div class="card">
+            <div id="athletesContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Cargando atletas...</p>
+                </div>
+            </div>
+
+            <div id="pagination" class="pagination" style="display: none;"></div>
+        </div>
+    </main>
+
+    <!-- Create/Edit Modal -->
+    <div id="athleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Nuevo Atleta</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+
+            <form id="athleteForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nombre *</label>
+                        <input type="text" id="first_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Apellido *</label>
+                        <input type="text" id="last_name" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Email *</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group full-width" id="passwordGroup">
+                        <label>Password *</label>
+                        <input type="password" id="password">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="tel" id="phone">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Nacimiento</label>
+                        <input type="date" id="date_of_birth">
+                    </div>
+                    <div class="form-group">
+                        <label>Género</label>
+                        <select id="gender">
+                            <option value="">Seleccionar...</option>
+                            <option value="male">Masculino</option>
+                            <option value="female">Femenino</option>
+                            <option value="other">Otro</option>
+                            <option value="prefer_not_to_say">Prefiero no decir</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Altura (cm)</label>
+                        <input type="number" id="height_cm" min="0" max="300">
+                    </div>
+                    <div class="form-group">
+                        <label>Peso (kg)</label>
+                        <input type="number" id="weight_kg" min="0" max="500" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="status">
+                            <option value="active">Activo</option>
+                            <option value="inactive">Inactivo</option>
+                            <option value="on_hold">En Pausa</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Objetivos</label>
+                        <textarea id="goals" placeholder="Ej: Mejorar fuerza, perder peso, preparar competencia..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn" id="submitBtn">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/v1';
+        let authToken = null;
+        let currentUser = null;
+        let athletes = [];
+        let currentPage = 1;
+        let totalPages = 1;
+        let editingAthleteId = null;
+        let searchTimeout = null;
+
+        // Check auth
+        function checkAuth() {
+            const userData = localStorage.getItem('cloudework_user');
+            if (!userData) {
+                window.location.href = 'login-connected.html';
+                return false;
+            }
+
+            try {
+                currentUser = JSON.parse(userData);
+                authToken = currentUser.token;
+                document.getElementById('userName').textContent = currentUser.first_name + ' ' + currentUser.last_name;
+                return true;
+            } catch (e) {
+                window.location.href = 'login-connected.html';
+                return false;
+            }
+        }
+
+        function logout() {
+            if (confirm('¿Seguro que quieres salir?')) {
+                localStorage.removeItem('cloudework_user');
+                window.location.href = 'login-connected.html';
+            }
+        }
+
+        // Fetch with auth
+        async function fetchAPI(endpoint, options = {}) {
+            const response = await fetch(`${API_URL}${endpoint}`, {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${authToken}`,
+                    ...options.headers
+                }
+            });
+
+            if (response.status === 401) {
+                logout();
+                throw new Error('Unauthorized');
+            }
+
+            const data = await response.json();
+            return data;
+        }
+
+        // Load athletes
+        async function loadAthletes(page = 1, search = '') {
+            try {
+                let url = `/athletes?page=${page}&per_page=10`;
+                if (search) {
+                    url += `&search=${encodeURIComponent(search)}`;
+                }
+
+                const data = await fetchAPI(url);
+                
+                if (data.success) {
+                    athletes = data.data.athletes;
+                    currentPage = data.data.pagination.current_page;
+                    totalPages = data.data.pagination.total_pages;
+                    
+                    renderAthletes();
+                    renderPagination();
+                } else {
+                    showAlert(data.message || 'Error cargando atletas', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading athletes:', error);
+                showAlert('Error cargando atletas. Verifica que el servidor esté corriendo.', 'error');
+            }
+        }
+
+        function renderAthletes() {
+            const container = document.getElementById('athletesContainer');
+            
+            if (athletes.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 3rem; color: var(--text-gray);">No se encontraron atletas</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Atleta</th>
+                            <th>Email</th>
+                            <th>Estado</th>
+                            <th>Workouts</th>
+                            <th>PRs</th>
+                            <th>Racha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${athletes.map(athlete => {
+                            const stats = athlete.statistics || athlete.stats || {};
+                            const totalWorkouts = stats.total_workouts || 0;
+                            const totalPrs = stats.total_prs || 0;
+                            const currentStreak = stats.current_streak || 0;
+                            
+                            return `
+                            <tr>
+                                <td>
+                                    <div class="athlete-name">
+                                        <div class="athlete-avatar">
+                                            ${athlete.user.first_name.charAt(0)}${athlete.user.last_name.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 600;">${athlete.user.full_name}</div>
+                                            ${athlete.age ? `<div style="font-size: 0.85rem; color: var(--text-gray);">${athlete.age} años</div>` : ''}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>${athlete.user.email}</td>
+                                <td>
+                                    <span class="badge badge-${athlete.status === 'active' ? 'success' : athlete.status === 'on_hold' ? 'warning' : 'danger'}">
+                                        ${athlete.status === 'active' ? 'Activo' : athlete.status === 'on_hold' ? 'En Pausa' : 'Inactivo'}
+                                    </span>
+                                </td>
+                                <td>${totalWorkouts}</td>
+                                <td>${totalPrs}</td>
+                                <td>${currentStreak} días</td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="btn-icon" onclick="editAthlete(${athlete.id})" title="Editar">✏️</button>
+                                        <button class="btn-icon" onclick="deleteAthlete(${athlete.id}, '${athlete.user.full_name}')" title="Eliminar">🗑️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function renderPagination() {
+            const paginationDiv = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                paginationDiv.style.display = 'none';
+                return;
+            }
+
+            paginationDiv.style.display = 'flex';
+            
+            let html = '';
+            
+            if (currentPage > 1) {
+                html += `<button class="page-btn" onclick="loadAthletes(${currentPage - 1})">← Anterior</button>`;
+            }
+            
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="loadAthletes(${i})">${i}</button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    html += `<span class="page-btn" style="cursor: default;">...</span>`;
+                }
+            }
+            
+            if (currentPage < totalPages) {
+                html += `<button class="page-btn" onclick="loadAthletes(${currentPage + 1})">Siguiente →</button>`;
+            }
+            
+            paginationDiv.innerHTML = html;
+        }
+
+        // Search
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                loadAthletes(1, e.target.value);
+            }, 500);
+        });
+
+        // Modal functions
+        function openCreateModal() {
+            editingAthleteId = null;
+            document.getElementById('modalTitle').textContent = 'Nuevo Atleta';
+            document.getElementById('athleteForm').reset();
+            document.getElementById('passwordGroup').style.display = 'block';
+            document.getElementById('password').required = true;
+            document.getElementById('status').value = 'active';
+            document.getElementById('athleteModal').classList.add('active');
+        }
+
+        async function editAthlete(id) {
+            try {
+                const data = await fetchAPI(`/athletes/${id}`);
+                
+                if (data.success) {
+                    editingAthleteId = id;
+                    const athlete = data.data.athlete;
+                    
+                    document.getElementById('modalTitle').textContent = 'Editar Atleta';
+                    document.getElementById('first_name').value = athlete.user.first_name;
+                    document.getElementById('last_name').value = athlete.user.last_name;
+                    document.getElementById('email').value = athlete.user.email;
+                    document.getElementById('phone').value = athlete.user.phone || '';
+                    document.getElementById('date_of_birth').value = athlete.date_of_birth || '';
+                    document.getElementById('gender').value = athlete.gender || '';
+                    document.getElementById('height_cm').value = athlete.height_cm || '';
+                    document.getElementById('weight_kg').value = athlete.weight_kg || '';
+                    document.getElementById('status').value = athlete.status;
+                    document.getElementById('goals').value = athlete.goals || '';
+                    
+                    document.getElementById('passwordGroup').style.display = 'none';
+                    document.getElementById('password').required = false;
+                    
+                    document.getElementById('athleteModal').classList.add('active');
+                }
+            } catch (error) {
+                showAlert('Error cargando datos del atleta', 'error');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('athleteModal').classList.remove('active');
+            editingAthleteId = null;
+        }
+
+        // Form submit
+        document.getElementById('athleteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Guardando...';
+            
+            try {
+                const formData = {
+                    first_name: document.getElementById('first_name').value,
+                    last_name: document.getElementById('last_name').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    date_of_birth: document.getElementById('date_of_birth').value,
+                    gender: document.getElementById('gender').value,
+                    height_cm: parseFloat(document.getElementById('height_cm').value) || null,
+                    weight_kg: parseFloat(document.getElementById('weight_kg').value) || null,
+                    status: document.getElementById('status').value,
+                    goals: document.getElementById('goals').value
+                };
+
+                if (!editingAthleteId) {
+                    formData.password = document.getElementById('password').value;
+                }
+
+                const endpoint = editingAthleteId ? `/athletes/${editingAthleteId}` : '/athletes';
+                const method = editingAthleteId ? 'PUT' : 'POST';
+
+                const data = await fetchAPI(endpoint, {
+                    method: method,
+                    body: JSON.stringify(formData)
+                });
+
+                if (data.success) {
+                    showAlert(editingAthleteId ? 'Atleta actualizado correctamente' : 'Atleta creado correctamente', 'success');
+                    closeModal();
+                    loadAthletes(currentPage);
+                } else {
+                    showAlert(data.message || 'Error guardando atleta', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error guardando atleta', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Guardar';
+            }
+        });
+
+        async function deleteAthlete(id, name) {
+            if (!confirm(`¿Estás seguro de eliminar a ${name}? Esta acción no se puede deshacer.`)) {
+                return;
+            }
+
+            try {
+                const data = await fetchAPI(`/athletes/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (data.success) {
+                    showAlert('Atleta eliminado correctamente', 'success');
+                    loadAthletes(currentPage);
+                } else {
+                    showAlert(data.message || 'Error eliminando atleta', 'error');
+                }
+            } catch (error) {
+                showAlert('Error eliminando atleta', 'error');
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('alert');
+            alertDiv.textContent = message;
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.style.display = 'block';
+
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Initialize
+        if (checkAuth()) {
+            loadAthletes();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CloudEwork</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #E85A2A;
+            --secondary: #004E89;
+            --dark: #1A1A2E;
+            --dark-light: #252541;
+            --accent: #FFD23F;
+            --text-light: #E8E8E8;
+            --text-gray: #A0A0B0;
+            --success: #2ECC71;
+            --danger: #E74C3C;
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, #16213E 100%);
+            min-height: 100vh;
+            color: var(--text-light);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem 0;
+            z-index: 100;
+        }
+
+        .logo {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1.5rem;
+            color: var(--text-gray);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255, 107, 53, 0.1);
+            color: var(--primary);
+            border-left: 3px solid var(--primary);
+        }
+
+        .nav-icon {
+            margin-right: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            left: 260px;
+            top: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 90;
+        }
+
+        .header-title h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.5rem;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--text-gray);
+        }
+
+        .logout-btn {
+            padding: 0.5rem 1rem;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            margin-top: 70px;
+            padding: 2rem;
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .kpi-title {
+            font-size: 0.875rem;
+            color: var(--text-gray);
+            text-transform: uppercase;
+        }
+
+        .kpi-icon {
+            font-size: 1.5rem;
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-family: 'Oswald', sans-serif;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-change {
+            font-size: 0.875rem;
+        }
+
+        .kpi-change.positive {
+            color: var(--success);
+        }
+
+        .kpi-change.negative {
+            color: var(--danger);
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            font-family: 'Oswald', sans-serif;
+        }
+
+        /* Athletes List */
+        .athlete-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+
+        .athlete-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 1rem;
+        }
+
+        .athlete-info {
+            flex: 1;
+        }
+
+        .athlete-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .athlete-stats {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <h1>CLOUDEWORK</h1>
+        </div>
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashboard-connected.html" class="nav-link active">
+                        <span class="nav-icon">📊</span>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="athletes.html" class="nav-link">
+                        <span class="nav-icon">👥</span>
+                        Atletas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="workouts.html" class="nav-link">
+                        <span class="nav-icon">💪</span>
+                        Workouts
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="programming.html" class="nav-link">
+                        <span class="nav-icon">📅</span>
+                        Programación
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="results.html" class="nav-link">
+                        <span class="nav-icon">🏆</span>
+                        Resultados
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="analytics.html" class="nav-link">
+                        <span class="nav-icon">📈</span>
+                        Analytics
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-title">
+            <h2>Dashboard</h2>
+        </div>
+        <div class="user-menu">
+            <div class="user-info">
+                <div class="user-name" id="userName">Cargando...</div>
+                <div class="user-role">Coach</div>
+            </div>
+            <button class="logout-btn" onclick="logout()">Salir</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div id="errorAlert" class="error" style="display: none;"></div>
+
+        <!-- KPIs -->
+        <div class="kpi-grid" id="kpiGrid">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Cargando estadísticas...</p>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Recent Athletes -->
+            <div class="card">
+                <h3 class="card-title">Atletas Activos</h3>
+                <div id="athletesList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card">
+                <h3 class="card-title">Actividad Reciente</h3>
+                <div id="recentActivity">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/v1';
+        let authToken = null;
+        let currentUser = null;
+
+        // Check authentication
+        function checkAuth() {
+            const userData = localStorage.getItem('cloudework_user');
+            if (!userData) {
+                window.location.href = 'login-connected.html';
+                return false;
+            }
+
+            try {
+                currentUser = JSON.parse(userData);
+                authToken = currentUser.token;
+                document.getElementById('userName').textContent = currentUser.first_name + ' ' + currentUser.last_name;
+                return true;
+            } catch (e) {
+                window.location.href = 'login-connected.html';
+                return false;
+            }
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('¿Seguro que quieres salir?')) {
+                localStorage.removeItem('cloudework_user');
+                window.location.href = 'login-connected.html';
+            }
+        }
+
+        // Fetch with auth
+        async function fetchAPI(endpoint, options = {}) {
+            const response = await fetch(`${API_URL}${endpoint}`, {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${authToken}`,
+                    ...options.headers
+                }
+            });
+
+            if (response.status === 401) {
+                logout();
+                throw new Error('Unauthorized');
+            }
+
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.message || 'Error en la petición');
+            }
+
+            return data;
+        }
+
+        // Load Dashboard Data
+        async function loadDashboard() {
+            try {
+                // Load KPIs
+                const dashboardData = await fetchAPI('/analytics/dashboard');
+                renderKPIs(dashboardData.data.kpis);
+                renderRecentActivity(dashboardData.data.recent_activity);
+
+                // Load Athletes
+                const athletesData = await fetchAPI('/athletes?per_page=5');
+                renderAthletes(athletesData.data.athletes);
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                showError('Error cargando datos. Asegúrate que el servidor esté corriendo.');
+            }
+        }
+
+        function renderKPIs(kpis) {
+            const kpiGrid = document.getElementById('kpiGrid');
+            
+            // Default values if data is missing
+            const totalAthletes = kpis?.total_athletes || { value: 0, growth_percentage: 0, trend: 'neutral' };
+            const workoutsWeek = kpis?.workouts_this_week || { value: 0, growth_percentage: 0, trend: 'neutral' };
+            const completionRate = kpis?.completion_rate || { value: 0, completed: 0, assigned: 0, trend: 'neutral' };
+            const prsMonth = kpis?.prs_this_month || { value: 0, growth_percentage: 0, trend: 'neutral' };
+            
+            kpiGrid.innerHTML = `
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Total Atletas</span>
+                        <span class="kpi-icon">👥</span>
+                    </div>
+                    <div class="kpi-value">${totalAthletes.value}</div>
+                    <div class="kpi-change ${totalAthletes.trend === 'up' ? 'positive' : 'negative'}">
+                        ${totalAthletes.trend === 'up' ? '↗' : '↘'} ${Math.abs(totalAthletes.growth_percentage || 0)}% vs mes pasado
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Workouts Esta Semana</span>
+                        <span class="kpi-icon">💪</span>
+                    </div>
+                    <div class="kpi-value">${workoutsWeek.value}</div>
+                    <div class="kpi-change ${workoutsWeek.trend === 'up' ? 'positive' : 'negative'}">
+                        ${workoutsWeek.trend === 'up' ? '↗' : '↘'} ${Math.abs(workoutsWeek.growth_percentage || 0)}% vs semana pasada
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Tasa de Completado</span>
+                        <span class="kpi-icon">✅</span>
+                    </div>
+                    <div class="kpi-value">${completionRate.value}%</div>
+                    <div class="kpi-change ${completionRate.trend === 'up' ? 'positive' : 'negative'}">
+                        ${completionRate.completed || 0} de ${completionRate.assigned || 0} asignados
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-title">PRs Este Mes</span>
+                        <span class="kpi-icon">🏆</span>
+                    </div>
+                    <div class="kpi-value">${prsMonth.value}</div>
+                    <div class="kpi-change ${prsMonth.trend === 'up' ? 'positive' : 'negative'}">
+                        ${prsMonth.trend === 'up' ? '↗' : '↘'} ${Math.abs(prsMonth.growth_percentage || 0)}% vs mes pasado
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAthletes(athletes) {
+            const athletesList = document.getElementById('athletesList');
+            
+            if (!athletes || athletes.length === 0) {
+                athletesList.innerHTML = '<p style="text-align: center; color: var(--text-gray);">No hay atletas</p>';
+                return;
+            }
+
+            athletesList.innerHTML = athletes.map(athlete => {
+                // Handle both possible structures
+                const stats = athlete.statistics || athlete.stats || {};
+                const totalWorkouts = stats.total_workouts || 0;
+                const totalPrs = stats.total_prs || 0;
+                const currentStreak = stats.current_streak || 0;
+                
+                return `
+                    <div class="athlete-item">
+                        <div class="athlete-avatar">
+                            ${athlete.user.first_name.charAt(0)}${athlete.user.last_name.charAt(0)}
+                        </div>
+                        <div class="athlete-info">
+                            <div class="athlete-name">${athlete.user.full_name}</div>
+                            <div class="athlete-stats">
+                                ${totalWorkouts} workouts • ${totalPrs} PRs • Racha: ${currentStreak} días
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderRecentActivity(activity) {
+            const activityDiv = document.getElementById('recentActivity');
+            
+            if (!activity || activity.length === 0) {
+                activityDiv.innerHTML = '<p style="text-align: center; color: var(--text-gray);">Sin actividad reciente</p>';
+                return;
+            }
+
+            activityDiv.innerHTML = activity.map(item => `
+                <div class="athlete-item">
+                    <div class="athlete-info">
+                        <div class="athlete-name">${item.athlete_name}</div>
+                        <div class="athlete-stats">
+                            ${item.workout_name} • ${item.rx_or_scaled.toUpperCase()} ${item.is_pr ? '🏆 PR!' : ''}
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-gray); margin-top: 0.25rem;">
+                            ${item.completed_at}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorAlert');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Initialize
+        if (checkAuth()) {
+            loadDashboard();
+        }
+    </script>
+</body>
+</html>

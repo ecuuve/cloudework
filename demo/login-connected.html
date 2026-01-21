@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CloudEwork</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #E85A2A;
+            --secondary: #004E89;
+            --dark: #1A1A2E;
+            --dark-light: #252541;
+            --accent: #FFD23F;
+            --text-light: #E8E8E8;
+            --text-gray: #A0A0B0;
+            --success: #2ECC71;
+            --danger: #E74C3C;
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, #16213E 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+        }
+
+        .container {
+            max-width: 450px;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 2.5rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .logo p {
+            color: var(--text-gray);
+            margin-top: 0.5rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .alert-success {
+            background: rgba(46, 204, 113, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .alert-error {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .demo-info {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 215, 63, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            color: var(--accent);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>CLOUDEWORK</h1>
+            <p>CrossFit Management Platform</p>
+        </div>
+
+        <div class="card">
+            <div id="alert" class="alert"></div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="demo@cloudework.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="btn" id="submitBtn">
+                    Iniciar Sesión
+                </button>
+            </form>
+
+            <div class="demo-info">
+                <strong>🎯 Credenciales Demo:</strong><br>
+                Email: demo@cloudework.com<br>
+                Password: demo123
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/v1';
+        const loginForm = document.getElementById('loginForm');
+        const alertDiv = document.getElementById('alert');
+        const submitBtn = document.getElementById('submitBtn');
+
+        function showAlert(message, type) {
+            alertDiv.textContent = message;
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.style.display = 'block';
+
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span> Conectando...';
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.data.token) {
+                    // Save session with real data from API
+                    localStorage.setItem('cloudework_user', JSON.stringify({
+                        id: data.data.user.id,
+                        email: data.data.user.email,
+                        first_name: data.data.user.first_name,
+                        last_name: data.data.user.last_name,
+                        role: data.data.user.role,
+                        token: data.data.token,
+                        profile: data.data.profile
+                    }));
+
+                    showAlert(`✅ ¡Bienvenido ${data.data.user.first_name}!`, 'success');
+
+                    setTimeout(() => {
+                        window.location.href = 'dashboard-connected.html';
+                    }, 1000);
+                } else {
+                    showAlert('❌ ' + (data.message || 'Credenciales incorrectas'), 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Iniciar Sesión';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert('❌ Error de conexión. Asegúrate que el servidor esté corriendo (php artisan serve)', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Iniciar Sesión';
+            }
+        });
+
+        // Check if already logged in
+        window.addEventListener('load', () => {
+            const user = localStorage.getItem('cloudework_user');
+            if (user) {
+                try {
+                    const userData = JSON.parse(user);
+                    if (userData.token) {
+                        window.location.href = 'dashboard-connected.html';
+                    }
+                } catch (e) {
+                    localStorage.removeItem('cloudework_user');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
