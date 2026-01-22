@@ -139,34 +139,47 @@ class ResultController extends Controller
         // If coach, get athlete_id from request
         // If athlete, get own results
         if ($user->isCoach()) {
-            $validator = Validator::make($request->all(), [
-                'athlete_id' => 'required|exists:athletes,id',
-            ]);
+            // athlete_id is now optional for coaches
+            if ($request->has('athlete_id')) {
+                $validator = Validator::make($request->all(), [
+                    'athlete_id' => 'required|exists:athletes,id',
+                ]);
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Athlete ID required',
-                    'errors' => $validator->errors(),
-                ], 422);
-            }
+                if ($validator->fails()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid athlete ID',
+                        'errors' => $validator->errors(),
+                    ], 422);
+                }
 
-            $athleteId = $request->athlete_id;
-            
-            // Verify athlete belongs to coach
-            $athlete = $user->coach->athletes()->find($athleteId);
-            if (!$athlete) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Athlete not found',
-                ], 404);
+                $athleteId = $request->athlete_id;
+                
+                // Verify athlete belongs to coach
+                $athlete = $user->coach->athletes()->find($athleteId);
+                if (!$athlete) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Athlete not found',
+                    ], 404);
+                }
+            } else {
+                // No athlete_id provided, return all results from coach's athletes
+                $athleteId = null;
             }
         } else {
             $athleteId = $user->athlete->id;
         }
 
-        $query = WorkoutResult::with(['workout', 'assignment'])
-            ->where('athlete_id', $athleteId);
+        $query = WorkoutResult::with(['workout', 'assignment', 'athlete.user']);
+        
+        if ($athleteId !== null) {
+            $query->where('athlete_id', $athleteId);
+        } elseif ($user->isCoach()) {
+            // Coach viewing all athletes
+            $athleteIds = $user->coach->athletes()->pluck('id');
+            $query->whereIn('athlete_id', $athleteIds);
+        }
 
         // Filters
         if ($request->has('workout_id')) {
@@ -443,6 +456,96 @@ class ResultController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update result',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get dashboard statistics
+     */
+    public function dashboardStats(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        try {
+            // Get coach's athletes
+            if (!$user->isCoach() || !$user->coach) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only coaches can access dashboard stats',
+                ], 403);
+            }
+
+            $coach = $user->coach;
+            $athleteIds = $coach->athletes()->pluck('id');
+
+            // Total athletes
+            $totalAthletes = $athleteIds->count();
+
+            // Workouts this week
+            $startOfWeek = now()->startOfWeek();
+            $endOfWeek = now()->endOfWeek();
+            $workoutsThisWeek = WorkoutResult::whereIn('athlete_id', $athleteIds)
+                ->whereBetween('completed_at', [$startOfWeek, $endOfWeek])
+                ->count();
+
+            // Completion rate (workouts completed vs assigned this month)
+            $startOfMonth = now()->startOfMonth();
+            $endOfMonth = now()->endOfMonth();
+            
+            $assignedThisMonth = \App\Models\WorkoutAssignment::whereIn('athlete_id', $athleteIds)
+                ->whereBetween('scheduled_date', [$startOfMonth->format('Y-m-d'), $endOfMonth->format('Y-m-d')])
+                ->count();
+            
+            $completedThisMonth = \App\Models\WorkoutAssignment::whereIn('athlete_id', $athleteIds)
+                ->whereBetween('scheduled_date', [$startOfMonth->format('Y-m-d'), $endOfMonth->format('Y-m-d')])
+                ->where('is_completed', true)
+                ->count();
+
+            $completionRate = $assignedThisMonth > 0 
+                ? round(($completedThisMonth / $assignedThisMonth) * 100) 
+                : 0;
+
+            // PRs this month
+            $prsThisMonth = WorkoutResult::whereIn('athlete_id', $athleteIds)
+                ->where('is_pr', true)
+                ->whereBetween('completed_at', [$startOfMonth, $endOfMonth])
+                ->count();
+
+            // Recent activity
+            $recentResults = WorkoutResult::with(['athlete.user', 'workout'])
+                ->whereIn('athlete_id', $athleteIds)
+                ->orderBy('completed_at', 'desc')
+                ->take(10)
+                ->get()
+                ->map(function ($result) {
+                    return [
+                        'athlete_name' => $result->athlete->user->first_name . ' ' . $result->athlete->user->last_name,
+                        'workout_name' => $result->workout->name,
+                        'completed_at' => $result->completed_at->format('Y-m-d H:i'),
+                        'is_pr' => $result->is_pr,
+                        'time_seconds' => $result->time_seconds,
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'statistics' => [
+                        'total_athletes' => $totalAthletes,
+                        'workouts_this_week' => $workoutsThisWeek,
+                        'completion_rate' => $completionRate,
+                        'prs_this_month' => $prsThisMonth,
+                    ],
+                    'recent_activity' => $recentResults,
+                ],
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch dashboard stats',
                 'error' => $e->getMessage(),
             ], 500);
         }

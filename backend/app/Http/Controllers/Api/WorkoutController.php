@@ -415,4 +415,51 @@ class WorkoutController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Get leaderboard for a specific workout
+     */
+    public function leaderboard(Request $request, $id): JsonResponse
+    {
+        $workout = Workout::find($id);
+
+        if (!$workout) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Workout not found',
+            ], 404);
+        }
+
+        // Get all results for this workout, sorted by time (fastest first)
+        $results = \App\Models\WorkoutResult::with(['athlete.user'])
+            ->where('workout_id', $id)
+            ->where('time_seconds', '>', 0) // Only results with time
+            ->orderBy('time_seconds', 'asc')
+            ->get();
+
+        $leaderboard = $results->map(function ($result, $index) {
+            return [
+                'position' => $index + 1,
+                'athlete_id' => $result->athlete_id,
+                'athlete_name' => $result->athlete->user->first_name . ' ' . $result->athlete->user->last_name,
+                'time_seconds' => $result->time_seconds,
+                'rx_or_scaled' => $result->rx_or_scaled,
+                'completed_at' => $result->completed_at->format('Y-m-d'),
+                'is_pr' => $result->is_pr,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'workout' => [
+                    'id' => $workout->id,
+                    'name' => $workout->name,
+                    'description' => $workout->description,
+                ],
+                'leaderboard' => $leaderboard,
+                'total' => $leaderboard->count(),
+            ],
+        ]);
+    }
 }

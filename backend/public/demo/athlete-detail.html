@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle Atleta - COACHING</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #FF6B35; --primary-dark: #E85A2A; --secondary: #004E89;
+            --dark: #1A1A2E; --dark-light: #252541; --accent: #FFD23F;
+            --text-light: #E8E8E8; --text-gray: #A0A0B0;
+            --success: #2ECC71; --danger: #E74C3C;
+        }
+        body { font-family: 'Work Sans', sans-serif; background: linear-gradient(135deg, var(--dark) 0%, #16213E 100%); min-height: 100vh; color: var(--text-light); }
+        .sidebar { position: fixed; left: 0; top: 0; width: 260px; height: 100vh; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-right: 1px solid rgba(255, 255, 255, 0.1); padding: 2rem 0; z-index: 100; }
+        .logo { padding: 0 1.5rem; margin-bottom: 2rem; }
+        .logo h1 { font-family: 'Oswald', sans-serif; font-size: 1.8rem; color: var(--primary); }
+        .nav-menu { list-style: none; }
+        .nav-link { display: flex; align-items: center; padding: 0.875rem 1.5rem; color: var(--text-gray); text-decoration: none; transition: all 0.3s; }
+        .nav-link:hover, .nav-link.active { background: rgba(255, 107, 53, 0.1); color: var(--primary); border-left: 3px solid var(--primary); }
+        .nav-icon { margin-right: 0.75rem; font-size: 1.2rem; }
+        .header { position: fixed; left: 260px; top: 0; right: 0; height: 70px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; z-index: 90; }
+        .main-content { margin-left: 260px; margin-top: 70px; padding: 2rem; }
+        
+        .athlete-header { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: start; }
+        .athlete-info h2 { font-family: 'Oswald', sans-serif; font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem; }
+        .athlete-meta { display: flex; gap: 2rem; margin-top: 1rem; color: var(--text-gray); }
+        
+        .tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid rgba(255, 255, 255, 0.1); }
+        .tab { padding: 1rem 1.5rem; background: none; border: none; color: var(--text-gray); cursor: pointer; font-size: 1rem; transition: all 0.3s; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+        .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 1.5rem; }
+        .stat-value { font-size: 2.5rem; font-weight: 700; font-family: 'Oswald', sans-serif; color: var(--primary); }
+        .stat-label { font-size: 0.875rem; color: var(--text-gray); margin-top: 0.5rem; }
+        
+        .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .card-title { font-family: 'Oswald', sans-serif; font-size: 1.3rem; color: var(--primary); margin-bottom: 1rem; }
+        
+        .workout-item { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+        .workout-name { font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .workout-meta { font-size: 0.85rem; color: var(--text-gray); }
+        
+        .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+        .badge-pending { background: rgba(255, 215, 63, 0.2); color: var(--accent); }
+        .badge-completed { background: rgba(46, 204, 113, 0.2); color: var(--success); }
+        .badge-pr { background: rgba(255, 215, 63, 0.2); color: var(--accent); }
+        
+        .btn { padding: 0.75rem 1.5rem; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: all 0.3s; text-decoration: none; display: inline-block; }
+        .btn:hover { background: var(--primary-dark); }
+        .btn-secondary { background: rgba(255, 255, 255, 0.1); }
+        
+        .chat-container { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; height: 500px; display: flex; flex-direction: column; }
+        .chat-messages { flex: 1; padding: 1.5rem; overflow-y: auto; }
+        .message { margin-bottom: 1rem; }
+        .message-coach { text-align: right; }
+        .message-bubble { display: inline-block; padding: 0.75rem 1rem; border-radius: 12px; max-width: 70%; }
+        .message-coach .message-bubble { background: var(--primary); }
+        .message-athlete .message-bubble { background: rgba(255, 255, 255, 0.1); }
+        .message-time { font-size: 0.75rem; color: var(--text-gray); margin-top: 0.25rem; }
+        .chat-input { display: flex; gap: 1rem; padding: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+        .chat-input input { flex: 1; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: var(--text-light); }
+        
+        .loading { text-align: center; padding: 3rem; }
+        .spinner { display: inline-block; width: 40px; height: 40px; border: 4px solid rgba(255, 255, 255, 0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo"><h1>COACHING</h1></div>
+        <nav>            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashboard-connected.html" class="nav-link">
+                        <span class="nav-icon">📊</span>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="athletes.html" class="nav-link active">
+                        <span class="nav-icon">👥</span>
+                        Atletas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="workouts.html" class="nav-link">
+                        <span class="nav-icon">💪</span>
+                        Workouts
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="programming.html" class="nav-link">
+                        <span class="nav-icon">📅</span>
+                        Programación
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="calendar.html" class="nav-link">
+                        <span class="nav-icon">📆</span>
+                        Calendario
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="results.html" class="nav-link">
+                        <span class="nav-icon">🏆</span>
+                        Resultados
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="analytics.html" class="nav-link">
+                        <span class="nav-icon">📈</span>
+                        Analytics
+                    </a>
+                </li>
+            </ul></nav>
+    </aside>
+
+    <header class="header">
+        <a href="athletes.html" style="color: var(--text-gray); text-decoration: none;">← Volver a Atletas</a>
+        <button onclick="logout()" style="padding: 0.5rem 1rem; background: var(--danger); color: white; border: none; border-radius: 6px; cursor: pointer;">Salir</button>
+    </header>
+
+    <main class="main-content">
+        <div class="athlete-header" id="athleteHeader">
+            <div class="loading"><div class="spinner"></div></div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('stats')">📊 Estadísticas</button>
+            <button class="tab" onclick="switchTab('programming')">📅 Programación</button>
+            <button class="tab" onclick="switchTab('results')">🏆 Resultados</button>
+            <button class="tab" onclick="switchTab('prs')">🥇 PRs</button>
+            <button class="tab" onclick="switchTab('chat')">💬 Chat</button>
+        </div>
+
+        <div id="statsTab" class="tab-content active">
+            <div class="stats-grid" id="statsGrid">
+                <div class="loading"><div class="spinner"></div></div>
+            </div>
+        </div>
+
+        <div id="programmingTab" class="tab-content">
+            <div class="card">
+                <h3 class="card-title">Workouts Programados</h3>
+                <div id="programmingList">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="resultsTab" class="tab-content">
+            <div class="card">
+                <h3 class="card-title">Resultados Recientes</h3>
+                <div id="resultsList">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="prsTab" class="tab-content">
+            <div class="card">
+                <h3 class="card-title">Records Personales</h3>
+                <div id="prsList">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="chatTab" class="tab-content">
+            <div class="card">
+                <h3 class="card-title">Chat con el Atleta</h3>
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="loading"><div class="spinner"></div></div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="messageInput" placeholder="Escribe un mensaje...">
+                        <button class="btn" onclick="sendMessage()">Enviar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/v1';
+        let authToken = null;
+        let currentUser = null;
+        let athleteId = null;
+
+        function checkAuth() {
+            const userData = localStorage.getItem('cloudework_user');
+            if (!userData) { window.location.href = 'login-connected.html'; return false; }
+            try {
+                currentUser = JSON.parse(userData);
+                authToken = currentUser.token;
+                return true;
+            } catch (e) { window.location.href = 'login-connected.html'; return false; }
+        }
+
+        function logout() { localStorage.removeItem('cloudework_user'); window.location.href = 'login-connected.html'; }
+
+        async function fetchAPI(endpoint) {
+            const response = await fetch(`${API_URL}${endpoint}`, {
+                headers: { 'Authorization': `Bearer ${authToken}`, 'Accept': 'application/json' }
+            });
+            if (response.status === 401) logout();
+            return await response.json();
+        }
+
+        function getAthleteIdFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
+            
+            if (tab === 'chat') {
+                loadChat();
+                startChatPolling();
+            } else {
+                stopChatPolling();
+            }
+        }
+
+        async function loadAthleteHeader() {
+            try {
+                const data = await fetchAPI(`/athletes/${athleteId}`);
+                const athlete = data.data?.athlete;
+                
+                if (!athlete) {
+                    document.getElementById('athleteHeader').innerHTML = '<p style="color: var(--danger);">Atleta no encontrado</p>';
+                    return;
+                }
+
+                document.getElementById('athleteHeader').innerHTML = `
+                    <div class="athlete-info">
+                        <h2>${athlete.user?.full_name || 'Atleta'}</h2>
+                        <div class="athlete-meta">
+                            <span>📧 ${athlete.user?.email || ''}</span>
+                            <span>📱 ${athlete.phone || 'N/A'}</span>
+                            <span>🎂 ${athlete.date_of_birth || 'N/A'}</span>
+                            <span class="badge badge-${athlete.status === 'active' ? 'completed' : 'pending'}">${athlete.status}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <a href="programming.html?athlete=${athleteId}" class="btn">Asignar Workout</a>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const data = await fetchAPI(`/athletes/${athleteId}`);
+                const stats = data.data?.athlete?.statistics || {};
+                
+                document.getElementById('statsGrid').innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.total_workouts || 0}</div>
+                        <div class="stat-label">Workouts Completados</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.total_prs || 0}</div>
+                        <div class="stat-label">PRs Personales</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.current_streak || 0}</div>
+                        <div class="stat-label">Días Seguidos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.completion_rate || 0}%</div>
+                        <div class="stat-label">Tasa Completado</div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function loadProgramming() {
+            try {
+                const data = await fetchAPI(`/assignments?athlete_id=${athleteId}&per_page=20`);
+                const container = document.getElementById('programmingList');
+                
+                if (!data.success || !data.data?.assignments || data.data.assignments.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-gray);">No hay workouts programados</p>';
+                    return;
+                }
+
+                container.innerHTML = data.data.assignments.map(a => `
+                    <div class="workout-item">
+                        <div>
+                            <div class="workout-name">${a.workout?.name || 'Workout'}</div>
+                            <div class="workout-meta">
+                                📅 ${a.scheduled_date} • 
+                                <span class="badge badge-${a.is_completed ? 'completed' : 'pending'}">
+                                    ${a.is_completed ? 'Completado' : 'Pendiente'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function loadResults() {
+            try {
+                const data = await fetchAPI(`/results?athlete_id=${athleteId}&per_page=20`);
+                const container = document.getElementById('resultsList');
+                
+                if (!data.success || !data.data?.results || data.data.results.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-gray);">No hay resultados</p>';
+                    return;
+                }
+
+                container.innerHTML = data.data.results.map(r => `
+                    <div class="workout-item">
+                        <div>
+                            <div class="workout-name">${r.workout?.name || 'Workout'} ${r.is_pr ? '🏆' : ''}</div>
+                            <div class="workout-meta">
+                                ${r.completed_at} • ${r.rx_or_scaled?.toUpperCase()}
+                                ${r.time_seconds ? ` • ${Math.floor(r.time_seconds / 60)}:${(r.time_seconds % 60).toString().padStart(2, '0')}` : ''}
+                                ${r.rounds_completed ? ` • ${r.rounds_completed} rondas` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function loadPRs() {
+            try {
+                const data = await fetchAPI(`/results?athlete_id=${athleteId}&is_pr=1&per_page=20`);
+                const container = document.getElementById('prsList');
+                
+                if (!data.success || !data.data?.results || data.data.results.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-gray);">No hay PRs registrados</p>';
+                    return;
+                }
+
+                container.innerHTML = data.data.results.map(r => `
+                    <div class="workout-item">
+                        <div>
+                            <div class="workout-name">🏆 ${r.workout?.name || 'Workout'}</div>
+                            <div class="workout-meta">
+                                ${r.completed_at} • ${r.rx_or_scaled?.toUpperCase()}
+                                ${r.time_seconds ? ` • ${Math.floor(r.time_seconds / 60)}:${(r.time_seconds % 60).toString().padStart(2, '0')}` : ''}
+                            </div>
+                        </div>
+                        <span class="badge badge-pr">PR</span>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        let chatPolling = null;
+
+        async function loadChat() {
+            try {
+                // Get athlete's user_id
+                const athleteData = await fetchAPI(`/athletes/${athleteId}`);
+                const athleteUserId = athleteData.data?.athlete?.user_id;
+                
+                if (!athleteUserId) {
+                    document.getElementById('chatMessages').innerHTML = '<p style="color: var(--danger);">Error: No se pudo obtener datos del atleta</p>';
+                    return;
+                }
+
+                // Load messages
+                const data = await fetchAPI(`/messages?user_id=${athleteUserId}`);
+                const container = document.getElementById('chatMessages');
+                
+                if (!data.success || !data.data?.messages || data.data.messages.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-gray);">No hay mensajes aún. ¡Inicia la conversación!</p>';
+                    return;
+                }
+
+                container.innerHTML = data.data.messages.map(m => `
+                    <div class="message ${m.is_mine ? 'message-coach' : 'message-athlete'}">
+                        <div class="message-bubble">${m.message}</div>
+                        <div class="message-time">${m.time_ago}</div>
+                    </div>
+                `).join('');
+
+                // Scroll to bottom
+                container.scrollTop = container.scrollHeight;
+
+            } catch (error) {
+                console.error('Error loading chat:', error);
+                document.getElementById('chatMessages').innerHTML = '<p style="color: var(--danger);">Error cargando mensajes</p>';
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            try {
+                // Get athlete's user_id
+                const athleteData = await fetchAPI(`/athletes/${athleteId}`);
+                const athleteUserId = athleteData.data?.athlete?.user_id;
+                
+                if (!athleteUserId) {
+                    alert('Error: No se pudo obtener datos del atleta');
+                    return;
+                }
+
+                const response = await fetch(`${API_URL}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        recipient_id: athleteUserId,
+                        message: message,
+                        message_type: 'text'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    input.value = '';
+                    loadChat(); // Reload messages
+                } else {
+                    alert('Error enviando mensaje: ' + (data.message || 'Error desconocido'));
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Error enviando mensaje');
+            }
+        }
+
+        // Handle Enter key in message input
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageInput = document.getElementById('messageInput');
+            if (messageInput) {
+                messageInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+            }
+        });
+
+        // Start polling for new messages when chat tab is active
+        function startChatPolling() {
+            if (chatPolling) return; // Already polling
+            chatPolling = setInterval(() => {
+                if (document.getElementById('chatTab').classList.contains('active')) {
+                    loadChat();
+                }
+            }, 5000); // Poll every 5 seconds
+        }
+
+        function stopChatPolling() {
+            if (chatPolling) {
+                clearInterval(chatPolling);
+                chatPolling = null;
+            }
+        }
+
+        athleteId = getAthleteIdFromURL();
+        if (!athleteId) {
+            alert('No se especificó ID de atleta');
+            window.location.href = 'athletes.html';
+        }
+
+        if (checkAuth()) {
+            loadAthleteHeader();
+            loadStats();
+            loadProgramming();
+            loadResults();
+            loadPRs();
+        }
+    </script>
+</body>
+</html>

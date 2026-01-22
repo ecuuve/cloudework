@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - COACHING</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #FF6B35; --primary-dark: #E85A2A; --secondary: #004E89;
+            --dark: #1A1A2E; --dark-light: #252541; --accent: #FFD23F;
+            --text-light: #E8E8E8; --text-gray: #A0A0B0;
+            --success: #2ECC71; --danger: #E74C3C;
+        }
+        body { font-family: 'Work Sans', sans-serif; background: linear-gradient(135deg, var(--dark) 0%, #16213E 100%); min-height: 100vh; color: var(--text-light); }
+        .sidebar { position: fixed; left: 0; top: 0; width: 260px; height: 100vh; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-right: 1px solid rgba(255, 255, 255, 0.1); padding: 2rem 0; z-index: 100; }
+        .logo { padding: 0 1.5rem; margin-bottom: 2rem; }
+        .logo h1 { font-family: 'Oswald', sans-serif; font-size: 1.8rem; color: var(--primary); }
+        .nav-menu { list-style: none; }
+        .nav-link { display: flex; align-items: center; padding: 0.875rem 1.5rem; color: var(--text-gray); text-decoration: none; transition: all 0.3s; }
+        .nav-link:hover, .nav-link.active { background: rgba(255, 107, 53, 0.1); color: var(--primary); border-left: 3px solid var(--primary); }
+        .nav-icon { margin-right: 0.75rem; font-size: 1.2rem; }
+        .header { position: fixed; left: 260px; top: 0; right: 0; height: 70px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; z-index: 90; }
+        .header-title h2 { font-family: 'Oswald', sans-serif; font-size: 1.5rem; }
+        .main-content { margin-left: 260px; margin-top: 70px; padding: 2rem; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .kpi-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 1.5rem; transition: transform 0.3s; }
+        .kpi-card:hover { transform: translateY(-5px); }
+        .kpi-title { font-size: 0.875rem; color: var(--text-gray); text-transform: uppercase; margin-bottom: 0.5rem; }
+        .kpi-value { font-size: 2.5rem; font-weight: 700; font-family: 'Oswald', sans-serif; color: var(--primary); }
+        .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .card-title { font-family: 'Oswald', sans-serif; font-size: 1.3rem; color: var(--primary); margin-bottom: 1rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th { padding: 1rem; text-align: left; font-weight: 600; color: var(--text-gray); font-size: 0.875rem; text-transform: uppercase; background: rgba(255, 255, 255, 0.03); }
+        td { padding: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.05); }
+        .loading { text-align: center; padding: 3rem; }
+        .spinner { display: inline-block; width: 40px; height: 40px; border: 4px solid rgba(255, 255, 255, 0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .rank { font-size: 1.5rem; margin-right: 0.5rem; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo"><h1>COACHING</h1></div>
+        <nav>            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashboard-connected.html" class="nav-link">
+                        <span class="nav-icon">📊</span>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="athletes.html" class="nav-link">
+                        <span class="nav-icon">👥</span>
+                        Atletas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="workouts.html" class="nav-link">
+                        <span class="nav-icon">💪</span>
+                        Workouts
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="programming.html" class="nav-link">
+                        <span class="nav-icon">📅</span>
+                        Programación
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="calendar.html" class="nav-link">
+                        <span class="nav-icon">📆</span>
+                        Calendario
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="results.html" class="nav-link">
+                        <span class="nav-icon">🏆</span>
+                        Resultados
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="analytics.html" class="nav-link active">
+                        <span class="nav-icon">📈</span>
+                        Analytics
+                    </a>
+                </li>
+            </ul></nav>
+    </aside>
+
+    <header class="header">
+        <div class="header-title"><h2>Analytics y Estadísticas</h2></div>
+        <div><span id="userName"></span> <button onclick="logout()" style="padding: 0.5rem 1rem; background: var(--danger); color: white; border: none; border-radius: 6px; cursor: pointer; margin-left: 1rem;">Salir</button></div>
+    </header>
+
+    <main class="main-content">
+        <div class="kpi-grid" id="kpiGrid"><div class="loading"><div class="spinner"></div></div></div>
+
+        <div class="card">
+            <h3 class="card-title">🏆 Leaderboard - Fran</h3>
+            <div id="leaderboard"><div class="loading"><div class="spinner"></div></div></div>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">📊 PRs Recientes</h3>
+            <div id="recentPRs"><div class="loading"><div class="spinner"></div></div></div>
+        </div>
+    </main>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/v1';
+        let authToken = null;
+
+        function checkAuth() {
+            const userData = localStorage.getItem('cloudework_user');
+            if (!userData) { window.location.href = 'login-connected.html'; return false; }
+            try {
+                const user = JSON.parse(userData);
+                authToken = user.token;
+                document.getElementById('userName').textContent = user.first_name;
+                return true;
+            } catch (e) { window.location.href = 'login-connected.html'; return false; }
+        }
+
+        function logout() { localStorage.removeItem('cloudework_user'); window.location.href = 'login-connected.html'; }
+
+        async function fetchAPI(endpoint) {
+            const response = await fetch(`${API_URL}${endpoint}`, {
+                headers: { 'Authorization': `Bearer ${authToken}`, 'Accept': 'application/json' }
+            });
+            if (response.status === 401) logout();
+            return await response.json();
+        }
+
+        async function loadKPIs() {
+            try {
+                const data = await fetchAPI('/analytics/dashboard');
+                const kpis = data.data?.kpis || {};
+                
+                document.getElementById('kpiGrid').innerHTML = `
+                    <div class="kpi-card">
+                        <div class="kpi-title">Total Atletas</div>
+                        <div class="kpi-value">${kpis.total_athletes?.value || 0}</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">Workouts Esta Semana</div>
+                        <div class="kpi-value">${kpis.workouts_this_week?.value || 0}</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">Tasa Completado</div>
+                        <div class="kpi-value">${kpis.completion_rate?.value || 0}%</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">PRs Este Mes</div>
+                        <div class="kpi-value">${kpis.prs_this_month?.value || 0}</div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading KPIs:', error);
+            }
+        }
+
+        async function loadLeaderboard() {
+            try {
+                const data = await fetchAPI('/workouts/1/leaderboard');
+                const container = document.getElementById('leaderboard');
+                
+                if (!data.success || !data.data?.leaderboard || data.data.leaderboard.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-gray);">No hay datos</p>';
+                    return;
+                }
+
+                const medals = ['🥇', '🥈', '🥉'];
+                container.innerHTML = `
+                    <table>
+                        <thead><tr><th>Pos</th><th>Atleta</th><th>Tiempo</th><th>Tipo</th><th>Fecha</th></tr></thead>
+                        <tbody>
+                            ${data.data.leaderboard.map((item, idx) => `
+                                <tr>
+                                    <td><span class="rank">${medals[idx] || (idx + 1)}</span></td>
+                                    <td style="font-weight: 600;">${item.athlete_name}</td>
+                                    <td>${Math.floor(item.time_seconds / 60)}:${(item.time_seconds % 60).toString().padStart(2, '0')}</td>
+                                    <td>${item.rx_or_scaled?.toUpperCase()}</td>
+                                    <td style="color: var(--text-gray); font-size: 0.9rem;">${item.completed_at}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                document.getElementById('leaderboard').innerHTML = '<p style="color: var(--text-gray);">Error cargando leaderboard</p>';
+            }
+        }
+
+        async function loadRecentPRs() {
+            try {
+                const data = await fetchAPI('/results?is_pr=1&per_page=10');
+                const container = document.getElementById('recentPRs');
+                
+                if (!data.success || !data.data?.results || data.data.results.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-gray);">No hay PRs recientes</p>';
+                    return;
+                }
+
+                container.innerHTML = `
+                    <table>
+                        <thead><tr><th>Atleta</th><th>Workout</th><th>Resultado</th><th>Fecha</th></tr></thead>
+                        <tbody>
+                            ${data.data.results.map(r => `
+                                <tr>
+                                    <td style="font-weight: 600;">🏆 ${r.athlete?.user?.full_name || 'Atleta'}</td>
+                                    <td>${r.workout?.name || 'Workout'}</td>
+                                    <td>
+                                        ${r.time_seconds ? `${Math.floor(r.time_seconds / 60)}:${(r.time_seconds % 60).toString().padStart(2, '0')}` : ''}
+                                        ${r.rounds_completed ? `${r.rounds_completed} rondas` : ''}
+                                        ${r.reps_completed ? `${r.reps_completed} reps` : ''}
+                                    </td>
+                                    <td style="color: var(--text-gray); font-size: 0.9rem;">${r.completed_at}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                document.getElementById('recentPRs').innerHTML = '<p style="color: var(--text-gray);">Error cargando PRs</p>';
+            }
+        }
+
+        if (checkAuth()) { loadKPIs(); loadLeaderboard(); loadRecentPRs(); }
+    </script>
+</body>
+</html>

@@ -7,7 +7,7 @@ use App\Http\Controllers\Api\AthleteController;
 use App\Http\Controllers\Api\WorkoutController;
 use App\Http\Controllers\Api\AssignmentController;
 use App\Http\Controllers\Api\ResultController;
-use App\Http\Controllers\Api\AnalyticsController;
+use App\Http\Controllers\Api\MessageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,56 +16,51 @@ use App\Http\Controllers\Api\AnalyticsController;
 */
 
 // Public routes
-Route::prefix('v1')->group(function () {
-    // Authentication
-    Route::post('/register/coach', [AuthController::class, 'registerCoach']);
-    Route::post('/login', [AuthController::class, 'login']);
-    
-    // Health check
-    Route::get('/health', function () {
-        return response()->json([
-            'success' => true,
-            'message' => 'CloudEwork API is running',
-            'version' => '1.0.0',
-            'timestamp' => now()->toIso8601String(),
-        ]);
-    });
-});
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
 
 // Protected routes
-Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
-    // Authentication
+Route::middleware('auth:sanctum')->group(function () {
+    // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
-    Route::post('/refresh', [AuthController::class, 'refresh']);
     
     // Athletes
-    Route::apiResource('athletes', AthleteController::class);
+    Route::get('/athletes', [AthleteController::class, 'index']);
+    Route::post('/athletes', [AthleteController::class, 'store']);
+    Route::get('/athletes/{id}', [AthleteController::class, 'show']);
+    Route::put('/athletes/{id}', [AthleteController::class, 'update']);
+    Route::delete('/athletes/{id}', [AthleteController::class, 'destroy']);
+    Route::get('/athletes/{id}/progress', [AthleteController::class, 'progress']);
     
     // Workouts
-    Route::apiResource('workouts', WorkoutController::class);
-    Route::get('/benchmarks', [WorkoutController::class, 'benchmarks']);
+    Route::get('/workouts', [WorkoutController::class, 'index']);
+    Route::post('/workouts', [WorkoutController::class, 'store']);
+    Route::get('/workouts/{id}', [WorkoutController::class, 'show']);
+    Route::put('/workouts/{id}', [WorkoutController::class, 'update']);
+    Route::delete('/workouts/{id}', [WorkoutController::class, 'destroy']);
+    Route::get('/workouts/{id}/leaderboard', [WorkoutController::class, 'leaderboard']);
     
     // Assignments
-    Route::apiResource('assignments', AssignmentController::class);
-    Route::post('/assignments/bulk', [AssignmentController::class, 'bulkAssign']);
-    Route::get('/calendar', [AssignmentController::class, 'calendar']);
+    Route::get('/assignments', [AssignmentController::class, 'index']);
+    Route::post('/assignments', [AssignmentController::class, 'store']);
+    Route::post('/assignments/bulk', [AssignmentController::class, 'bulkStore']);
+    Route::get('/assignments/{id}', [AssignmentController::class, 'show']);
+    Route::put('/assignments/{id}', [AssignmentController::class, 'update']);
+    Route::delete('/assignments/{id}', [AssignmentController::class, 'destroy']);
     
     // Results
-    Route::apiResource('results', ResultController::class)->only(['index', 'store', 'update']);
-    Route::get('/results/workout/{workoutId}/history', [ResultController::class, 'workoutHistory']);
-    Route::get('/personal-records', [ResultController::class, 'personalRecords']);
+    Route::get('/results', [ResultController::class, 'index']);
+    Route::post('/results', [ResultController::class, 'store']);
+    Route::get('/results/{id}', [ResultController::class, 'show']);
     
     // Analytics
-    Route::get('/analytics/dashboard', [AnalyticsController::class, 'dashboard']);
-    Route::get('/analytics/athlete/{athleteId}/progress', [AnalyticsController::class, 'athleteProgress']);
-    Route::get('/analytics/workout/{workoutId}/leaderboard', [AnalyticsController::class, 'workoutLeaderboard']);
-});
-
-// Fallback route
-Route::fallback(function () {
-    return response()->json([
-        'success' => false,
-        'message' => 'Endpoint not found',
-    ], 404);
+    Route::get('/analytics/dashboard', [ResultController::class, 'dashboardStats']);
+    
+    // Messages
+    Route::get('/messages', [MessageController::class, 'index']);
+    Route::post('/messages', [MessageController::class, 'store']);
+    Route::put('/messages/{id}/read', [MessageController::class, 'markAsRead']);
+    Route::get('/messages/unread/count', [MessageController::class, 'unreadCount']);
+    Route::get('/messages/conversations', [MessageController::class, 'conversations']);
 });

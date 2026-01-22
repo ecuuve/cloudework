@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados - COACHING</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #FF6B35; --primary-dark: #E85A2A; --secondary: #004E89;
+            --dark: #1A1A2E; --dark-light: #252541; --accent: #FFD23F;
+            --text-light: #E8E8E8; --text-gray: #A0A0B0;
+            --success: #2ECC71; --danger: #E74C3C;
+        }
+        body { font-family: 'Work Sans', sans-serif; background: linear-gradient(135deg, var(--dark) 0%, #16213E 100%); min-height: 100vh; color: var(--text-light); }
+        .sidebar { position: fixed; left: 0; top: 0; width: 260px; height: 100vh; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-right: 1px solid rgba(255, 255, 255, 0.1); padding: 2rem 0; z-index: 100; }
+        .logo { padding: 0 1.5rem; margin-bottom: 2rem; }
+        .logo h1 { font-family: 'Oswald', sans-serif; font-size: 1.8rem; color: var(--primary); }
+        .nav-menu { list-style: none; }
+        .nav-link { display: flex; align-items: center; padding: 0.875rem 1.5rem; color: var(--text-gray); text-decoration: none; transition: all 0.3s; }
+        .nav-link:hover, .nav-link.active { background: rgba(255, 107, 53, 0.1); color: var(--primary); border-left: 3px solid var(--primary); }
+        .nav-icon { margin-right: 0.75rem; font-size: 1.2rem; }
+        .header { position: fixed; left: 260px; top: 0; right: 0; height: 70px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; z-index: 90; }
+        .header-title h2 { font-family: 'Oswald', sans-serif; font-size: 1.5rem; }
+        .main-content { margin-left: 260px; margin-top: 70px; padding: 2rem; }
+        .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .card-title { font-family: 'Oswald', sans-serif; font-size: 1.3rem; color: var(--primary); margin-bottom: 1rem; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; color: var(--text-gray); font-size: 0.9rem; }
+        input, select, textarea { width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: var(--text-light); font-size: 0.95rem; }
+        select option { background: var(--dark-light); color: var(--text-light); padding: 0.5rem; }
+        select:focus { border-color: var(--primary); outline: none; }
+        input.error, select.error { border-color: var(--danger); }
+        .error-message { color: var(--danger); font-size: 0.85rem; margin-top: 0.25rem; display: none; }
+        .error-message.show { display: block; }
+        .btn { padding: 0.75rem 1.5rem; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: all 0.3s; }
+        .btn:hover { background: var(--primary-dark); }
+        .result-item { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; }
+        .badge-pr { background: rgba(255, 215, 63, 0.2); color: var(--accent); padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+        .loading { text-align: center; padding: 3rem; }
+        .spinner { display: inline-block; width: 40px; height: 40px; border: 4px solid rgba(255, 255, 255, 0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+        .alert-success { background: rgba(46, 204, 113, 0.1); border: 1px solid var(--success); color: var(--success); }
+        .alert-error { background: rgba(231, 76, 60, 0.1); border: 1px solid var(--danger); color: var(--danger); }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo"><h1>COACHING</h1></div>
+        <nav>            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashboard-connected.html" class="nav-link">
+                        <span class="nav-icon">📊</span>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="athletes.html" class="nav-link">
+                        <span class="nav-icon">👥</span>
+                        Atletas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="workouts.html" class="nav-link">
+                        <span class="nav-icon">💪</span>
+                        Workouts
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="programming.html" class="nav-link">
+                        <span class="nav-icon">📅</span>
+                        Programación
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="calendar.html" class="nav-link">
+                        <span class="nav-icon">📆</span>
+                        Calendario
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="results.html" class="nav-link active">
+                        <span class="nav-icon">🏆</span>
+                        Resultados
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="analytics.html" class="nav-link">
+                        <span class="nav-icon">📈</span>
+                        Analytics
+                    </a>
+                </li>
+            </ul></nav>
+    </aside>
+
+    <header class="header">
+        <div class="header-title"><h2>Registrar Resultados</h2></div>
+        <div><span id="userName"></span> <button onclick="logout()" style="padding: 0.5rem 1rem; background: var(--danger); color: white; border: none; border-radius: 6px; cursor: pointer; margin-left: 1rem;">Salir</button></div>
+    </header>
+
+    <main class="main-content">
+        <div id="alert" class="alert" style="display: none;"></div>
+
+        <div class="card">
+            <h3 class="card-title">Registrar Resultado</h3>
+            <form id="resultForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Atleta *</label>
+                        <select id="athlete_id" required onchange="loadAthleteAssignments(); loadResults();">
+                            <option value="">Seleccionar atleta...</option>
+                        </select>
+                        <div class="error-message" id="error_athlete">Debes seleccionar un atleta</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Workout Asignado *</label>
+                        <select id="assignment_id" required disabled>
+                            <option value="">Primero selecciona un atleta...</option>
+                        </select>
+                        <div class="error-message" id="error_assignment">Debes seleccionar un workout asignado</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha *</label>
+                        <input type="date" id="completed_at" required>
+                        <div class="error-message" id="error_date">La fecha es requerida</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo *</label>
+                        <select id="rx_or_scaled" required>
+                            <option value="rx">RX</option>
+                            <option value="scaled">Scaled</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Tiempo (mm:ss)</label>
+                        <input type="text" id="time_seconds" placeholder="05:23">
+                        <div class="error-message" id="error_time">Formato inválido. Usa mm:ss (ej: 05:23)</div>
+                    </div>
+                    <div class="form-group"><label>Rondas</label><input type="number" id="rounds_completed" min="0"></div>
+                    <div class="form-group"><label>Reps</label><input type="number" id="reps_completed" min="0"></div>
+                    <div class="form-group"><label>Peso (kg)</label><input type="number" id="weight_kg" step="0.5"></div>
+                </div>
+                <div class="form-group"><label>Notas</label><textarea id="notes" rows="2"></textarea></div>
+                <button type="submit" class="btn">Registrar Resultado</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">Resultados Recientes</h3>
+            <div id="resultsContainer"><div class="loading"><div class="spinner"></div></div></div>
+        </div>
+    </main>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/v1';
+        let authToken = null;
+
+        function checkAuth() {
+            const userData = localStorage.getItem('cloudework_user');
+            if (!userData) { window.location.href = 'login-connected.html'; return false; }
+            try {
+                const user = JSON.parse(userData);
+                authToken = user.token;
+                document.getElementById('userName').textContent = user.first_name;
+                return true;
+            } catch (e) { window.location.href = 'login-connected.html'; return false; }
+        }
+
+        function logout() { localStorage.removeItem('cloudework_user'); window.location.href = 'login-connected.html'; }
+
+        async function fetchAPI(endpoint, options = {}) {
+            const response = await fetch(`${API_URL}${endpoint}`, {
+                ...options,
+                headers: { 'Authorization': `Bearer ${authToken}`, 'Accept': 'application/json', 'Content-Type': 'application/json', ...options.headers }
+            });
+            if (response.status === 401) logout();
+            return await response.json();
+        }
+
+        async function loadAthletes() {
+            const data = await fetchAPI('/athletes?per_page=100');
+            const select = document.getElementById('athlete_id');
+            if (data.success && data.data.athletes) {
+                data.data.athletes.forEach(a => {
+                    const opt = document.createElement('option');
+                    opt.value = a.id;
+                    opt.textContent = a.user.full_name;
+                    select.appendChild(opt);
+                });
+            }
+        }
+
+        async function loadAthleteAssignments() {
+            const athleteId = document.getElementById('athlete_id').value;
+            const assignmentSelect = document.getElementById('assignment_id');
+            
+            // Reset assignment select
+            assignmentSelect.innerHTML = '<option value="">Cargando...</option>';
+            assignmentSelect.disabled = true;
+            
+            if (!athleteId) {
+                assignmentSelect.innerHTML = '<option value="">Primero selecciona un atleta...</option>';
+                return;
+            }
+            
+            try {
+                const data = await fetchAPI(`/assignments?athlete_id=${athleteId}&is_completed=0&per_page=50`);
+                
+                assignmentSelect.innerHTML = '';
+                
+                if (data.success && data.data.assignments && data.data.assignments.length > 0) {
+                    data.data.assignments.forEach(assignment => {
+                        const opt = document.createElement('option');
+                        opt.value = assignment.id;
+                        opt.textContent = `${assignment.workout?.name || 'Workout'} - ${assignment.scheduled_date}`;
+                        assignmentSelect.appendChild(opt);
+                    });
+                    assignmentSelect.disabled = false;
+                } else {
+                    assignmentSelect.innerHTML = '<option value="">No hay workouts pendientes</option>';
+                }
+            } catch (error) {
+                console.error('Error loading assignments:', error);
+                assignmentSelect.innerHTML = '<option value="">Error cargando workouts</option>';
+            }
+        }
+
+        async function loadResults() {
+            try {
+                // Get selected athlete if any
+                const athleteId = document.getElementById('athlete_id')?.value;
+                let url = '/results?per_page=20';
+                
+                // If coach and athlete selected, filter by athlete
+                if (athleteId) {
+                    url += `&athlete_id=${athleteId}`;
+                }
+                
+                const data = await fetchAPI(url);
+                const container = document.getElementById('resultsContainer');
+                if (!data.success || !data.data.results || data.data.results.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-gray);">No hay resultados</p>';
+                    return;
+                }
+                container.innerHTML = data.data.results.map(r => `
+                    <div class="result-item">
+                        <div>
+                            <div style="font-weight: 600;">${r.athlete?.user?.full_name || 'Atleta'} - ${r.workout?.name || 'Workout'}</div>
+                            <div style="font-size: 0.85rem; color: var(--text-gray);">
+                                ${r.completed_at} • ${r.rx_or_scaled?.toUpperCase() || ''} 
+                                ${r.time_seconds ? `• ${Math.floor(r.time_seconds / 60)}:${(r.time_seconds % 60).toString().padStart(2, '0')}` : ''}
+                                ${r.rounds_completed ? `• ${r.rounds_completed} rondas` : ''}
+                                ${r.reps_completed ? `• ${r.reps_completed} reps` : ''}
+                                ${r.is_pr ? '<span class="badge-pr">🏆 PR!</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading results:', error);
+                document.getElementById('resultsContainer').innerHTML = '<p style="color: var(--danger);">Error cargando resultados</p>';
+            }
+        }
+
+        document.getElementById('resultForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Clear previous errors
+            document.querySelectorAll('.error-message').forEach(err => err.classList.remove('show'));
+            document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+            
+            // Validate
+            let hasErrors = false;
+            
+            const athleteId = document.getElementById('athlete_id').value;
+            if (!athleteId) {
+                document.getElementById('athlete_id').classList.add('error');
+                document.getElementById('error_athlete').classList.add('show');
+                hasErrors = true;
+            }
+            
+            const assignmentId = document.getElementById('assignment_id').value;
+            if (!assignmentId) {
+                document.getElementById('assignment_id').classList.add('error');
+                document.getElementById('error_assignment').classList.add('show');
+                hasErrors = true;
+            }
+            
+            const completedAt = document.getElementById('completed_at').value;
+            if (!completedAt) {
+                document.getElementById('completed_at').classList.add('error');
+                document.getElementById('error_date').classList.add('show');
+                hasErrors = true;
+            }
+            
+            const timeInput = document.getElementById('time_seconds').value;
+            if (timeInput && !/^\d{1,2}:\d{2}$/.test(timeInput)) {
+                document.getElementById('time_seconds').classList.add('error');
+                document.getElementById('error_time').classList.add('show');
+                hasErrors = true;
+            }
+            
+            if (hasErrors) {
+                showAlert('❌ Por favor corrige los errores del formulario', 'error');
+                return;
+            }
+            
+            const btn = e.target.querySelector('button');
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+
+            try {
+                let timeSeconds = null;
+                if (timeInput) {
+                    const [mins, secs] = timeInput.split(':').map(Number);
+                    timeSeconds = (mins * 60) + (secs || 0);
+                }
+
+                const formData = {
+                    assignment_id: parseInt(document.getElementById('assignment_id').value),
+                    completed_at: document.getElementById('completed_at').value,
+                    rx_or_scaled: document.getElementById('rx_or_scaled').value,
+                    time_seconds: timeSeconds,
+                    rounds_completed: parseInt(document.getElementById('rounds_completed').value) || null,
+                    reps_completed: parseInt(document.getElementById('reps_completed').value) || null,
+                    weight_used: parseFloat(document.getElementById('weight_kg').value) ? { kg: parseFloat(document.getElementById('weight_kg').value) } : null,
+                    notes: document.getElementById('notes').value
+                };
+
+                const data = await fetchAPI('/results', { method: 'POST', body: JSON.stringify(formData) });
+
+                if (data.success) {
+                    const msg = data.data.result?.is_pr ? '✅ ¡Resultado registrado! 🏆 ES UN PR!' : '✅ Resultado registrado';
+                    showAlert(msg, 'success');
+                    document.getElementById('resultForm').reset();
+                    document.getElementById('completed_at').valueAsDate = new Date();
+                    loadResults();
+                } else {
+                    showAlert('❌ ' + (data.message || 'Error'), 'error');
+                }
+            } catch (error) {
+                showAlert('❌ Error al registrar', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Registrar Resultado';
+            }
+        });
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+            setTimeout(() => alert.style.display = 'none', 5000);
+        }
+
+        document.getElementById('completed_at').valueAsDate = new Date();
+        if (checkAuth()) { loadAthletes(); loadResults(); }
+    </script>
+</body>
+</html>

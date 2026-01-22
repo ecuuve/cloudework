@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - CloudEwork</title>
+    <title>Dashboard - COACHING</title>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
@@ -294,10 +294,10 @@
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="logo">
-            <h1>CLOUDEWORK</h1>
+            <h1>COACHING</h1>
         </div>
         <nav>
-            <ul class="nav-menu">
+                        <ul class="nav-menu">
                 <li class="nav-item">
                     <a href="dashboard-connected.html" class="nav-link active">
                         <span class="nav-icon">📊</span>
@@ -320,6 +320,12 @@
                     <a href="programming.html" class="nav-link">
                         <span class="nav-icon">📅</span>
                         Programación
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="calendar.html" class="nav-link">
+                        <span class="nav-icon">📆</span>
+                        Calendario
                     </a>
                 </li>
                 <li class="nav-item">
@@ -421,6 +427,14 @@
         }
 
         // Fetch with auth
+        // Helper function to format time
+        function formatTime(seconds) {
+            if (!seconds || seconds === 0) return '';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
         async function fetchAPI(endpoint, options = {}) {
             const response = await fetch(`${API_URL}${endpoint}`, {
                 ...options,
@@ -450,12 +464,12 @@
             try {
                 // Load KPIs
                 const dashboardData = await fetchAPI('/analytics/dashboard');
-                renderKPIs(dashboardData.data.kpis);
-                renderRecentActivity(dashboardData.data.recent_activity);
+                renderKPIs(dashboardData.data.statistics || dashboardData.data.kpis);
+                renderRecentActivity(dashboardData.data.recent_activity || []);
 
                 // Load Athletes
                 const athletesData = await fetchAPI('/athletes?per_page=5');
-                renderAthletes(athletesData.data.athletes);
+                renderAthletes(athletesData.data.athletes || []);
 
             } catch (error) {
                 console.error('Error loading dashboard:', error);
@@ -466,11 +480,16 @@
         function renderKPIs(kpis) {
             const kpiGrid = document.getElementById('kpiGrid');
             
-            // Default values if data is missing
-            const totalAthletes = kpis?.total_athletes || { value: 0, growth_percentage: 0, trend: 'neutral' };
-            const workoutsWeek = kpis?.workouts_this_week || { value: 0, growth_percentage: 0, trend: 'neutral' };
-            const completionRate = kpis?.completion_rate || { value: 0, completed: 0, assigned: 0, trend: 'neutral' };
-            const prsMonth = kpis?.prs_this_month || { value: 0, growth_percentage: 0, trend: 'neutral' };
+            if (!kpis) {
+                console.error('No KPIs data received');
+                return;
+            }
+            
+            // API returns simple values, not objects
+            const totalAthletes = kpis.total_athletes || 0;
+            const workoutsWeek = kpis.workouts_this_week || 0;
+            const completionRate = kpis.completion_rate || 0;
+            const prsMonth = kpis.prs_this_month || 0;
             
             kpiGrid.innerHTML = `
                 <div class="kpi-card">
@@ -478,9 +497,9 @@
                         <span class="kpi-title">Total Atletas</span>
                         <span class="kpi-icon">👥</span>
                     </div>
-                    <div class="kpi-value">${totalAthletes.value}</div>
-                    <div class="kpi-change ${totalAthletes.trend === 'up' ? 'positive' : 'negative'}">
-                        ${totalAthletes.trend === 'up' ? '↗' : '↘'} ${Math.abs(totalAthletes.growth_percentage || 0)}% vs mes pasado
+                    <div class="kpi-value">${totalAthletes}</div>
+                    <div class="kpi-change neutral">
+                        ↗ 0% vs mes pasado
                     </div>
                 </div>
 
@@ -489,9 +508,9 @@
                         <span class="kpi-title">Workouts Esta Semana</span>
                         <span class="kpi-icon">💪</span>
                     </div>
-                    <div class="kpi-value">${workoutsWeek.value}</div>
-                    <div class="kpi-change ${workoutsWeek.trend === 'up' ? 'positive' : 'negative'}">
-                        ${workoutsWeek.trend === 'up' ? '↗' : '↘'} ${Math.abs(workoutsWeek.growth_percentage || 0)}% vs semana pasada
+                    <div class="kpi-value">${workoutsWeek}</div>
+                    <div class="kpi-change neutral">
+                        ↗ 0% vs semana pasada
                     </div>
                 </div>
 
@@ -500,9 +519,9 @@
                         <span class="kpi-title">Tasa de Completado</span>
                         <span class="kpi-icon">✅</span>
                     </div>
-                    <div class="kpi-value">${completionRate.value}%</div>
-                    <div class="kpi-change ${completionRate.trend === 'up' ? 'positive' : 'negative'}">
-                        ${completionRate.completed || 0} de ${completionRate.assigned || 0} asignados
+                    <div class="kpi-value">${completionRate}%</div>
+                    <div class="kpi-change neutral">
+                        0 de 0 asignados
                     </div>
                 </div>
 
@@ -511,9 +530,9 @@
                         <span class="kpi-title">PRs Este Mes</span>
                         <span class="kpi-icon">🏆</span>
                     </div>
-                    <div class="kpi-value">${prsMonth.value}</div>
-                    <div class="kpi-change ${prsMonth.trend === 'up' ? 'positive' : 'negative'}">
-                        ${prsMonth.trend === 'up' ? '↗' : '↘'} ${Math.abs(prsMonth.growth_percentage || 0)}% vs mes pasado
+                    <div class="kpi-value">${prsMonth}</div>
+                    <div class="kpi-change neutral">
+                        ↗ 0% vs mes pasado
                     </div>
                 </div>
             `;
@@ -558,19 +577,28 @@
                 return;
             }
 
-            activityDiv.innerHTML = activity.map(item => `
+            activityDiv.innerHTML = activity.map(item => {
+                const athleteName = item.athlete_name || 'Atleta';
+                const workoutName = item.workout_name || 'Workout';
+                const rxScaled = item.rx_or_scaled ? item.rx_or_scaled.toUpperCase() : 'RX';
+                const isPR = item.is_pr ? '🏆 PR!' : '';
+                const completedAt = item.completed_at || '';
+                const timeFormatted = item.time_seconds ? formatTime(item.time_seconds) : '';
+                
+                return `
                 <div class="athlete-item">
                     <div class="athlete-info">
-                        <div class="athlete-name">${item.athlete_name}</div>
+                        <div class="athlete-name">${athleteName}</div>
                         <div class="athlete-stats">
-                            ${item.workout_name} • ${item.rx_or_scaled.toUpperCase()} ${item.is_pr ? '🏆 PR!' : ''}
+                            ${workoutName} • ${rxScaled} ${timeFormatted ? `• ${timeFormatted}` : ''} ${isPR}
                         </div>
                         <div style="font-size: 0.75rem; color: var(--text-gray); margin-top: 0.25rem;">
-                            ${item.completed_at}
+                            ${completedAt}
                         </div>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function showError(message) {

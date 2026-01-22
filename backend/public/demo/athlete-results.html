@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Resultados - COACHING</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #FF6B35; --primary-dark: #E85A2A; --secondary: #004E89;
+            --dark: #1A1A2E; --dark-light: #252541; --accent: #FFD23F;
+            --text-light: #E8E8E8; --text-gray: #A0A0B0;
+            --success: #2ECC71; --danger: #E74C3C;
+        }
+        body { font-family: 'Work Sans', sans-serif; background: linear-gradient(135deg, var(--dark) 0%, #16213E 100%); min-height: 100vh; color: var(--text-light); }
+        .sidebar { position: fixed; left: 0; top: 0; width: 260px; height: 100vh; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-right: 1px solid rgba(255, 255, 255, 0.1); padding: 2rem 0; z-index: 100; }
+        .logo { padding: 0 1.5rem; margin-bottom: 2rem; }
+        .logo h1 { font-family: 'Oswald', sans-serif; font-size: 1.8rem; color: var(--primary); }
+        .nav-menu { list-style: none; }
+        .nav-link { display: flex; align-items: center; padding: 0.875rem 1.5rem; color: var(--text-gray); text-decoration: none; transition: all 0.3s; }
+        .nav-link:hover, .nav-link.active { background: rgba(255, 107, 53, 0.1); color: var(--primary); border-left: 3px solid var(--primary); }
+        .nav-icon { margin-right: 0.75rem; font-size: 1.2rem; }
+        .header { position: fixed; left: 260px; top: 0; right: 0; height: 70px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; z-index: 90; }
+        .main-content { margin-left: 260px; margin-top: 70px; padding: 2rem; }
+        .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .card-title { font-family: 'Oswald', sans-serif; font-size: 1.3rem; color: var(--primary); margin-bottom: 1rem; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; color: var(--text-gray); font-size: 0.9rem; }
+        input, select, textarea { width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: var(--text-light); font-size: 0.95rem; }
+        select option { background: var(--dark-light); color: var(--text-light); padding: 0.5rem; }
+        .btn { padding: 0.75rem 1.5rem; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: all 0.3s; }
+        .btn:hover { background: var(--primary-dark); }
+        .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+        .alert-success { background: rgba(46, 204, 113, 0.1); border: 1px solid var(--success); color: var(--success); }
+        .alert-error { background: rgba(231, 76, 60, 0.1); border: 1px solid var(--danger); color: var(--danger); }
+        .workout-details { background: rgba(255, 107, 53, 0.1); border-left: 3px solid var(--primary); padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo"><h1>COACHING</h1></div>
+        <nav><ul class="nav-menu">
+            <li><a href="athlete-dashboard.html" class="nav-link"><span class="nav-icon">📊</span>Mi Dashboard</a></li>
+            <li><a href="athlete-workouts.html" class="nav-link"><span class="nav-icon">💪</span>Mis Workouts</a></li>
+            <li><a href="athlete-results.html" class="nav-link active"><span class="nav-icon">🏆</span>Mis Resultados</a></li>
+            <li><a href="athlete-prs.html" class="nav-link"><span class="nav-icon">🥇</span>Mis PRs</a></li>
+        </ul></nav>
+    </aside>
+
+    <header class="header">
+        <h2 style="font-family: 'Oswald', sans-serif; font-size: 1.5rem;">Registrar Resultado</h2>
+        <button onclick="logout()" style="padding: 0.5rem 1rem; background: var(--danger); color: white; border: none; border-radius: 6px; cursor: pointer;">Salir</button>
+    </header>
+
+    <main class="main-content">
+        <div id="alert" class="alert" style="display: none;"></div>
+
+        <div class="card">
+            <h3 class="card-title">Selecciona Workout</h3>
+            <div class="form-group">
+                <label>Workout Pendiente *</label>
+                <select id="assignment_id" onchange="showWorkoutDetails()">
+                    <option value="">Cargando...</option>
+                </select>
+            </div>
+            <div id="workoutDetails" style="display: none;"></div>
+        </div>
+
+        <div class="card" id="resultForm" style="display: none;">
+            <h3 class="card-title">Registra tu Resultado</h3>
+            <form id="submitForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Fecha *</label>
+                        <input type="date" id="completed_at" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo *</label>
+                        <select id="rx_or_scaled" required>
+                            <option value="rx">RX (Como está escrito)</option>
+                            <option value="scaled">Scaled (Modificado)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Tiempo (mm:ss)</label>
+                        <input type="text" id="time_seconds" placeholder="05:23">
+                    </div>
+                    <div class="form-group">
+                        <label>Rondas Completadas</label>
+                        <input type="number" id="rounds_completed" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Reps Completados</label>
+                        <input type="number" id="reps_completed" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Peso Usado (kg)</label>
+                        <input type="number" id="weight_kg" step="0.5">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Notas / Cómo te sentiste</label>
+                    <textarea id="notes" rows="3" placeholder="Ej: Me sentí fuerte hoy, buen ritmo..."></textarea>
+                </div>
+                <button type="submit" class="btn">Registrar Resultado</button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/v1';
+        let authToken = null;
+        let currentUser = null;
+
+        function checkAuth() {
+            const userData = localStorage.getItem('cloudework_user');
+            if (!userData) { window.location.href = 'login-connected.html'; return false; }
+            try {
+                currentUser = JSON.parse(userData);
+                authToken = currentUser.token;
+                if (currentUser.role !== 'athlete') {
+                    window.location.href = 'dashboard-connected.html';
+                    return false;
+                }
+                return true;
+            } catch (e) { window.location.href = 'login-connected.html'; return false; }
+        }
+
+        function logout() { localStorage.removeItem('cloudework_user'); window.location.href = 'login-connected.html'; }
+
+        async function fetchAPI(endpoint, options = {}) {
+            const response = await fetch(`${API_URL}${endpoint}`, {
+                ...options,
+                headers: { 'Authorization': `Bearer ${authToken}`, 'Accept': 'application/json', 'Content-Type': 'application/json', ...options.headers }
+            });
+            if (response.status === 401) logout();
+            return await response.json();
+        }
+
+        async function loadPendingWorkouts() {
+            try {
+                const data = await fetchAPI(`/assignments?athlete_id=${currentUser.profile.id}&is_completed=0&per_page=50`);
+                const select = document.getElementById('assignment_id');
+                
+                if (data.success && data.data?.assignments && data.data.assignments.length > 0) {
+                    select.innerHTML = '<option value="">Selecciona un workout...</option>' + 
+                        data.data.assignments.map(a => 
+                            `<option value="${a.id}" data-workout='${JSON.stringify(a.workout)}'>${a.workout?.name || 'Workout'} - ${a.scheduled_date}</option>`
+                        ).join('');
+                } else {
+                    select.innerHTML = '<option value="">No tienes workouts pendientes</option>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function showWorkoutDetails() {
+            const select = document.getElementById('assignment_id');
+            const assignmentId = select.value;
+            
+            if (!assignmentId) {
+                document.getElementById('workoutDetails').style.display = 'none';
+                document.getElementById('resultForm').style.display = 'none';
+                return;
+            }
+
+            const option = select.options[select.selectedIndex];
+            const workout = JSON.parse(option.getAttribute('data-workout') || '{}');
+
+            document.getElementById('workoutDetails').innerHTML = `
+                <div class="workout-details">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">${workout.name || 'Workout'}</h4>
+                    <p style="margin-bottom: 0.5rem;">${workout.description || ''}</p>
+                    <div style="font-size: 0.85rem; color: var(--text-gray);">
+                        Tipo: ${workout.workout_type || ''} • 
+                        Dificultad: ${workout.difficulty_level || ''} • 
+                        Duración estimada: ${workout.estimated_duration_minutes || '?'} min
+                    </div>
+                </div>
+            `;
+            document.getElementById('workoutDetails').style.display = 'block';
+            document.getElementById('resultForm').style.display = 'block';
+        }
+
+        document.getElementById('submitForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const assignmentId = document.getElementById('assignment_id').value;
+            if (!assignmentId) {
+                showAlert('Debes seleccionar un workout', 'error');
+                return;
+            }
+
+            const btn = e.target.querySelector('button');
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+
+            try {
+                const timeInput = document.getElementById('time_seconds').value;
+                let timeSeconds = null;
+                if (timeInput) {
+                    const [mins, secs] = timeInput.split(':').map(Number);
+                    timeSeconds = (mins * 60) + (secs || 0);
+                }
+
+                const formData = {
+                    assignment_id: parseInt(assignmentId),
+                    completed_at: document.getElementById('completed_at').value,
+                    rx_or_scaled: document.getElementById('rx_or_scaled').value,
+                    time_seconds: timeSeconds,
+                    rounds_completed: parseInt(document.getElementById('rounds_completed').value) || null,
+                    reps_completed: parseInt(document.getElementById('reps_completed').value) || null,
+                    weight_used: parseFloat(document.getElementById('weight_kg').value) ? { kg: parseFloat(document.getElementById('weight_kg').value) } : null,
+                    notes: document.getElementById('notes').value
+                };
+
+                const data = await fetchAPI('/results', { method: 'POST', body: JSON.stringify(formData) });
+
+                if (data.success) {
+                    const msg = data.data.result?.is_pr ? '✅ ¡Resultado registrado! 🏆 ¡ES UN PR!' : '✅ Resultado registrado correctamente';
+                    showAlert(msg, 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'athlete-dashboard.html';
+                    }, 2000);
+                } else {
+                    showAlert('❌ ' + (data.message || 'Error al registrar'), 'error');
+                }
+            } catch (error) {
+                showAlert('❌ Error al registrar resultado', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Registrar Resultado';
+            }
+        });
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+            setTimeout(() => alert.style.display = 'none', 5000);
+        }
+
+        document.getElementById('completed_at').valueAsDate = new Date();
+        if (checkAuth()) { loadPendingWorkouts(); }
+    </script>
+</body>
+</html>

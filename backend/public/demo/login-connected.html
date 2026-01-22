@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - CloudEwork</title>
+    <title>Login - COACHING</title>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
@@ -167,7 +167,7 @@
 <body>
     <div class="container">
         <div class="logo">
-            <h1>CLOUDEWORK</h1>
+            <h1>COACHING</h1>
             <p>CrossFit Management Platform</p>
         </div>
 
@@ -251,7 +251,12 @@
                     showAlert(`✅ ¡Bienvenido ${data.data.user.first_name}!`, 'success');
 
                     setTimeout(() => {
-                        window.location.href = 'dashboard-connected.html';
+                        // Redirect based on role
+                        if (data.data.user.role === 'athlete') {
+                            window.location.href = 'athlete-dashboard.html';
+                        } else {
+                            window.location.href = 'dashboard-connected.html';
+                        }
                     }, 1000);
                 } else {
                     showAlert('❌ ' + (data.message || 'Credenciales incorrectas'), 'error');

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atletas - CloudEwork</title>
+    <title>Atletas - COACHING</title>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
@@ -429,10 +429,10 @@
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="logo">
-            <h1>CLOUDEWORK</h1>
+            <h1>COACHING</h1>
         </div>
         <nav>
-            <ul class="nav-menu">
+                        <ul class="nav-menu">
                 <li class="nav-item">
                     <a href="dashboard-connected.html" class="nav-link">
                         <span class="nav-icon">📊</span>
@@ -455,6 +455,12 @@
                     <a href="programming.html" class="nav-link">
                         <span class="nav-icon">📅</span>
                         Programación
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="calendar.html" class="nav-link">
+                        <span class="nav-icon">📆</span>
+                        Calendario
                     </a>
                 </li>
                 <li class="nav-item">
@@ -720,6 +726,7 @@
                                 <td>${currentStreak} días</td>
                                 <td>
                                     <div class="actions">
+                                        <button class="btn-icon" onclick="window.location.href='athlete-detail.html?id=${athlete.id}'" title="Ver Detalle">👁️</button>
                                         <button class="btn-icon" onclick="editAthlete(${athlete.id})" title="Editar">✏️</button>
                                         <button class="btn-icon" onclick="deleteAthlete(${athlete.id}, '${athlete.user.full_name}')" title="Eliminar">🗑️</button>
                                     </div>
