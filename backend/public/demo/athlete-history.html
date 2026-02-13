@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Historial - COACHING</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --primary:#FF6B35; --dark:#1A1A2E; --dark-light:#16213E;
+            --card-bg:rgba(255,255,255,0.05); --card-border:rgba(255,255,255,0.1);
+            --success:#10b981; --warning:#f59e0b; --danger:#ef4444;
+            --text-muted:#94a3b8; --text-main:#e2e8f0;
+        }
+        body {
+            overflow-x: hidden; font-family:'Work Sans',sans-serif; background:linear-gradient(135deg,var(--dark) 0%,var(--dark-light) 100%); min-height:100vh; color:var(--text-main); }
+
+        /* SIDEBAR */
+        .sidebar { position:fixed; left:0; top:0; width:250px; height:100vh; background:rgba(15,23,42,0.95); border-right:1px solid var(--card-border); padding:1.75rem 0; z-index:100; display:flex; flex-direction:column; }
+        .logo { padding:0 1.5rem; margin-bottom:2.5rem; }
+        .logo h1 { font-family:'Oswald',sans-serif; font-size:1.6rem; color:var(--primary); letter-spacing:2px; }
+        .logo span { color:var(--text-muted); font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; display:block; margin-top:2px; }
+        .nav-menu { list-style:none; flex:1; }
+        .nav-item { margin-bottom:2px; }
+        .nav-link { display:flex; align-items:center; padding:0.75rem 1.5rem; color:var(--text-muted); text-decoration:none; transition:all 0.25s; font-size:0.93rem; border-left:3px solid transparent; }
+        .nav-link:hover { background:rgba(255,107,53,0.08); color:#fff; }
+        .nav-link.active { background:rgba(255,107,53,0.12); color:var(--primary); border-left-color:var(--primary); }
+        .nav-icon { margin-right:0.75rem; font-size:1.05rem; width:1.3rem; text-align:center; }
+        .sidebar-bottom { padding:1.5rem; border-top:1px solid var(--card-border); }
+        .user-info { display:flex; align-items:center; gap:0.75rem; }
+        .avatar { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--primary),#e04a1e); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.95rem; color:#fff; flex-shrink:0; }
+        .user-name { font-size:0.88rem; font-weight:600; }
+        .user-role { font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; }
+        .logout-btn { margin-top:0.75rem; width:100%; background:none; border:1px solid var(--card-border); color:var(--text-muted); padding:0.5rem; border-radius:8px; cursor:pointer; font-size:0.8rem; transition:all 0.2s; font-family:inherit; }
+        .logout-btn:hover { border-color:var(--danger); color:var(--danger); }
+
+        /* HEADER */
+        .header { position:fixed; left:250px; top:0; right:0; height:64px; background:rgba(15,23,42,0.85); border-bottom:1px solid var(--card-border); padding:0 2rem; display:flex; align-items:center; z-index:90; }
+        .header h2 { font-family:'Oswald',sans-serif; font-size:1.3rem; font-weight:600; }
+        .header-date { color:var(--text-muted); font-size:0.8rem; margin-top:2px; }
+
+        /* MAIN */
+        .main { margin-left:250px; margin-top:64px; padding:1.75rem 2rem; }
+
+        /* STATS */
+        .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.75rem; }
+        .stat-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px; padding:1.1rem; text-align:center; }
+        .stat-icon { font-size:1.3rem; margin-bottom:0.3rem; }
+        .stat-val { font-family:'Oswald',sans-serif; font-size:1.8rem; color:var(--primary); line-height:1; }
+        .stat-label { font-size:0.7rem; color:var(--text-muted); margin-top:0.3rem; text-transform:uppercase; letter-spacing:0.5px; }
+        .stat-card.green .stat-val { color:var(--success); }
+        .stat-card.orange .stat-val { color:var(--warning); }
+
+        /* FILTERS */
+        .filters { display:flex; gap:0.6rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+        .filter-btn { padding:0.4rem 0.9rem; border:1px solid var(--card-border); border-radius:20px; background:transparent; color:var(--text-muted); font-size:0.78rem; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+        .filter-btn:hover { border-color:var(--primary); color:var(--primary); }
+        .filter-btn.active { background:rgba(255,107,53,0.12); border-color:var(--primary); color:var(--primary); }
+
+        /* HISTORY LIST */
+        .history-list { display:flex; flex-direction:column; gap:0.55rem; }
+        .history-item { background:var(--card-bg); border:1px solid var(--card-border); border-radius:12px; padding:0.85rem 1.1rem; display:flex; align-items:center; gap:1rem; transition:all 0.2s; }
+        .history-item:hover { border-color:rgba(255,107,53,0.25); background:rgba(255,107,53,0.04); }
+        .h-check { width:32px; height:32px; border-radius:50%; background:rgba(16,185,129,0.12); color:var(--success); display:flex; align-items:center; justify-content:center; font-size:0.9rem; flex-shrink:0; }
+        .h-check.pr { background:rgba(255,107,53,0.12); color:var(--primary); }
+        .h-info { flex:1; min-width:0; }
+        .h-name { font-weight:600; font-size:0.9rem; }
+        .h-date { font-size:0.74rem; color:var(--text-muted); margin-top:1px; }
+        .h-tags { display:flex; gap:0.4rem; margin-top:0.3rem; flex-wrap:wrap; }
+        .tag { font-size:0.65rem; padding:0.12rem 0.4rem; border-radius:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.3px; }
+        .tag-rx { background:rgba(16,185,129,0.15); color:var(--success); }
+        .tag-scaled { background:rgba(245,158,11,0.15); color:var(--warning); }
+        .tag-pr { background:linear-gradient(135deg,var(--primary),#e04a1e); color:#fff; }
+        .h-right { text-align:right; flex-shrink:0; min-width:80px; }
+        .h-time { font-family:'Oswald',sans-serif; font-size:1.05rem; color:var(--primary); }
+        .h-feel { font-size:0.72rem; color:var(--text-muted); margin-top:2px; }
+
+        /* PAGINATION */
+        .pagination { display:flex; justify-content:center; gap:0.5rem; margin-top:1.5rem; flex-wrap:wrap; }
+        .page-btn { padding:0.4rem 0.8rem; border:1px solid var(--card-border); border-radius:8px; background:transparent; color:var(--text-muted); font-size:0.8rem; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+        .page-btn:hover { border-color:var(--primary); color:var(--primary); }
+        .page-btn.active { background:rgba(255,107,53,0.12); border-color:var(--primary); color:var(--primary); }
+        .page-btn:disabled { opacity:0.3; cursor:default; }
+
+        /* STATES */
+        .loading-wrap { text-align:center; padding:3rem; }
+        .loading-spinner { display:inline-block; width:40px; height:40px; border:4px solid rgba(255,107,53,0.2); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .empty-state { text-align:center; padding:3rem; color:var(--text-muted); }
+        .empty-icon { font-size:2.5rem; margin-bottom:1rem; opacity:0.5; }
+        .error-banner { background:rgba(239,68,68,0.1); border:1px solid var(--danger); border-radius:12px; padding:1.25rem 1.5rem; margin-bottom:1.5rem; color:#fca5a5; font-size:0.88rem; display:none; }
+        .error-banner strong { display:block; margin-bottom:0.3rem; }
+
+        /* TOAST */
+        .toast { position:fixed; bottom:1.5rem; right:1.5rem; background:#1e293b; color:#fff; padding:0.9rem 1.4rem; border-radius:12px; font-size:0.85rem; box-shadow:0 8px 24px rgba(0,0,0,0.35); transform:translateY(120%); transition:transform 0.35s; z-index:200; border-left:4px solid var(--success); }
+        .toast.show { transform:translateY(0); }
+        .toast.error { border-left-color:var(--danger); }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="logo">
+        <h1>COACHING</h1>
+        <span>Athlete Portal</span>
+    </div>
+    <nav>
+        <ul class="nav-menu">
+                    <li class="nav-item"><a href="athlete-dashboard.html" class="nav-link"><span class="nav-icon">🏠</span> Mi Dashboard</a></li>
+        <li class="nav-item"><a href="athlete-calendar.html" class="nav-link"><span class="nav-icon">📅</span> Calendario</a></li>
+        <li class="nav-item"><a href="athlete-history.html" class="nav-link active"><span class="nav-icon">📊</span> Mi Historial</a></li>
+        </ul>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="user-info">
+            <div class="avatar" id="avatarInit">A</div>
+            <div>
+                <div class="user-name" id="sidebarName">Cargando...</div>
+                <div class="user-role">Atleta</div>
+            </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+    </div>
+</aside>
+
+<header class="header">
+    <div>
+        <h2>📊 Mi Historial</h2>
+        <div class="header-date" id="headerDate"></div>
+    </div>
+</header>
+
+<main class="main">
+
+    <!-- STATS -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon">📋</div>
+            <div class="stat-val" id="statTotal">—</div>
+            <div class="stat-label">Total Completados</div>
+        </div>
+        <div class="stat-card green">
+            <div class="stat-icon">🏆</div>
+            <div class="stat-val" id="statPRs">—</div>
+            <div class="stat-label">Personal Records</div>
+        </div>
+        <div class="stat-card orange">
+            <div class="stat-icon">⏱️</div>
+            <div class="stat-val" id="statAvgTime">—</div>
+            <div class="stat-label">Tiempo Promedio</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🔥</div>
+            <div class="stat-val" id="statRx">—</div>
+            <div class="stat-label">Completados RX</div>
+        </div>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="filters">
+        <button class="filter-btn active" onclick="setFilter('all', this)">Todos</button>
+        <button class="filter-btn" onclick="setFilter('week', this)">Última semana</button>
+        <button class="filter-btn" onclick="setFilter('month', this)">Último mes</button>
+        <button class="filter-btn" onclick="setFilter('pr', this)">Solo PRs 🏆</button>
+        <button class="filter-btn" onclick="setFilter('rx', this)">Solo RX</button>
+    </div>
+
+    <!-- ERROR -->
+    <div class="error-banner" id="errorBanner">
+        <strong>⚠️ Error al cargar</strong>
+        <span id="errorText"></span>
+    </div>
+
+    <!-- LISTA -->
+    <div id="historyList">
+        <div class="loading-wrap"><div class="loading-spinner"></div></div>
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div class="pagination" id="pagination"></div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_URL = 'http://localhost:8000/api/v1';
+const authToken = localStorage.getItem('authToken');
+if (!authToken) { window.location.href = 'login-connected.html'; }
+
+let currentFilter = 'all';
+let currentPage   = 1;
+let totalPages    = 1;
+
+document.getElementById('headerDate').textContent =
+    new Date().toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+loadUserInfo();
+loadResults(1);
+
+// ── USER INFO ──────────────────────────────────────────────────────────────
+async function loadUserInfo() {
+    try {
+        const res  = await fetch(`${API_URL}/me`, { headers: authHeaders() });
+        const data = await res.json();
+        if (data.success) {
+            const u = data.data.user;
+            document.getElementById('sidebarName').textContent =
+                u.full_name || `${u.first_name||''} ${u.last_name||''}`.trim() || u.email;
+            document.getElementById('avatarInit').textContent =
+                (u.first_name || u.email || 'A')[0].toUpperCase();
+        }
+    } catch(e) { /* silencioso */ }
+}
+
+// ── CARGAR RESULTADOS ──────────────────────────────────────────────────────
+async function loadResults(page = 1) {
+    currentPage = page;
+    document.getElementById('historyList').innerHTML =
+        '<div class="loading-wrap"><div class="loading-spinner"></div></div>';
+    document.getElementById('errorBanner').style.display = 'none';
+    document.getElementById('pagination').innerHTML = '';
+
+    try {
+        let params = `per_page=20&sort_by=completed_at&sort_order=desc&page=${page}`;
+        const now  = new Date();
+
+        if (currentFilter === 'week') {
+            const mon = getMonday(now);
+            params += `&date_from=${fmt(mon)}&date_to=${fmt(now)}`;
+        } else if (currentFilter === 'month') {
+            const first = new Date(now.getFullYear(), now.getMonth(), 1);
+            params += `&date_from=${fmt(first)}&date_to=${fmt(now)}`;
+        } else if (currentFilter === 'pr') {
+            params += `&is_pr=true`;
+        } else if (currentFilter === 'rx') {
+            params += `&rx_or_scaled=rx`;
+        }
+
+        const res = await fetch(`${API_URL}/results?${params}`, { headers: authHeaders() });
+
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`HTTP ${res.status} — ${text.substring(0,120)}`);
+        }
+
+        const data = await res.json();
+
+        if (data.success) {
+            const results    = data.data.results    || [];
+            const pagination = data.data.pagination || {};
+            totalPages = pagination.total_pages  || 1;
+
+            renderStats(results, pagination.total || 0);
+            renderHistory(results);
+            renderPagination();
+        } else {
+            showError(data.message || 'Error desconocido del servidor');
+        }
+
+    } catch(e) {
+        console.error('loadResults error:', e);
+        showError(e.message || 'Error de conexión. ¿Está corriendo el servidor en localhost:8000?');
+    }
+}
+
+// ── STATS ──────────────────────────────────────────────────────────────────
+function renderStats(results, total) {
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statPRs').textContent   = results.filter(r => r.is_pr).length;
+    document.getElementById('statRx').textContent    = results.filter(r => r.rx_or_scaled === 'rx').length;
+
+    const times = results.filter(r => r.time_seconds).map(r => r.time_seconds);
+    document.getElementById('statAvgTime').textContent =
+        times.length ? formatTime(Math.round(times.reduce((a,b)=>a+b,0)/times.length)) : '─';
+}
+
+// ── RENDER LISTA ───────────────────────────────────────────────────────────
+function renderHistory(results) {
+    const el = document.getElementById('historyList');
+
+    if (!results.length) {
+        const msgs = {
+            all:   'Aún no tienes workouts completados',
+            week:  'Sin workouts esta semana',
+            month: 'Sin workouts este mes',
+            pr:    'Aún no tienes Personal Records',
+            rx:    'Sin workouts completados en RX'
+        };
+        el.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">📋</div>
+                <p style="font-weight:600;margin-bottom:0.4rem;">${msgs[currentFilter]||'Sin resultados'}</p>
+                <p style="font-size:0.82rem;">Completa un workout para verlo aquí</p>
+            </div>`;
+        return;
+    }
+
+    const feels = ['','😞','😐','🙂','😄','🤩'];
+    el.innerHTML = '<div class="history-list">' + results.map(r => {
+        const w      = r.workout || {};
+        const isPR   = r.is_pr;
+        const date   = r.completed_at
+            ? new Date(r.completed_at).toLocaleDateString('es-ES', { weekday:'short', day:'numeric', month:'short', year:'numeric' })
+            : '';
+        const time   = r.completed_at
+            ? new Date(r.completed_at).toLocaleTimeString('es-ES', { hour:'2-digit', minute:'2-digit' })
+            : '';
+        const timeDisplay = r.formatted_time || formatTime(r.time_seconds) || '─';
+
+        return `
+        <div class="history-item" onclick="goWorkout(${r.assignment_id})" style="cursor:pointer;">
+            <div class="h-check ${isPR?'pr':''}">${isPR?'🏆':'✓'}</div>
+            <div class="h-info">
+                <div class="h-name">${w.name||'Workout'}</div>
+                <div class="h-date">${date}${time ? ' · '+time : ''}</div>
+                <div class="h-tags">
+                    ${isPR ? '<span class="tag tag-pr">PR</span>' : ''}
+                    <span class="tag ${r.rx_or_scaled==='rx'?'tag-rx':'tag-scaled'}">${r.rx_or_scaled==='rx'?'RX':'Scaled'}</span>
+                    ${r.rounds_completed ? `<span class="tag" style="background:rgba(255,255,255,0.08);color:var(--text-muted);">🔁 ${r.rounds_completed}rds</span>` : ''}
+                </div>
+            </div>
+            <div class="h-right">
+                <div class="h-time">${timeDisplay}</div>
+                <div class="h-feel">${r.feeling_rating ? feels[r.feeling_rating] : ''}</div>
+            </div>
+        </div>`;
+    }).join('') + '</div>';
+}
+
+// ── PAGINACIÓN ─────────────────────────────────────────────────────────────
+function renderPagination() {
+    const el = document.getElementById('pagination');
+    if (totalPages <= 1) { el.innerHTML = ''; return; }
+    let html = `<button class="page-btn" onclick="loadResults(${currentPage-1})" ${currentPage<=1?'disabled':''}>← Anterior</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+        html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="loadResults(${i})">${i}</button>`;
+    }
+    html += `<button class="page-btn" onclick="loadResults(${currentPage+1})" ${currentPage>=totalPages?'disabled':''}>Siguiente →</button>`;
+    el.innerHTML = html;
+}
+
+// ── FILTROS ────────────────────────────────────────────────────────────────
+function setFilter(filter, btn) {
+    currentFilter = filter;
+    currentPage   = 1;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadResults(1);
+}
+
+// ── ERROR ──────────────────────────────────────────────────────────────────
+function showError(msg) {
+    document.getElementById('errorText').textContent = msg;
+    document.getElementById('errorBanner').style.display = 'block';
+    document.getElementById('historyList').innerHTML =
+        '<div class="empty-state"><div class="empty-icon">⚡</div><p>No se pudo cargar el historial</p></div>';
+}
+
+// ── HELPERS ────────────────────────────────────────────────────────────────
+function logout() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('coaching_user');
+    window.location.href = 'login-connected.html';
+}
+function authHeaders() { return { 'Authorization': `Bearer ${authToken}`, 'Accept': 'application/json' }; }
+function fmt(d)         { return d.toISOString().split('T')[0]; }
+function getMonday(d)   {
+    const date = new Date(d);
+    const day  = date.getDay();
+    date.setDate(date.getDate() - day + (day === 0 ? -6 : 1));
+    return date;
+}
+function formatTime(s) {
+    if (!s && s !== 0) return null;
+    const h   = Math.floor(s / 3600);
+    const m   = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return h > 0
+        ? `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`
+        : `${m}:${String(sec).padStart(2,'0')}`;
+}
+function showToast(msg, error=false) {
+    const t = document.getElementById('toast');
+    t.textContent = (error ? '❌ ' : '✅ ') + msg;
+    t.className = 'toast show' + (error ? ' error' : '');
+    setTimeout(() => t.className = 'toast', 3500);
+}
+
+function goWorkout(assignmentId) {
+    if (assignmentId) {
+        window.location.href = `athlete-workout-view.html?id=${assignmentId}`;
+    }
+}
+</script>
+</body>
+</html>

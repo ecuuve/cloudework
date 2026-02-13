@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Diagnóstico - COACHING</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:monospace; background:#0f172a; color:#e2e8f0; padding:2rem; }
+h1 { color:#FF6B35; margin-bottom:1.5rem; font-size:1.4rem; }
+.test { background:#1e293b; border-radius:8px; padding:1rem 1.25rem; margin-bottom:0.75rem; display:flex; align-items:center; gap:1rem; }
+.status { font-size:1.3rem; width:2rem; flex-shrink:0; }
+.label { font-weight:600; font-size:0.9rem; flex:1; }
+.detail { font-size:0.75rem; color:#94a3b8; margin-top:0.25rem; }
+.value { font-size:0.82rem; color:#60a5fa; text-align:right; max-width:300px; word-break:break-all; }
+.ok { border-left:3px solid #10b981; }
+.fail { border-left:3px solid #ef4444; }
+.warn { border-left:3px solid #f59e0b; }
+.pending { border-left:3px solid #64748b; }
+button { margin-top:1.5rem; background:#FF6B35; color:#fff; border:none; padding:0.75rem 1.5rem; border-radius:8px; cursor:pointer; font-size:0.9rem; font-family:monospace; }
+button:hover { background:#e04a1e; }
+pre { background:#0f172a; border:1px solid #334155; border-radius:6px; padding:1rem; font-size:0.75rem; overflow-x:auto; margin-top:1rem; max-height:300px; overflow-y:auto; color:#a3e635; }
+</style>
+</head>
+<body>
+<h1>🔍 Diagnóstico COACHING App</h1>
+<div id="tests"></div>
+<button onclick="runDiagnostics()">🔄 Volver a probar</button>
+<pre id="log"></pre>
+
+<script>
+const API = 'http://localhost:8000/api/v1';
+const container = document.getElementById('tests');
+const logEl = document.getElementById('log');
+const logs = [];
+
+function log(msg) {
+    logs.push(new Date().toLocaleTimeString() + ' - ' + msg);
+    logEl.textContent = logs.join('\n');
+}
+
+function addTest(id, label, detail) {
+    const div = document.createElement('div');
+    div.className = 'test pending';
+    div.id = 'test-' + id;
+    div.innerHTML = `<span class="status">⏳</span><div class="label">${label}<div class="detail">${detail}</div></div><div class="value" id="val-${id}">Probando...</div>`;
+    container.appendChild(div);
+}
+
+function setResult(id, ok, value, warn) {
+    const el = document.getElementById('test-' + id);
+    if (!el) return;
+    const cls = ok ? 'ok' : warn ? 'warn' : 'fail';
+    const icon = ok ? '✅' : warn ? '⚠️' : '❌';
+    el.className = 'test ' + cls;
+    el.querySelector('.status').textContent = icon;
+    document.getElementById('val-' + id).textContent = value || '';
+}
+
+async function runDiagnostics() {
+    container.innerHTML = '';
+    logs.length = 0;
+
+    // ── TEST 1: Servidor ──────────────────────────────────────────────────
+    addTest('server', 'Servidor Laravel corriendo', 'GET http://localhost:8000');
+    try {
+        const r = await fetch('http://localhost:8000/', { signal: AbortSignal.timeout(4000) });
+        if (r.ok || r.status === 200) {
+            setResult('server', true, 'HTTP ' + r.status + ' OK');
+            log('✅ Servidor OK');
+        } else if (r.status === 500) {
+            // 500 en / puede ser normal si hay un error en web routes pero la API funciona
+            setResult('server', null, 'HTTP 500 — pero si el login funciona, el servidor está OK', true);
+            log('⚠️ Servidor devolvió 500 en / (inofensivo si la API funciona)');
+        } else {
+            setResult('server', null, 'HTTP ' + r.status + ' — inofensivo si la API funciona abajo', true);
+            log('⚠️ Servidor status: ' + r.status);
+        }
+    } catch(e) {
+        if (e.name === 'TimeoutError' || e.message.includes('timed out')) {
+            setResult('server', false, '⏱️ Timeout — ¿está corriendo php artisan serve?');
+        } else {
+            setResult('server', false, e.message);
+        }
+        log('❌ Servidor no responde: ' + e.message);
+    }
+
+    // ── TEST 2: API prefix ────────────────────────────────────────────────
+    addTest('api', 'API /api/v1 accesible', 'POST /api/v1/login (ruta existe)');
+    try {
+        const r = await fetch(`${API}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ email: 'test@test.com', password: 'wrong' }),
+            signal: AbortSignal.timeout(5000)
+        });
+        if (r.status === 422 || r.status === 401 || r.status === 200) {
+            setResult('api', true, 'Ruta existe (HTTP ' + r.status + ')');
+            log('✅ API accesible, status: ' + r.status);
+        } else {
+            setResult('api', false, 'HTTP ' + r.status + ' inesperado');
+            log('⚠️ API status inesperado: ' + r.status);
+        }
+    } catch(e) {
+        setResult('api', false, e.message);
+        log('❌ API no accesible: ' + e.message);
+    }
+
+    // ── TEST 3: Login con credenciales reales ─────────────────────────────
+    addTest('login', 'Login con coach@coaching.com', 'POST /api/v1/login');
+    let token = null;
+    try {
+        const r = await fetch(`${API}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ email: 'coach@coaching.com', password: 'coaching123' }),
+            signal: AbortSignal.timeout(5000)
+        });
+        const data = await r.json();
+        if (data.success && data.data.token) {
+            token = data.data.token;
+            setResult('login', true, 'Token recibido. Rol: ' + data.data.user.role);
+            log('✅ Login OK. Rol: ' + data.data.user.role);
+        } else {
+            setResult('login', false, data.message || JSON.stringify(data).substring(0, 80));
+            log('❌ Login falló: ' + JSON.stringify(data).substring(0, 100));
+        }
+    } catch(e) {
+        setResult('login', false, e.message);
+        log('❌ Login error: ' + e.message);
+    }
+
+    // ── TEST 4: Token en localStorage ────────────────────────────────────
+    addTest('storage', 'Token guardado en localStorage', 'localStorage.getItem("authToken")');
+    const storedToken = localStorage.getItem('authToken');
+    const storedUser  = localStorage.getItem('cloudework_user');
+    if (storedToken) {
+        setResult('storage', true, 'Token presente (' + storedToken.length + ' chars)');
+        log('✅ Token en storage: ' + storedToken.substring(0, 20) + '...');
+    } else if (storedUser) {
+        setResult('storage', null, 'Solo cloudework_user (sin authToken)', true);
+        log('⚠️ Solo cloudework_user, sin authToken separado');
+    } else {
+        setResult('storage', false, 'Sin token en localStorage — no has iniciado sesión');
+        log('❌ Sin token en localStorage');
+    }
+
+    // ── TEST 5: /me con token ─────────────────────────────────────────────
+    const testToken = token || storedToken;
+    addTest('me', 'Endpoint /me con token', 'GET /api/v1/me');
+    if (!testToken) {
+        setResult('me', false, 'Sin token para probar');
+    } else {
+        try {
+            const r = await fetch(`${API}/me`, {
+                headers: { 'Authorization': 'Bearer ' + testToken, 'Accept': 'application/json' },
+                signal: AbortSignal.timeout(5000)
+            });
+            const data = await r.json();
+            if (data.success) {
+                setResult('me', true, data.data.user.email + ' (' + data.data.user.role + ')');
+                log('✅ /me OK: ' + data.data.user.email);
+            } else {
+                setResult('me', false, 'HTTP ' + r.status + ': ' + (data.message || ''));
+                log('❌ /me falló: ' + r.status);
+            }
+        } catch(e) {
+            setResult('me', false, e.message);
+        }
+    }
+
+    // ── TEST 6: CORS ──────────────────────────────────────────────────────
+    addTest('cors', 'CORS no bloquea requests', 'Verificar headers Access-Control-*');
+    try {
+        const r = await fetch(`${API}/login`, {
+            method: 'OPTIONS',
+            headers: { 'Origin': window.location.origin },
+            signal: AbortSignal.timeout(3000)
+        });
+        const cors = r.headers.get('Access-Control-Allow-Origin');
+        if (cors) {
+            setResult('cors', true, 'CORS OK: ' + cors);
+            log('✅ CORS: ' + cors);
+        } else {
+            setResult('cors', null, 'No detectado (puede estar OK si mismo origen)', true);
+            log('⚠️ CORS headers no presentes (puede ser normal)');
+        }
+    } catch(e) {
+        setResult('cors', null, 'No determinado: ' + e.message, true);
+    }
+
+    // ── TEST 7: Rutas de atleta ───────────────────────────────────────────
+    addTest('athlete_routes', 'Rutas /my/assignments existen', 'GET /api/v1/my/assignments');
+    if (!testToken) {
+        setResult('athlete_routes', null, 'Sin token — no probado', true);
+    } else {
+        try {
+            const r = await fetch(`${API}/my/assignments?scheduled_date=2025-01-01`, {
+                headers: { 'Authorization': 'Bearer ' + testToken, 'Accept': 'application/json' },
+                signal: AbortSignal.timeout(5000)
+            });
+            const data = await r.json();
+            if (r.status === 403) {
+                setResult('athlete_routes', null, '403: El usuario logueado es COACH, no atleta', true);
+                log('⚠️ /my/assignments: 403 (usuario es coach, no atleta)');
+            } else if (data.success !== undefined) {
+                setResult('athlete_routes', true, 'Ruta existe (HTTP ' + r.status + ')');
+                log('✅ /my/assignments OK: ' + r.status);
+            } else {
+                setResult('athlete_routes', false, 'HTTP ' + r.status);
+            }
+        } catch(e) {
+            setResult('athlete_routes', false, e.message);
+        }
+    }
+
+    // ── TEST 8: Login como atleta ──────────────────────────────────────────
+    addTest('athlete_login', 'Login con atleta@coaching.com', 'POST /api/v1/login');
+    let athleteToken = null;
+    try {
+        const r = await fetch(`${API}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ email: 'atleta@coaching.com', password: 'coaching123' }),
+            signal: AbortSignal.timeout(5000)
+        });
+        const data = await r.json();
+        if (data.success && data.data.token) {
+            athleteToken = data.data.token;
+            setResult('athlete_login', true, 'Login OK. Rol: ' + data.data.user.role);
+            log('✅ Atleta login OK');
+        } else {
+            setResult('athlete_login', false, (data.message || 'Sin token') + ' — Corre: php artisan db:seed --class=EnsureAdminSeeder');
+            log('❌ Atleta login falló: ' + (data.message || JSON.stringify(data)));
+        }
+    } catch(e) {
+        setResult('athlete_login', false, e.message);
+    }
+
+    // ── TEST 9: /my/assignments como atleta ────────────────────────────────
+    addTest('athlete_assignments', '/my/assignments como atleta', 'GET /api/v1/my/assignments');
+    if (!athleteToken) {
+        setResult('athlete_assignments', false, 'Sin token de atleta — login falló');
+    } else {
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const r = await fetch(`${API}/my/assignments?scheduled_date=${today}`, {
+                headers: { 'Authorization': 'Bearer ' + athleteToken, 'Accept': 'application/json' },
+                signal: AbortSignal.timeout(5000)
+            });
+            const data = await r.json();
+            if (data.success) {
+                const count = (data.data.assignments || []).length;
+                setResult('athlete_assignments', true, `OK — ${count} workouts hoy`);
+                log('✅ /my/assignments atleta OK: ' + count + ' workouts');
+            } else {
+                setResult('athlete_assignments', false, 'HTTP ' + r.status + ': ' + (data.message||''));
+            }
+        } catch(e) {
+            setResult('athlete_assignments', false, e.message);
+        }
+    }
+
+    log('');
+    log('=== Diagnóstico completado ===');
+    log('');
+    if (token) log('💡 TIP: Usa coach@coaching.com para el dashboard del coach');
+    if (athleteToken) log('💡 TIP: Usa atleta@coaching.com para el dashboard del atleta');
+}
+
+runDiagnostics();
+</script>
+
+<div style="margin-top:2rem;background:#1e293b;border-radius:8px;padding:1.25rem;border:1px solid #334155;">
+    <h2 style="color:#FF6B35;font-size:1rem;margin-bottom:1rem;">🚀 Acceso directo (una vez que todo esté verde)</h2>
+    <div style="display:grid;gap:0.75rem;">
+        <a href="dashboard-connected.html" style="display:block;background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.3);border-radius:6px;padding:0.75rem 1rem;text-decoration:none;color:#e2e8f0;">
+            <div style="font-weight:700;color:#FF6B35;">🏋️ Dashboard Coach</div>
+            <div style="font-size:0.75rem;color:#94a3b8;margin-top:2px;">Logueado como: coach@coaching.com</div>
+        </a>
+        <a href="login-connected.html" style="display:block;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:6px;padding:0.75rem 1rem;text-decoration:none;color:#e2e8f0;">
+            <div style="font-weight:700;color:#10b981;">⚡ Login como Atleta</div>
+            <div style="font-size:0.75rem;color:#94a3b8;margin-top:2px;">Usa: atleta@coaching.com / coaching123</div>
+        </a>
+    </div>
+    <div style="margin-top:1rem;font-size:0.72rem;color:#64748b;border-top:1px solid #334155;padding-top:0.75rem;">
+        <strong style="color:#94a3b8;">Si algo no funciona:</strong> abre DevTools (F12) → Console y dime el error en rojo exacto
+    </div>
+</div>
+</body>
+</html>

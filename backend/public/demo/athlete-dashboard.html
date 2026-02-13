@@ -4,205 +4,388 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Dashboard - COACHING</title>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin:0; padding:0; box-sizing:border-box; }
         :root {
-            --primary: #FF6B35; --primary-dark: #E85A2A; --secondary: #004E89;
-            --dark: #1A1A2E; --dark-light: #252541; --accent: #FFD23F;
-            --text-light: #E8E8E8; --text-gray: #A0A0B0;
-            --success: #2ECC71; --danger: #E74C3C;
+            --primary:#FF6B35; --dark:#1A1A2E; --dark-light:#16213E;
+            --card-bg:rgba(255,255,255,0.05); --card-border:rgba(255,255,255,0.1);
+            --success:#10b981; --warning:#f59e0b; --danger:#ef4444; --info:#3b82f6;
+            --text-muted:#94a3b8; --text-main:#e2e8f0;
         }
-        body { font-family: 'Work Sans', sans-serif; background: linear-gradient(135deg, var(--dark) 0%, #16213E 100%); min-height: 100vh; color: var(--text-light); }
-        .sidebar { position: fixed; left: 0; top: 0; width: 260px; height: 100vh; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-right: 1px solid rgba(255, 255, 255, 0.1); padding: 2rem 0; z-index: 100; }
-        .logo { padding: 0 1.5rem; margin-bottom: 2rem; }
-        .logo h1 { font-family: 'Oswald', sans-serif; font-size: 1.8rem; color: var(--primary); }
-        .nav-menu { list-style: none; }
-        .nav-link { display: flex; align-items: center; padding: 0.875rem 1.5rem; color: var(--text-gray); text-decoration: none; transition: all 0.3s; }
-        .nav-link:hover, .nav-link.active { background: rgba(255, 107, 53, 0.1); color: var(--primary); border-left: 3px solid var(--primary); }
-        .nav-icon { margin-right: 0.75rem; font-size: 1.2rem; }
-        .header { position: fixed; left: 260px; top: 0; right: 0; height: 70px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; z-index: 90; }
-        .main-content { margin-left: 260px; margin-top: 70px; padding: 2rem; }
-        .welcome { margin-bottom: 2rem; }
-        .welcome h2 { font-family: 'Oswald', sans-serif; font-size: 2rem; color: var(--primary); }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .stat-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 1.5rem; }
-        .stat-value { font-size: 2.5rem; font-weight: 700; font-family: 'Oswald', sans-serif; color: var(--primary); }
-        .stat-label { font-size: 0.875rem; color: var(--text-gray); margin-top: 0.5rem; }
-        .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
-        .card-title { font-family: 'Oswald', sans-serif; font-size: 1.3rem; color: var(--primary); margin-bottom: 1rem; }
-        .workout-item { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
-        .workout-info { flex: 1; }
-        .workout-name { font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; }
-        .workout-meta { font-size: 0.85rem; color: var(--text-gray); }
-        .btn { padding: 0.75rem 1.5rem; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.3s; text-decoration: none; display: inline-block; }
-        .btn:hover { background: var(--primary-dark); }
-        .btn-small { padding: 0.5rem 1rem; font-size: 0.85rem; }
-        .badge-pending { background: rgba(255, 215, 63, 0.2); color: var(--accent); padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
-        .badge-completed { background: rgba(46, 204, 113, 0.2); color: var(--success); padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; }
-        .loading { text-align: center; padding: 3rem; }
-        .spinner { display: inline-block; width: 40px; height: 40px; border: 4px solid rgba(255, 255, 255, 0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        body {
+            overflow-x: hidden; font-family:'Work Sans',sans-serif; background:linear-gradient(135deg,var(--dark) 0%,var(--dark-light) 100%); min-height:100vh; color:var(--text-main); }
+
+        .sidebar { position:fixed; left:0; top:0; width:250px; height:100vh; background:rgba(15,23,42,0.85); border-right:1px solid var(--card-border); padding:1.75rem 0; z-index:100; display:flex; flex-direction:column; }
+        .logo { padding:0 1.5rem; margin-bottom:2rem; }
+        .logo h1 { font-family:'Oswald',sans-serif; font-size:1.6rem; color:var(--primary); letter-spacing:2px; }
+        .nav-menu { list-style:none; flex:1; }
+        .nav-item { margin-bottom:2px; }
+        .nav-link { display:flex; align-items:center; padding:0.7rem 1.5rem; color:var(--text-muted); text-decoration:none; transition:all 0.25s; font-size:0.95rem; border-left:3px solid transparent; }
+        .nav-link:hover { background:rgba(255,107,53,0.08); color:#fff; }
+        .nav-link.active { background:rgba(255,107,53,0.12); color:var(--primary); border-left-color:var(--primary); }
+        .nav-icon { margin-right:0.75rem; font-size:1.1rem; width:1.3rem; text-align:center; }
+        .sidebar-bottom { padding:1.5rem; border-top:1px solid var(--card-border); }
+        .user-info { display:flex; align-items:center; gap:0.75rem; }
+        .avatar { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--primary),#e04a1e); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.95rem; color:#fff; }
+        .user-name { font-size:0.88rem; font-weight:600; color:var(--text-main); }
+        .user-role { font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; }
+        .logout-btn { margin-top:0.75rem; width:100%; background:none; border:1px solid var(--card-border); color:var(--text-muted); padding:0.5rem; border-radius:8px; cursor:pointer; font-size:0.8rem; transition:all 0.2s; font-family:inherit; }
+        .logout-btn:hover { border-color:var(--danger); color:var(--danger); }
+
+        .header { position:fixed; left:250px; top:0; right:0; height:64px; background:rgba(15,23,42,0.75); border-bottom:1px solid var(--card-border); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; z-index:90; }
+        .header-left h2 { font-family:'Oswald',sans-serif; font-size:1.3rem; font-weight:600; }
+        .header-date { color:var(--text-muted); font-size:0.82rem; margin-top:1px; }
+
+        .main { margin-left:250px; margin-top:64px; padding:1.75rem 2rem; max-width:1600px; }
+
+        .banner { background:linear-gradient(135deg,rgba(255,107,53,0.15),rgba(255,107,53,0.05)); border:1px solid rgba(255,107,53,0.25); border-radius:14px; padding:1.5rem 2rem; display:flex; align-items:center; gap:2rem; margin-bottom:2rem; position:relative; overflow:hidden; }
+        .banner::before { content:''; position:absolute; top:0; right:0; width:200px; height:200px; background:radial-gradient(circle, rgba(255,107,53,0.15) 0%, transparent 70%); border-radius:50%; }
+        .banner-icon { font-size:3rem; z-index:1; }
+        .banner-text { flex:1; z-index:1; }
+        .banner-text h3 { font-size:1.3rem; color:var(--primary); margin-bottom:4px; font-family:'Oswald',sans-serif; }
+        .banner-text p { font-size:0.9rem; color:var(--text-muted); }
+        .banner-streak { font-size:2.5rem; font-weight:700; color:var(--primary); font-family:'Oswald',sans-serif; z-index:1; }
+
+        .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1.2rem; margin-bottom:2rem; }
+        .kpi-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:12px; padding:1.25rem; transition:all 0.25s; position:relative; overflow:hidden; }
+        .kpi-card::before { content:''; position:absolute; top:0; left:0; width:4px; height:100%; background:var(--primary); opacity:0; transition:opacity 0.25s; }
+        .kpi-card:hover { transform:translateY(-2px); border-color:rgba(255,107,53,0.3); }
+        .kpi-card:hover::before { opacity:1; }
+        .kpi-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem; }
+        .kpi-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
+        .kpi-icon.success { background:rgba(16,185,129,0.15); color:var(--success); }
+        .kpi-icon.primary { background:rgba(255,107,53,0.15); color:var(--primary); }
+        .kpi-icon.info { background:rgba(59,130,246,0.15); color:var(--info); }
+        .kpi-icon.warning { background:rgba(245,158,11,0.15); color:var(--warning); }
+        .kpi-label { font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; font-weight:600; }
+        .kpi-value { font-size:2rem; font-weight:700; color:var(--text-main); font-family:'Oswald',sans-serif; line-height:1; margin-bottom:0.4rem; }
+        .kpi-meta { font-size:0.75rem; color:var(--text-muted); }
+
+        .chart-section { background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px; padding:1.5rem; margin-bottom:2rem; }
+        .section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; }
+        .section-title { font-family:'Oswald',sans-serif; font-size:1.1rem; color:var(--text-main); }
+        .week-chart { display:grid; grid-template-columns:repeat(7,1fr); gap:0.75rem; }
+        .day-bar { text-align:center; }
+        .day-label { font-size:0.7rem; color:var(--text-muted); margin-bottom:0.5rem; text-transform:uppercase; font-weight:600; }
+        .bar-container { height:120px; display:flex; align-items:flex-end; justify-content:center; }
+        .bar { width:100%; max-width:60px; background:linear-gradient(to top, var(--primary), rgba(255,107,53,0.6)); border-radius:6px 6px 0 0; transition:all 0.3s; position:relative; }
+        .bar:hover { transform:scaleY(1.05); filter:brightness(1.2); }
+        .bar-value { position:absolute; top:-1.5rem; left:50%; transform:translateX(-50%); font-size:0.85rem; font-weight:600; color:var(--text-main); }
+        .bar.empty { background:var(--card-border); opacity:0.3; }
+
+        .pr-list { display:flex; flex-direction:column; gap:0.75rem; }
+        .pr-item { display:flex; align-items:center; gap:1rem; padding:0.75rem; background:rgba(255,255,255,0.03); border-radius:8px; border:1px solid var(--card-border); transition:all 0.2s; }
+        .pr-item:hover { background:rgba(255,255,255,0.06); border-color:rgba(255,107,53,0.3); }
+        .pr-trophy { font-size:1.5rem; }
+        .pr-info { flex:1; }
+        .pr-name { font-weight:600; font-size:0.9rem; color:var(--text-main); margin-bottom:2px; }
+        .pr-details { font-size:0.75rem; color:var(--text-muted); }
+        .pr-date { font-size:0.72rem; color:var(--text-muted); white-space:nowrap; }
+
+        .workouts-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:1rem; }
+        .workout-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px; padding:1.25rem; transition:all 0.25s; cursor:pointer; position:relative; overflow:hidden; }
+        .workout-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--primary); opacity:0; transition:opacity 0.25s; }
+        .workout-card:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,0.25); }
+        .workout-card:hover::before { opacity:1; }
+        .workout-card.completed { border-color:rgba(16,185,129,0.3); background:rgba(16,185,129,0.06); }
+        .workout-card.completed::before { background:var(--success); opacity:1; }
+        .card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.6rem; }
+        .card-name { font-weight:600; font-size:1.05rem; color:var(--text-main); }
+        .badge { font-size:0.68rem; font-weight:600; text-transform:uppercase; padding:0.2rem 0.55rem; border-radius:20px; letter-spacing:0.4px; }
+        .badge-pending { background:rgba(245,158,11,0.15); color:var(--warning); }
+        .badge-done { background:rgba(16,185,129,0.15); color:var(--success); }
+        .badge-high { background:rgba(239,68,68,0.15); color:var(--danger); }
+        .card-meta { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:0.75rem; }
+        .card-meta span { font-size:0.78rem; color:var(--text-muted); }
+        .card-notes { font-size:0.8rem; color:var(--text-muted); background:rgba(0,0,0,0.2); border-radius:8px; padding:0.45rem 0.65rem; margin-bottom:0.75rem; }
+        .card-actions { display:flex; gap:0.6rem; }
+        .btn { flex:1; padding:0.6rem 0.75rem; border:none; border-radius:8px; font-weight:600; font-size:0.82rem; cursor:pointer; transition:all 0.2s; text-align:center; font-family:'Work Sans',sans-serif; }
+        .btn-primary { background:var(--primary); color:#fff; }
+        .btn-primary:hover { background:#e05a24; }
+        .btn-outline { background:transparent; color:var(--text-muted); border:1px solid var(--card-border); }
+        .btn-outline:hover { border-color:var(--primary); color:var(--primary); }
+        .btn-done { background:var(--success); color:#fff; opacity:0.7; cursor:default; }
+
+        .empty-state { text-align:center; padding:2.5rem 1rem; color:var(--text-muted); }
+        .empty-state .empty-icon { font-size:2.8rem; margin-bottom:0.75rem; }
+        .empty-state p { font-size:0.88rem; }
+        
+        .loading { text-align:center; padding:3rem; }
+        .loading-spinner { display:inline-block; width:40px; height:40px; border:4px solid rgba(255,107,53,0.2); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; }
+        @keyframes spin { to { transform:rotate(360deg); } }
     </style>
 </head>
 <body>
-    <aside class="sidebar">
-        <div class="logo"><h1>COACHING</h1></div>
-        <nav><ul class="nav-menu">
-            <li><a href="athlete-dashboard.html" class="nav-link active"><span class="nav-icon">📊</span>Mi Dashboard</a></li>
-            <li><a href="athlete-workouts.html" class="nav-link"><span class="nav-icon">💪</span>Mis Workouts</a></li>
-            <li><a href="athlete-results.html" class="nav-link"><span class="nav-icon">🏆</span>Mis Resultados</a></li>
-            <li><a href="athlete-prs.html" class="nav-link"><span class="nav-icon">🥇</span>Mis PRs</a></li>
-        </ul></nav>
-    </aside>
 
-    <header class="header">
-        <div class="welcome">
-            <h2 id="welcomeMsg">¡Hola!</h2>
+<aside class="sidebar">
+    <div class="logo"><h1>COACHING</h1></div>
+    <nav><ul class="nav-menu">
+                <li class="nav-item"><a href="athlete-dashboard.html" class="nav-link active"><span class="nav-icon">🏠</span> Mi Dashboard</a></li>
+        <li class="nav-item"><a href="athlete-calendar.html" class="nav-link"><span class="nav-icon">📅</span> Calendario</a></li>
+        <li class="nav-item"><a href="athlete-history.html" class="nav-link"><span class="nav-icon">📊</span> Mi Historial</a></li>
+    </ul></nav>
+    <div class="sidebar-bottom">
+        <div class="user-info">
+            <div class="avatar" id="avatarInit">A</div>
+            <div><div class="user-name" id="sidebarName">Cargando...</div><div class="user-role">Atleta</div></div>
         </div>
-        <button onclick="logout()" style="padding: 0.5rem 1rem; background: var(--danger); color: white; border: none; border-radius: 6px; cursor: pointer;">Salir</button>
-    </header>
+        <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+    </div>
+</aside>
 
-    <main class="main-content">
-        <div class="stats-grid" id="statsGrid">
-            <div class="loading"><div class="spinner"></div></div>
+<header class="header">
+    <div class="header-left"><h2>Mi Dashboard</h2><div class="header-date" id="headerDate"></div></div>
+</header>
+
+<main class="main">
+    <div class="banner" id="motivationBanner">
+        <div class="loading"><div class="loading-spinner"></div></div>
+    </div>
+
+    <div class="kpi-grid" id="kpiGrid">
+        <div class="loading"><div class="loading-spinner"></div></div>
+    </div>
+
+    <div class="chart-section">
+        <div class="section-header">
+            <div class="section-title">📈 Actividad Semanal</div>
         </div>
+        <div class="week-chart" id="weekChart">
+            <div class="loading"><div class="loading-spinner"></div></div>
+        </div>
+    </div>
 
-        <div class="card">
-            <h3 class="card-title">Workouts Pendientes</h3>
-            <div id="pendingWorkouts">
-                <div class="loading"><div class="spinner"></div></div>
+    <div class="chart-section">
+        <div class="section-header">
+            <div class="section-title">🏆 Récords Personales Recientes</div>
+        </div>
+        <div class="pr-list" id="prList">
+            <div class="loading"><div class="loading-spinner"></div></div>
+        </div>
+    </div>
+
+    <div class="chart-section">
+        <div class="section-header">
+            <div class="section-title" id="workoutsTitle">🎯 Mis Workouts de Hoy</div>
+        </div>
+        <div class="workouts-grid" id="todayWorkouts">
+            <div class="loading"><div class="loading-spinner"></div></div>
+        </div>
+    </div>
+</main>
+
+<script>
+const API_URL = 'http://localhost:8000/api/v1';
+const authToken = localStorage.getItem('authToken');
+
+console.log('🔵 Dashboard iniciado');
+console.log('🔑 Auth token:', authToken ? 'Presente' : 'NO PRESENTE');
+
+if (!authToken) {
+    console.error('❌ No hay token, redirigiendo');
+    window.location.href = 'login-connected.html';
+}
+
+// Leer parámetros de la URL
+const urlParams = new URLSearchParams(window.location.search);
+const selectedDate = urlParams.get('date'); // Fecha desde calendario
+const shouldRefresh = urlParams.get('refresh') === 'true'; // Viene de completar workout
+const activeDate = selectedDate ? new Date(selectedDate + 'T00:00:00') : new Date();
+
+// Limpiar parámetro refresh de la URL
+if (shouldRefresh) {
+    window.history.replaceState({}, document.title, window.location.pathname + (selectedDate ? `?date=${selectedDate}` : ''));
+}
+
+// Mostrar fecha activa en el header
+document.getElementById('headerDate').textContent = activeDate.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+// Si viene del calendario, mostrar indicador visual
+if (selectedDate) {
+    const isToday = selectedDate === fmt(new Date());
+    if (!isToday) {
+        document.getElementById('headerDate').innerHTML +=
+            ` &nbsp;<span style="background:rgba(255,107,53,0.2);color:var(--primary);padding:0.2rem 0.6rem;border-radius:20px;font-size:0.75rem;font-weight:700;">📅 Día seleccionado</span>`;
+    }
+}
+
+loadAll();
+
+async function loadAll() {
+    // ── 1. Info del usuario ───────────────────────────────────────────────
+    try {
+        const meRes  = await fetch(`${API_URL}/me`, { headers: authHeaders() });
+        const meData = await meRes.json();
+        if (meData.success) {
+            const u = meData.data.user;
+            document.getElementById('sidebarName').textContent = u.full_name || `${u.first_name||''} ${u.last_name||''}`.trim() || u.email;
+            document.getElementById('avatarInit').textContent  = (u.first_name || u.email || 'A')[0].toUpperCase();
+        }
+    } catch(e) { console.warn('/me falló:', e.message); }
+
+    // ── 2. Stats del atleta ────────────────────────────────────────────────
+    try {
+        const statsRes  = await fetch(`${API_URL}/my/stats`, { headers: authHeaders() });
+        const statsData = statsRes.ok ? await statsRes.json() : { success: false };
+
+        if (statsData.success) {
+            renderBanner(statsData.data);
+            renderKPIs(statsData.data);
+            renderWeeklyChart(statsData.data.weekly_activity || []);
+            renderRecentPRs(statsData.data?.insights?.recent_prs || []);
+        } else {
+            // Endpoint falló: mostrar estado vacío en vez de spinner eterno
+            renderBanner({ overview: { current_streak: 0 } });
+            renderKPIs(null);
+            renderWeeklyChart([]);
+            renderRecentPRs([]);
+        }
+    } catch(e) {
+        console.warn('/my/stats falló:', e.message);
+        renderBanner({ overview: { current_streak: 0 } });
+        renderKPIs(null);
+        renderWeeklyChart([]);
+        renderRecentPRs([]);
+    }
+
+    // ── 3. Workouts del día ────────────────────────────────────────────────
+    try {
+        const dayFmt   = fmt(activeDate);
+        console.log('📡 Fetching assignments para fecha:', dayFmt);
+        const assignRes  = await fetch(`${API_URL}/my/assignments?scheduled_date=${dayFmt}`, { headers: authHeaders() });
+        console.log('📡 Response status:', assignRes.status);
+        const assignData = await assignRes.json();
+        console.log('📦 Assignments data completo:', JSON.stringify(assignData, null, 2));
+        console.log('📦 Cantidad de assignments:', (assignData.data?.assignments || []).length);
+
+        const titleEl = document.getElementById('workoutsTitle');
+        if (titleEl) {
+            const isToday = dayFmt === fmt(new Date());
+            if (isToday) {
+                titleEl.textContent = '🎯 Mis Workouts de Hoy';
+            } else {
+                const fecha = activeDate.toLocaleDateString('es-ES', {weekday:'long', day:'numeric', month:'long'});
+                titleEl.innerHTML = `📅 Workouts del ${fecha}`;
+            }
+        }
+        renderTodayWorkouts(assignData.success ? (assignData.data.assignments || []) : []);
+    } catch(e) {
+        console.warn('/my/assignments falló:', e.message);
+        renderTodayWorkouts([]);
+    }
+}
+
+function renderBanner(stats) {
+    const s = (stats && stats.overview) ? (stats.overview.current_streak || 0) : 0;
+    let icon, title, sub;
+    if (s >= 7)      { icon='🔥'; title=`${s} días de streak!`; sub='Estás imparable. Sigue así.'; }
+    else if (s >= 3) { icon='⚡'; title=`Streak de ${s} días`; sub='Vas muy bien, mantén el ritmo.'; }
+    else if (s === 0){ icon='🎯'; title='Comienza tu streak'; sub='Completa un workout hoy.'; }
+    else             { icon='💪'; title=`Día ${s} de tu streak`; sub='Cada día cuenta.'; }
+    
+    document.getElementById('motivationBanner').innerHTML = `
+        <div class="banner-icon">${icon}</div>
+        <div class="banner-text"><h3>${title}</h3><p>${sub}</p></div>
+        <div class="banner-streak">${s}</div>
+    `;
+}
+
+function renderKPIs(stats) {
+    // Guard: si no hay stats, mostrar zeros
+    if (!stats || !stats.overview) {
+        document.getElementById('kpiGrid').innerHTML =
+            '<div style="text-align:center;padding:2rem;color:var(--text-muted);">📊 Completa tu primer workout para ver estadísticas</div>';
+        return;
+    }
+    const kpis = [
+        { icon:'💪', color:'success', label:'Total Workouts', value:stats.overview.total_workouts, meta:`Esta semana: ${stats.this_week.workouts_completed}` },
+        { icon:'🏆', color:'primary', label:'Personal Records', value:stats.overview.total_prs, meta:`Este mes: ${stats.this_month.prs_achieved}` },
+        { icon:'📊', color:'info', label:'Tasa de Completación', value:`${stats.this_week.completion_rate}%`, meta:'Esta semana' },
+        { icon:'⏱️', color:'warning', label:'Tiempo Promedio', value:`${stats.performance.avg_workout_time_minutes}`, meta:'minutos' },
+        { icon:'⚡', color:'primary', label:'Tasa RX', value:`${stats.performance.rx_rate}%`, meta:'Workouts en RX' },
+        { icon:'😊', color:'success', label:'Sentimiento Promedio', value:stats.performance.avg_feeling_rating.toFixed(1), meta:'de 5 estrellas' },
+        { icon:'🔥', color:'warning', label:'Mejor Streak', value:stats.overview.longest_streak, meta:'días consecutivos' },
+        { icon:'📅', color:'info', label:'Este Mes', value:stats.this_month.workouts_completed, meta:'workouts completados' },
+    ];
+
+    document.getElementById('kpiGrid').innerHTML = kpis.map(k => `
+        <div class="kpi-card">
+            <div class="kpi-header">
+                <div class="kpi-icon ${k.color}">${k.icon}</div>
             </div>
+            <div class="kpi-label">${k.label}</div>
+            <div class="kpi-value">${k.value}</div>
+            <div class="kpi-meta">${k.meta}</div>
         </div>
+    `).join('');
+}
 
-        <div class="card">
-            <h3 class="card-title">Últimos Resultados</h3>
-            <div id="recentResults">
-                <div class="loading"><div class="spinner"></div></div>
+function renderWeeklyChart(activity) {
+    const maxCount = Math.max(...activity.map(d => d.count), 1);
+    document.getElementById('weekChart').innerHTML = activity.map(d => {
+        const height = (d.count / maxCount) * 100;
+        return `
+            <div class="day-bar">
+                <div class="day-label">${d.day}</div>
+                <div class="bar-container">
+                    <div class="bar ${d.count === 0 ? 'empty' : ''}" style="height:${height}%">
+                        ${d.count > 0 ? `<div class="bar-value">${d.count}</div>` : ''}
+                    </div>
+                </div>
             </div>
-        </div>
-    </main>
+        `;
+    }).join('');
+}
 
-    <script>
-        const API_URL = 'http://localhost:8000/api/v1';
-        let authToken = null;
-        let currentUser = null;
+function renderRecentPRs(prs) {
+    console.log('🏆 renderRecentPRs llamado con:', prs);
+    const el = document.getElementById('prList');
+    if (!el) return;
+    
+    // Aceptar tanto array directo como objeto con recent_prs
+    const prsList = Array.isArray(prs) ? prs : (prs?.recent_prs || []);
+    
+    if (!prsList || prsList.length === 0) {
+        el.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);font-size:0.85rem;">🏆<br>Aún no tienes récords personales.<br>¡Sigue entrenando!</div>';
+        return;
+    }
+    
+    el.innerHTML = prsList.slice(0,5).map(pr => 
+        `<div style="padding:0.75rem 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+            <div style="font-weight:600;margin-bottom:0.25rem;">${pr.workout_name || pr.movement_name || 'Workout'}</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);">${pr.metric_value || pr.value} ${pr.metric_type || pr.unit || ''} · ${pr.achieved_at || ''}</div>
+        </div>`
+    ).join('');
+}
 
-        function checkAuth() {
-            const userData = localStorage.getItem('cloudework_user');
-            if (!userData) { window.location.href = 'login-connected.html'; return false; }
-            try {
-                currentUser = JSON.parse(userData);
-                authToken = currentUser.token;
-                
-                // Redirect if not athlete
-                if (currentUser.role !== 'athlete') {
-                    window.location.href = 'dashboard-connected.html';
-                    return false;
-                }
-                
-                document.getElementById('welcomeMsg').textContent = `¡Hola ${currentUser.first_name}!`;
-                return true;
-            } catch (e) { window.location.href = 'login-connected.html'; return false; }
-        }
 
-        function logout() { localStorage.removeItem('cloudework_user'); window.location.href = 'login-connected.html'; }
+function renderTodayWorkouts(assignments) {
+    console.log("🎯 renderTodayWorkouts llamado con:", assignments);
+    console.log("🎯 Tipo:", typeof assignments, "| Es array:", Array.isArray(assignments), "| Length:", assignments?.length);
+    if (!assignments.length) {
+        document.getElementById('todayWorkouts').innerHTML = '<div class="empty-state"><div class="empty-icon">🎉</div><p>No tienes workouts para hoy. ¡Descansa!</p></div>';
+        return;
+    }
+    document.getElementById('todayWorkouts').innerHTML = assignments.map(a => {
+        const w = a.workout || {};
+        const done = a.is_completed;
+        return `<div class="workout-card ${done?'completed':''}" onclick="goWorkout(${a.id})">
+            <div class="card-top"><div class="card-name">${w.name||'Workout'}</div>${done?'<span class="badge badge-done">Completado</span>':(a.priority==='high'?'<span class="badge badge-high">Alta</span>':'<span class="badge badge-pending">Pendiente</span>')}</div>
+            <div class="card-meta"><span>📋 ${w.type||'Custom'}</span><span>⚡ ${w.difficulty||'Intermedia'}</span></div>
+            ${a.notes?`<div class="card-notes">📝 ${a.notes}</div>`:''}
+            <div class="card-actions">${done?`<button class="btn btn-done" disabled>✅ Completado</button>`:`<button class="btn btn-primary" onclick="event.stopPropagation(); goWorkout(${a.id},true)">▶️ Empezar</button><button class="btn btn-outline" onclick="event.stopPropagation(); goWorkout(${a.id})">Ver detalles</button>`}</div>
+        </div>`;
+    }).join('');
+}
 
-        async function fetchAPI(endpoint) {
-            const response = await fetch(`${API_URL}${endpoint}`, {
-                headers: { 'Authorization': `Bearer ${authToken}`, 'Accept': 'application/json' }
-            });
-            if (response.status === 401) logout();
-            return await response.json();
-        }
-
-        async function loadStats() {
-            try {
-                const data = await fetchAPI(`/athletes/${currentUser.profile.id}`);
-                const stats = data.data?.athlete?.statistics || {};
-                
-                document.getElementById('statsGrid').innerHTML = `
-                    <div class="stat-card">
-                        <div class="stat-value">${stats.total_workouts || 0}</div>
-                        <div class="stat-label">Workouts Completados</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">${stats.total_prs || 0}</div>
-                        <div class="stat-label">PRs Personales</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">${stats.current_streak || 0}</div>
-                        <div class="stat-label">Días Seguidos</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">${stats.completion_rate || 0}%</div>
-                        <div class="stat-label">Tasa Completado</div>
-                    </div>
-                `;
-            } catch (error) {
-                console.error('Error loading stats:', error);
-            }
-        }
-
-        async function loadPendingWorkouts() {
-            try {
-                const data = await fetchAPI(`/assignments?athlete_id=${currentUser.profile.id}&is_completed=0&per_page=5`);
-                const container = document.getElementById('pendingWorkouts');
-                
-                if (!data.success || !data.data?.assignments || data.data.assignments.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: var(--text-gray);">No tienes workouts pendientes</p>';
-                    return;
-                }
-
-                container.innerHTML = data.data.assignments.map(a => `
-                    <div class="workout-item">
-                        <div class="workout-info">
-                            <div class="workout-name">${a.workout?.name || 'Workout'}</div>
-                            <div class="workout-meta">
-                                📅 ${a.scheduled_date} • 
-                                <span class="badge-pending">Pendiente</span>
-                            </div>
-                        </div>
-                        <a href="athlete-results.html?assignment=${a.id}" class="btn btn-small">Registrar Resultado</a>
-                    </div>
-                `).join('');
-            } catch (error) {
-                console.error('Error loading workouts:', error);
-            }
-        }
-
-        async function loadRecentResults() {
-            try {
-                const data = await fetchAPI(`/results?athlete_id=${currentUser.profile.id}&per_page=5`);
-                const container = document.getElementById('recentResults');
-                
-                if (!data.success || !data.data?.results || data.data.results.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: var(--text-gray);">Aún no tienes resultados</p>';
-                    return;
-                }
-
-                container.innerHTML = data.data.results.map(r => `
-                    <div class="workout-item">
-                        <div class="workout-info">
-                            <div class="workout-name">${r.workout?.name || 'Workout'} ${r.is_pr ? '🏆' : ''}</div>
-                            <div class="workout-meta">
-                                ${r.completed_at} • ${r.rx_or_scaled?.toUpperCase()}
-                                ${r.time_seconds ? ` • ${Math.floor(r.time_seconds / 60)}:${(r.time_seconds % 60).toString().padStart(2, '0')}` : ''}
-                            </div>
-                        </div>
-                        <span class="badge-completed">Completado</span>
-                    </div>
-                `).join('');
-            } catch (error) {
-                console.error('Error loading results:', error);
-            }
-        }
-
-        if (checkAuth()) {
-            loadStats();
-            loadPendingWorkouts();
-            loadRecentResults();
-        }
-    </script>
+function goWorkout(id, start=false) {
+    const dateParam = selectedDate ? `&date=${selectedDate}` : '';
+    window.location.href = `athlete-workout-view.html?id=${id}${start?'&start=true':''}${dateParam}`;
+}
+function logout() { localStorage.removeItem('authToken'); localStorage.removeItem('cloudework_user'); window.location.href = 'login-connected.html'; }
+function authHeaders() { return {'Authorization':`Bearer ${authToken}`,'Accept':'application/json'}; }
+function fmt(d) { return d.toISOString().split('T')[0]; }
+</script>
 </body>
 </html>

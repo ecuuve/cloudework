@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Calendario - COACHING</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --primary:#FF6B35; --dark:#1A1A2E; --dark-light:#16213E;
+            --card-bg:rgba(255,255,255,0.05); --card-border:rgba(255,255,255,0.1);
+            --success:#10b981; --warning:#f59e0b; --danger:#ef4444; --info:#3b82f6;
+            --text-muted:#94a3b8; --text-main:#e2e8f0;
+        }
+        body {
+            overflow-x: hidden; font-family:'Work Sans',sans-serif; background:linear-gradient(135deg,var(--dark) 0%,var(--dark-light) 100%); min-height:100vh; color:var(--text-main); }
+
+        .sidebar { position:fixed; left:0; top:0; width:250px; height:100vh; background:rgba(15,23,42,0.85); border-right:1px solid var(--card-border); padding:1.75rem 0; z-index:100; display:flex; flex-direction:column; }
+        .logo { padding:0 1.5rem; margin-bottom:2rem; }
+        .logo h1 { font-family:'Oswald',sans-serif; font-size:1.6rem; color:var(--primary); letter-spacing:2px; }
+        .logo span { color:var(--text-muted); font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; }
+        .nav-menu { list-style:none; flex:1; }
+        .nav-item { margin-bottom:2px; }
+        .nav-link { display:flex; align-items:center; padding:0.7rem 1.5rem; color:var(--text-muted); text-decoration:none; transition:all 0.25s; font-size:0.95rem; border-left:3px solid transparent; }
+        .nav-link:hover { background:rgba(255,107,53,0.08); color:#fff; }
+        .nav-link.active { background:rgba(255,107,53,0.12); color:var(--primary); border-left-color:var(--primary); }
+        .nav-icon { margin-right:0.75rem; font-size:1.1rem; width:1.3rem; text-align:center; }
+        .sidebar-bottom { padding:1.5rem; border-top:1px solid var(--card-border); }
+        .user-info { display:flex; align-items:center; gap:0.75rem; }
+        .avatar { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--primary),#e04a1e); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.95rem; color:#fff; }
+        .user-name { font-size:0.88rem; font-weight:600; color:var(--text-main); }
+        .user-role { font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; }
+        .logout-btn { margin-top:0.75rem; width:100%; background:none; border:1px solid var(--card-border); color:var(--text-muted); padding:0.5rem; border-radius:8px; cursor:pointer; font-size:0.8rem; transition:all 0.2s; font-family:inherit; }
+        .logout-btn:hover { border-color:var(--danger); color:var(--danger); }
+
+        .header { position:fixed; left:250px; top:0; right:0; height:64px; background:rgba(15,23,42,0.75); border-bottom:1px solid var(--card-border); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; z-index:90; }
+        .header-left h2 { font-family:'Oswald',sans-serif; font-size:1.3rem; font-weight:600; }
+        .header-controls { display:flex; gap:1rem; align-items:center; }
+        .view-toggle { display:flex; gap:0.5rem; background:var(--card-bg); border:1px solid var(--card-border); border-radius:8px; padding:0.25rem; }
+        .view-btn { padding:0.5rem 1rem; border:none; background:none; color:var(--text-muted); cursor:pointer; border-radius:6px; font-size:0.85rem; font-weight:600; transition:all 0.2s; font-family:inherit; }
+        .view-btn.active { background:var(--primary); color:#fff; }
+        .view-btn:hover:not(.active) { color:var(--text-main); }
+
+        .main { margin-left:250px; margin-top:64px; padding:1.75rem 2rem; max-width:1600px; }
+
+        /* CALENDAR VIEW */
+        .calendar-nav { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; background:var(--card-bg); border:1px solid var(--card-border); border-radius:12px; padding:1rem 1.5rem; }
+        .calendar-nav h3 { font-family:'Oswald',sans-serif; font-size:1.5rem; color:var(--text-main); }
+        .nav-btns { display:flex; gap:0.5rem; }
+        .nav-btns button { padding:0.5rem 1rem; background:var(--card-bg); border:1px solid var(--card-border); color:var(--text-main); border-radius:8px; cursor:pointer; font-weight:600; font-size:0.85rem; transition:all 0.2s; font-family:inherit; }
+        .nav-btns button:hover { background:var(--primary); border-color:var(--primary); }
+
+        .calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1rem; }
+        .calendar-day { background:var(--card-bg); border:1px solid var(--card-border); border-radius:12px; padding:1rem; min-height:120px; transition:all 0.2s; cursor:pointer; }
+        .calendar-day:hover { transform:translateY(-2px); border-color:rgba(255,107,53,0.3); }
+        .calendar-day.today { border-color:var(--primary); border-width:2px; }
+        .calendar-day.other-month { opacity:0.4; }
+        .day-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; padding-bottom:0.5rem; border-bottom:1px solid var(--card-border); }
+        .day-number { font-weight:700; font-size:1.1rem; color:var(--text-main); }
+        .day-name { font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; font-weight:600; }
+        .day-workouts { display:flex; flex-direction:column; gap:0.4rem; }
+        .workout-pill { background:rgba(255,107,53,0.15); border-left:3px solid var(--primary); padding:0.4rem 0.6rem; border-radius:4px; font-size:0.75rem; font-weight:600; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .workout-pill.completed { background:rgba(16,185,129,0.15); border-left-color:var(--success); }
+        .workout-pill.high-priority { border-left-color:var(--danger); }
+
+        /* LIST VIEW */
+        .week-section { background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px; padding:1.5rem; margin-bottom:1.5rem; }
+        .week-header { font-family:'Oswald',sans-serif; font-size:1.2rem; color:var(--primary); margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:1px solid var(--card-border); }
+        .workout-card { background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:12px; padding:1.25rem; margin-bottom:1rem; transition:all 0.25s; cursor:pointer; }
+        .workout-card:hover { transform:translateY(-2px); border-color:rgba(255,107,53,0.3); }
+        .workout-card.completed { border-left:4px solid var(--success); background:rgba(16,185,129,0.06); }
+        .card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem; }
+        .card-date { font-size:0.85rem; color:var(--text-muted); font-weight:600; }
+        .card-name { font-weight:600; font-size:1.1rem; color:var(--text-main); margin-bottom:0.4rem; }
+        .card-meta { display:flex; gap:1rem; flex-wrap:wrap; font-size:0.8rem; color:var(--text-muted); }
+        .badge { font-size:0.7rem; font-weight:600; text-transform:uppercase; padding:0.25rem 0.6rem; border-radius:20px; letter-spacing:0.4px; }
+        .badge-pending { background:rgba(245,158,11,0.15); color:var(--warning); }
+        .badge-done { background:rgba(16,185,129,0.15); color:var(--success); }
+        .badge-high { background:rgba(239,68,68,0.15); color:var(--danger); }
+
+        .loading { text-align:center; padding:3rem; }
+        .loading-spinner { display:inline-block; width:40px; height:40px; border:4px solid rgba(255,107,53,0.2); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .empty-state { text-align:center; padding:3rem; color:var(--text-muted); }
+        .empty-icon { font-size:3rem; margin-bottom:1rem; }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="logo"><h1>COACHING</h1><span>Athlete Portal</span></div>
+    <nav><ul class="nav-menu">
+                <li class="nav-item"><a href="athlete-dashboard.html" class="nav-link"><span class="nav-icon">🏠</span> Mi Dashboard</a></li>
+        <li class="nav-item"><a href="athlete-calendar.html" class="nav-link active"><span class="nav-icon">📅</span> Calendario</a></li>
+        <li class="nav-item"><a href="athlete-history.html" class="nav-link"><span class="nav-icon">📊</span> Mi Historial</a></li>
+    </ul></nav>
+    <div class="sidebar-bottom">
+        <div class="user-info">
+            <div class="avatar" id="avatarInit">A</div>
+            <div><div class="user-name" id="sidebarName">Cargando...</div><div class="user-role">Atleta</div></div>
+        </div>
+        <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+    </div>
+</aside>
+
+<header class="header">
+    <div class="header-left"><h2>📅 Mi Programación</h2></div>
+    <div class="header-controls">
+        <div class="view-toggle">
+            <button class="view-btn active" onclick="switchView('calendar')">Calendario</button>
+            <button class="view-btn" onclick="switchView('list')">Lista</button>
+        </div>
+    </div>
+</header>
+
+<main class="main">
+    <!-- CALENDAR VIEW -->
+    <div id="calendarView">
+        <div class="calendar-nav">
+            <div class="nav-btns">
+                <button onclick="previousMonth()">← Anterior</button>
+                <button onclick="goToday()">Hoy</button>
+            </div>
+            <h3 id="calendarTitle">Enero 2026</h3>
+            <button class="nav-btns" onclick="nextMonth()" style="padding:0.5rem 1rem;">Siguiente →</button>
+        </div>
+        <div class="calendar-grid" id="calendarGrid">
+            <div class="loading"><div class="loading-spinner"></div></div>
+        </div>
+    </div>
+
+    <!-- LIST VIEW -->
+    <div id="listView" style="display:none;">
+        <div id="listContent">
+            <div class="loading"><div class="loading-spinner"></div></div>
+        </div>
+    </div>
+</main>
+
+<script>
+const API_URL = 'http://localhost:8000/api/v1';
+const authToken = localStorage.getItem('authToken');
+if (!authToken) window.location.href = 'login-connected.html';
+
+let currentDate = new Date();
+let currentView = 'calendar';
+let allAssignments = [];
+
+// Load user info
+fetch(`${API_URL}/me`, { headers: authHeaders() })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const user = data.data.user;
+            document.getElementById('sidebarName').textContent = user.full_name || user.email;
+            document.getElementById('avatarInit').textContent = (user.first_name||'')[0] || 'A';
+        }
+    });
+
+loadAssignments();
+
+function loadAssignments() {
+    const startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    
+    fetch(`${API_URL}/my/assignments?date_from=${fmt(startDate)}&date_to=${fmt(endDate)}`, {
+        headers: authHeaders()
+    })
+    .then(r => r.json())
+        .then(data => {
+        allAssignments = (data && data.success) ? (data.data.assignments || []) : [];
+        renderCalendar();
+        renderList();
+    })
+    .catch(e => console.error('Error loading assignments:', e));
+}
+
+function renderCalendar() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    document.getElementById('calendarTitle').textContent = new Date(year, month).toLocaleDateString('es-ES', {month:'long', year:'numeric'});
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const prevMonthDays = new Date(year, month, 0).getDate();
+    
+    const today = new Date();
+    const isToday = (d) => d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+    
+    let html = '';
+    
+    // Previous month days
+    for (let i = firstDay - 1; i >= 0; i--) {
+        const day = prevMonthDays - i;
+        html += `<div class="calendar-day other-month"><div class="day-header"><span class="day-number">${day}</span></div></div>`;
+    }
+    
+    // Current month days
+    for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const dateStr = fmt(date);
+        const dayAssignments = allAssignments.filter(a => a.scheduled_date === dateStr);
+        
+        const todayClass = isToday(date) ? 'today' : '';
+        
+        html += `
+            <div class="calendar-day ${todayClass}" onclick="goToDay('${dateStr}')">
+                <div class="day-header">
+                    <span class="day-number">${day}</span>
+                    <span class="day-name">${date.toLocaleDateString('es-ES', {weekday:'short'})}</span>
+                </div>
+                <div class="day-workouts">
+                    ${dayAssignments.slice(0,3).map(a => {
+                        const w = a.workout || {};
+                        const completedClass = a.is_completed ? 'completed' : '';
+                        const priorityClass = a.priority === 'high' ? 'high-priority' : '';
+                        return `<div class="workout-pill ${completedClass} ${priorityClass}">${w.name || 'Workout'}</div>`;
+                    }).join('')}
+                    ${dayAssignments.length > 3 ? `<div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.2rem;">+${dayAssignments.length - 3} más</div>` : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Next month days to fill grid
+    const totalCells = firstDay + daysInMonth;
+    const remainingCells = 7 - (totalCells % 7);
+    if (remainingCells < 7) {
+        for (let i = 1; i <= remainingCells; i++) {
+            html += `<div class="calendar-day other-month"><div class="day-header"><span class="day-number">${i}</span></div></div>`;
+        }
+    }
+    
+    document.getElementById('calendarGrid').innerHTML = html;
+}
+
+function renderList() {
+    // Group by week
+    const weeks = {};
+    allAssignments.forEach(a => {
+        const date = new Date(a.scheduled_date + 'T00:00:00');
+        const weekStart = getMonday(date);
+        const weekKey = fmt(weekStart);
+        if (!weeks[weekKey]) weeks[weekKey] = [];
+        weeks[weekKey].push(a);
+    });
+    
+    const sortedWeeks = Object.keys(weeks).sort();
+    
+    if (sortedWeeks.length === 0) {
+        document.getElementById('listContent').innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><p>No tienes workouts programados este mes</p></div>';
+        return;
+    }
+    
+    const html = sortedWeeks.map(weekKey => {
+        const weekDate = new Date(weekKey + 'T00:00:00');
+        const weekEnd = new Date(weekDate);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        const title = `Semana del ${weekDate.toLocaleDateString('es-ES', {day:'numeric', month:'short'})} al ${weekEnd.toLocaleDateString('es-ES', {day:'numeric', month:'short'})}`;
+        
+        const weekAssignments = weeks[weekKey].sort((a,b) => a.scheduled_date.localeCompare(b.scheduled_date));
+        
+        return `
+            <div class="week-section">
+                <div class="week-header">${title}</div>
+                ${weekAssignments.map(a => {
+                    const w = a.workout || {};
+                    const date = new Date(a.scheduled_date + 'T00:00:00');
+                    const completedClass = a.is_completed ? 'completed' : '';
+                    return `
+                        <div class="workout-card ${completedClass}" onclick=\"goWorkout(${a.id}, '${a.scheduled_date}')\">
+                            <div class="card-top">
+                                <div>
+                                    <div class="card-date">${date.toLocaleDateString('es-ES', {weekday:'long', day:'numeric', month:'long'})}</div>
+                                    <div class="card-name">${w.name || 'Workout'}</div>
+                                </div>
+                                ${a.is_completed ? '<span class="badge badge-done">✅ Completado</span>' : (a.priority === 'high' ? '<span class="badge badge-high">Alta Prioridad</span>' : '<span class="badge badge-pending">Pendiente</span>')}
+                            </div>
+                            <div class="card-meta">
+                                <span>📋 ${w.type || 'Custom'}</span>
+                                <span>⚡ ${w.difficulty || 'Intermedia'}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }).join('');
+    
+    document.getElementById('listContent').innerHTML = html;
+}
+
+function switchView(view) {
+    currentView = view;
+    document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    if (view === 'calendar') {
+        document.getElementById('calendarView').style.display = 'block';
+        document.getElementById('listView').style.display = 'none';
+    } else {
+        document.getElementById('calendarView').style.display = 'none';
+        document.getElementById('listView').style.display = 'block';
+    }
+}
+
+function previousMonth() {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    loadAssignments();
+}
+
+function nextMonth() {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    loadAssignments();
+}
+
+function goToday() {
+    currentDate = new Date();
+    loadAssignments();
+}
+
+function goToDay(dateStr) {
+    window.location.href = `athlete-dashboard.html?date=${dateStr}`;
+}
+
+function goWorkout(id, date) {
+    const dateParam = date ? `&date=${date}` : '';
+    window.location.href = `athlete-workout-view.html?id=${id}${dateParam}`;
+}
+
+function getMonday(d) {
+    const date = new Date(d);
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(date.setDate(diff));
+}
+
+function logout() { localStorage.removeItem('authToken'); localStorage.removeItem('cloudework_user'); window.location.href = 'login-connected.html'; }
+function authHeaders() { return {'Authorization':`Bearer ${authToken}`,'Accept':'application/json'}; }
+function fmt(d) { return d.toISOString().split('T')[0]; }
+</script>
+</body>
+</html>

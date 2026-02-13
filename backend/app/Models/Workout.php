@@ -31,6 +31,8 @@ class Workout extends Model
         'equipment_needed',
         'tags',
         'notes',
+        'sections',
+        'mindset_intention',
     ];
 
     /**
@@ -48,6 +50,7 @@ class Workout extends Model
             'scaling_options' => 'array',
             'equipment_needed' => 'array',
             'tags' => 'array',
+            'sections' => 'array',
         ];
     }
 

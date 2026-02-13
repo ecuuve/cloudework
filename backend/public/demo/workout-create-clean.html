@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programación del Día - COACHING</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem 0;
+            z-index: 100;
+        }
+
+        .logo {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.5rem;
+            color: #3b82f6;
+            font-weight: 700;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1.5rem;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .nav-icon {
+            margin-right: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            left: 260px;
+            top: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 90;
+        }
+
+        .header-title h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            margin-top: 70px;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #94a3b8;
+        }
+
+        /* Date Section */
+        .date-section {
+            background: #1e293b;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .date-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #cbd5e1;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 0.875rem;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .form-select option {
+            background: #0f172a;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 0.875rem;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        /* Button */
+        .btn {
+            padding: 0.625rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #334155;
+            color: #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        /* Sessions */
+        .sessions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .sessions-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .session-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #334155;
+        }
+
+        .session-header h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        /* Pieces */
+        .pieces-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        .pieces-header h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        .piece-card {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .piece-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .piece-header-left {
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .piece-fields {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Exercises */
+        .exercises-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1rem 0 0.75rem 0;
+            padding-top: 1rem;
+            border-top: 1px solid #334155;
+        }
+
+        .exercises-header h5 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+
+        .exercise-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .exercise-name-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+
+        .exercise-fields {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .exercise-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .exercise-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        /* Save Section */
+        .save-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #334155;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .alert {
+            position: fixed;
+            top: 90px;
+            right: 2rem;
+            min-width: 400px;
+            max-width: 600px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            animation: slideInRight 0.4s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        .alert-danger {
+            background: #dc2626;
+            border: 2px solid #ef4444;
+            color: white;
+        }
+
+        .alert-success {
+            background: #059669;
+            border: 2px solid #10b981;
+            color: white;
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .alert-message {
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <h1>COACHING</h1>
+        </div>
+        <nav>
+                        <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashboard-connected.html" class="nav-link">
+                        <span class="nav-icon">📊</span>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="athletes.html" class="nav-link">
+                        <span class="nav-icon">👥</span>
+                        Atletas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="workouts.html" class="nav-link">
+                        <span class="nav-icon">💪</span>
+                        Workouts
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="calendar.html" class="nav-link">
+                        <span class="nav-icon">📅</span>
+                        Programación
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="exercise-library.html" class="nav-link">
+                        <span class="nav-icon">📚</span>
+                        Biblioteca
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-title">
+            <h2>Programación del Día</h2>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+    <div class="container">
+        <div id="alertContainer"></div>
+
+        <!-- Date Section -->
+        <div class="date-section">
+            <div class="date-grid">
+                <div class="form-group">
+                    <label class="form-label">Fecha</label>
+                    <input type="date" id="programDate" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Día de la Semana</label>
+                    <input type="text" id="dayOfWeek" class="form-input" readonly>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sessions Container -->
+        <div class="sessions-header">
+            <h2>Sesiones</h2>
+            <button type="button" class="btn btn-primary" onclick="addSession()">+ Agregar Sesión</button>
+        </div>
+        <div id="sessionsContainer"></div>
+
+        <!-- Save Section -->
+        <div class="save-section">
+            <button type="button" class="btn btn-success" onclick="saveProgram()">💾 Guardar Programación Completa</button>
+            <label style="display: flex; align-items: center; gap: 0.5rem; color: #94a3b8; cursor: pointer;">
+                <input type="checkbox" id="redirectAfterSave" style="width: 18px; height: 18px; cursor: pointer;">
+                <span>Ir a Workouts después de guardar</span>
+            </label>
+            <button type="button" class="btn btn-secondary" onclick="window.location='workouts.html'">Cancelar</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/v1';
+        const authToken = localStorage.getItem('authToken');
+
+        if (!authToken) {
+            window.location.href = 'login-connected.html';
+        }
+
+        let sessionCounter = 0;
+        let pieceCounters = {};
+        let exerciseCounters = {};
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            setDefaultDate();
+            
+            // Check if loading from template
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('template') === 'true') {
+                loadTemplate();
+            } else {
+                addSession();
+            }
+        });
+
+        function setDefaultDate() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            document.getElementById('programDate').value = `${yyyy}-${mm}-${dd}`;
+            updateDayOfWeek();
+            document.getElementById('programDate').addEventListener('change', updateDayOfWeek);
+        }
+
+        function updateDayOfWeek() {
+            const dateInput = document.getElementById('programDate').value;
+            if (dateInput) {
+                const date = new Date(dateInput + 'T00:00:00');
+                const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+                document.getElementById('dayOfWeek').value = days[date.getDay()];
+            }
+        }
+
+        function addSession() {
+            sessionCounter++;
+            pieceCounters[sessionCounter] = 0;
+
+            const html = `
+                <div class="session-card" data-session-id="${sessionCounter}">
+                    <div class="session-header">
+                        <h3 ondblclick="editSessionName(${sessionCounter})" style="cursor: pointer;" title="Doble click para editar">
+                            <span class="session-name-display">Sesión ${sessionCounter}</span>
+                            <input type="text" class="form-input session-name-input" value="Sesión ${sessionCounter}" style="display: none; width: 200px;" onblur="saveSessionName(${sessionCounter})" onkeypress="if(event.key==='Enter') this.blur()">
+                        </h3>
+                        <button type="button" class="btn btn-danger" onclick="removeSession(${sessionCounter})">Eliminar</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Intención de la Sesión</label>
+                        <textarea class="form-textarea session-intention" placeholder="¿Cuál es la intención de esta sesión?">Sesión de entrenamiento ${sessionCounter}</textarea>
+                    </div>
+
+                    <div class="pieces-header">
+                        <h4>Piezas</h4>
+                        <button type="button" class="btn btn-secondary" onclick="addPiece(${sessionCounter})">+ Agregar Pieza</button>
+                    </div>
+                    <div id="pieces-${sessionCounter}"></div>
+                </div>
+            `;
+
+            document.getElementById('sessionsContainer').insertAdjacentHTML('beforeend', html);
+            
+            // Agregar una pieza por defecto
+            addPiece(sessionCounter);
+        }
+
+        function removeSession(sessionId) {
+            if (confirm('¿Eliminar esta sesión completa?')) {
+                document.querySelector(`[data-session-id="${sessionId}"]`).remove();
+            }
+        }
+
+        function addPiece(sessionId) {
+            pieceCounters[sessionId]++;
+            const pieceId = `${sessionId}-${pieceCounters[sessionId]}`;
+            exerciseCounters[pieceId] = 0;
+
+            const html = `
+                <div class="piece-card" data-piece-id="${pieceId}">
+                    <div class="piece-header">
+                        <span class="piece-header-left">Pieza ${pieceCounters[sessionId]}</span>
+                        <button type="button" class="btn btn-danger" onclick="removePiece('${pieceId}')">Eliminar</button>
+                    </div>
+
+                    <div class="piece-fields">
+                        <div class="form-group">
+                            <label class="form-label">Título *</label>
+                            <input type="text" class="form-input piece-title" placeholder="Ej: Movilidad, Fuerza, MetCon" value="Pieza ${pieceCounters[sessionId]}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tipo *</label>
+                            <select class="form-select piece-type">
+                                <option value="mindset">Mindset</option>
+                                <option value="mobility">Movilidad</option>
+                                <option value="warmup">Calentamiento</option>
+                                <option value="strength">Fuerza</option>
+                                <option value="skill">Skill</option>
+                                <option value="metcon">MetCon</option>
+                                <option value="cooldown">Cooldown</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="exercises-header">
+                        <h5>Ejercicios</h5>
+                        <button type="button" class="btn btn-secondary" onclick="addExercise('${pieceId}')">+ Agregar Ejercicio</button>
+                    </div>
+                    <div id="exercises-${pieceId}"></div>
+                </div>
+            `;
+
+            document.getElementById(`pieces-${sessionId}`).insertAdjacentHTML('beforeend', html);
+            
+            // Agregar un ejercicio por defecto
+            addExercise(pieceId);
+        }
+
+        function removePiece(pieceId) {
+            if (confirm('¿Eliminar esta pieza?')) {
+                document.querySelector(`[data-piece-id="${pieceId}"]`).remove();
+            }
+        }
+
+        function addExercise(pieceId) {
+            exerciseCounters[pieceId]++;
+            const exerciseId = exerciseCounters[pieceId];
+
+            const html = `
+                <div class="exercise-card" data-exercise-id="${exerciseId}">
+                    <div class="exercise-header">
+                        <span class="exercise-name-label">Ejercicio ${exerciseId}</span>
+                        <button type="button" class="btn btn-danger" onclick="removeExercise('${pieceId}', ${exerciseId})">Eliminar</button>
+                    </div>
+
+                    <div class="exercise-fields">
+                        <div class="form-group">
+                            <label class="form-label">Nombre *</label>
+                            <input type="text" class="form-input ex-name" placeholder="Nombre del ejercicio" value="Ejercicio ${exerciseId}">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Estructura</label>
+                            <select class="form-select ex-structure" onchange="updateExerciseFields('${pieceId}', ${exerciseId}, this.value)">
+                                <option value="none">Sin estructura</option>
+                                <option value="sets_reps">Sets x Reps</option>
+                                <option value="amrap">AMRAP</option>
+                                <option value="emom">EMOM</option>
+                                <option value="for_time">For Time</option>
+                                <option value="tabata">Tabata</option>
+                                <option value="intervals">Intervalos</option>
+                                <option value="death_by">Death by...</option>
+                                <option value="chipper">Chipper</option>
+                            </select>
+                        </div>
+
+                        <div class="ex-structure-fields"></div>
+
+                        <div class="form-group">
+                            <label class="form-label">Video URL</label>
+                            <input type="url" class="form-input ex-video" placeholder="https://youtube.com/...">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Notas</label>
+                            <textarea class="form-textarea ex-notes" placeholder="Instrucciones adicionales" style="min-height: 60px;"></textarea>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById(`exercises-${pieceId}`).insertAdjacentHTML('beforeend', html);
+        }
+
+        function removeExercise(pieceId, exerciseId) {
+            const piece = document.querySelector(`[data-piece-id="${pieceId}"]`);
+            const exercise = piece.querySelector(`[data-exercise-id="${exerciseId}"]`);
+            exercise.remove();
+        }
+
+        function updateExerciseFields(pieceId, exerciseId, structure) {
+            const piece = document.querySelector(`[data-piece-id="${pieceId}"]`);
+            const exercise = piece.querySelector(`[data-exercise-id="${exerciseId}"]`);
+            const container = exercise.querySelector('.ex-structure-fields');
+
+            let html = '';
+
+            if (structure === 'sets_reps') {
+                html = `
+                    <div class="exercise-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Sets</label>
+                            <input type="text" class="form-input ex-sets" placeholder="3">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Reps</label>
+                            <input type="text" class="form-input ex-reps" placeholder="10">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Descanso</label>
+                            <input type="text" class="form-input ex-rest" placeholder="2 min">
+                        </div>
+                    </div>
+                `;
+            } else if (structure === 'amrap') {
+                html = `
+                    <div class="form-group">
+                        <label class="form-label">Duración</label>
+                        <input type="text" class="form-input ex-duration" placeholder="20 min">
+                    </div>
+                `;
+            } else if (structure === 'emom') {
+                html = `
+                    <div class="exercise-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Duración</label>
+                            <input type="text" class="form-input ex-duration" placeholder="10 min">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Reps/min</label>
+                            <input type="text" class="form-input ex-reps" placeholder="5">
+                        </div>
+                    </div>
+                `;
+            } else if (structure === 'for_time') {
+                html = `
+                    <div class="exercise-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Rondas/Reps</label>
+                            <input type="text" class="form-input ex-reps" placeholder="21-15-9">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Cap Time</label>
+                            <input type="text" class="form-input ex-duration" placeholder="10 min">
+                        </div>
+                    </div>
+                `;
+            } else if (structure === 'none') {
+                html = `
+                    <div class="form-group">
+                        <label class="form-label">Duración</label>
+                        <input type="text" class="form-input ex-duration" placeholder="5 min">
+                    </div>
+                `;
+            } else if (structure === 'tabata') {
+                html = `
+                    <div class="form-group">
+                        <label class="form-label">Rondas</label>
+                        <input type="text" class="form-input ex-sets" placeholder="8" value="8">
+                    </div>
+                `;
+            } else if (structure === 'intervals') {
+                html = `
+                    <div class="exercise-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Trabajo</label>
+                            <input type="text" class="form-input ex-duration" placeholder="40 seg">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Descanso</label>
+                            <input type="text" class="form-input ex-rest" placeholder="20 seg">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Rondas</label>
+                            <input type="text" class="form-input ex-sets" placeholder="10">
+                        </div>
+                    </div>
+                `;
+            } else if (structure === 'death_by') {
+                html = `
+                    <div class="exercise-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Incremento/min</label>
+                            <input type="text" class="form-input ex-reps" placeholder="+1 rep">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Cap</label>
+                            <input type="text" class="form-input ex-duration" placeholder="20 min">
+                        </div>
+                    </div>
+                `;
+            } else if (structure === 'chipper') {
+                html = `
+                    <div class="exercise-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Total Reps</label>
+                            <input type="text" class="form-input ex-reps" placeholder="50 reps">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Cap Time</label>
+                            <input type="text" class="form-input ex-duration" placeholder="30 min">
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        async function saveProgram() {
+            try {
+                const programDate = document.getElementById('programDate').value;
+                if (!programDate) {
+                    showAlert('Selecciona una fecha', 'danger');
+                    return;
+                }
+
+                const sessionCards = document.querySelectorAll('.session-card');
+                if (sessionCards.length === 0) {
+                    showAlert('Agrega al menos una sesión', 'danger');
+                    return;
+                }
+
+                for (let [sessionIndex, sessionCard] of sessionCards.entries()) {
+                    const sessionNumber = sessionIndex + 1;
+                    const intention = sessionCard.querySelector('.session-intention').value.trim();
+
+                    const pieceCards = sessionCard.querySelectorAll('.piece-card');
+                    if (pieceCards.length === 0) {
+                        showAlert(`Sesión ${sessionNumber} necesita al menos una pieza`, 'danger');
+                        return;
+                    }
+
+                    const pieces = [];
+                    for (let [pieceIndex, pieceCard] of pieceCards.entries()) {
+                        const title = pieceCard.querySelector('.piece-title').value.trim();
+                        const type = pieceCard.querySelector('.piece-type').value;
+
+                        if (!title) {
+                            showAlert(`Sesión ${sessionNumber}, Pieza ${pieceIndex + 1} necesita título`, 'danger');
+                            return;
+                        }
+
+                        const exercises = [];
+                        const exerciseCards = pieceCard.querySelectorAll('.exercise-card');
+
+                        for (let exerciseCard of exerciseCards) {
+                            const name = exerciseCard.querySelector('.ex-name').value.trim();
+                            if (!name) continue;
+
+                            const exercise = {
+                                name: name,
+                                structure: exerciseCard.querySelector('.ex-structure').value,
+                                video_url: exerciseCard.querySelector('.ex-video').value.trim(),
+                                notes: exerciseCard.querySelector('.ex-notes').value.trim()
+                            };
+
+                            const sets = exerciseCard.querySelector('.ex-sets');
+                            const reps = exerciseCard.querySelector('.ex-reps');
+                            const duration = exerciseCard.querySelector('.ex-duration');
+                            const rest = exerciseCard.querySelector('.ex-rest');
+
+                            if (sets && sets.value) exercise.sets = sets.value.trim();
+                            if (reps && reps.value) exercise.reps = reps.value.trim();
+                            if (duration && duration.value) exercise.duration = duration.value.trim();
+                            if (rest && rest.value) exercise.rest = rest.value.trim();
+
+                            exercises.push(exercise);
+                        }
+
+                        pieces.push({
+                            piece_number: pieceIndex + 1,
+                            title: title,
+                            type: type,
+                            exercises: exercises
+                        });
+                    }
+
+                    const workout = {
+                        name: `PROGRA ${programDate} Sesión ${sessionNumber}`,
+                        description: intention || 'Programación del día',
+                        workout_type: 'custom',
+                        difficulty_level: 'intermediate',
+                        workout_structure: { 
+                            format: 'custom',
+                            rounds: null,
+                            time_cap: null
+                        },
+                        mindset_intention: intention,
+                        sections: pieces,
+                        is_public: false,
+                        is_benchmark: false
+                    };
+
+                    const response = await fetch(`${API_URL}/workouts`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${authToken}`
+                        },
+                        body: JSON.stringify(workout)
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        console.error('Error del servidor:', data);
+                        
+                        // Mostrar errores específicos
+                        let errorMessage = `Error en Sesión ${sessionNumber}: `;
+                        
+                        if (data.errors) {
+                            // Laravel validation errors
+                            const errorsList = Object.entries(data.errors)
+                                .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
+                                .join(' | ');
+                            errorMessage += errorsList;
+                        } else if (data.message) {
+                            errorMessage += data.message;
+                        } else {
+                            errorMessage += 'Error desconocido';
+                        }
+                        
+                        throw new Error(errorMessage);
+                    }
+                }
+
+                showAlert('¡Programación guardada exitosamente!', 'success');
+                
+                // Solo redirigir si el checkbox está marcado
+                if (document.getElementById('redirectAfterSave').checked) {
+                    setTimeout(() => window.location = 'workouts.html', 1500);
+                } else {
+                    // Limpiar formulario para crear nuevo
+                    setTimeout(() => {
+                        document.getElementById('sessionsContainer').innerHTML = '';
+                        sessionCounter = 0;
+                        addSession();
+                    }, 1500);
+                }
+
+            } catch (error) {
+                console.error(error);
+                showAlert(error.message, 'danger');
+            }
+        }
+
+        function showAlert(message, type) {
+            const icon = type === 'success' ? '✅' : '❌';
+            const title = type === 'success' ? 'Éxito' : 'Error';
+            
+            document.getElementById('alertContainer').innerHTML = `
+                <div class="alert alert-${type}">
+                    <div class="alert-icon">${icon}</div>
+                    <div class="alert-content">
+                        <div class="alert-title">${title}</div>
+                        <div class="alert-message">${message}</div>
+                    </div>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                const alert = document.querySelector('.alert');
+                if (alert) {
+                    alert.style.animation = 'slideOutRight 0.4s ease';
+                    setTimeout(() => {
+                        document.getElementById('alertContainer').innerHTML = '';
+                    }, 400);
+                }
+            }, 6000);
+        }
+
+        function editSessionName(sessionId) {
+            const session = document.querySelector(`[data-session-id="${sessionId}"]`);
+            const display = session.querySelector('.session-name-display');
+            const input = session.querySelector('.session-name-input');
+            display.style.display = 'none';
+            input.style.display = 'inline-block';
+            input.focus();
+            input.select();
+        }
+
+        function saveSessionName(sessionId) {
+            const session = document.querySelector(`[data-session-id="${sessionId}"]`);
+            const display = session.querySelector('.session-name-display');
+            const input = session.querySelector('.session-name-input');
+            display.textContent = input.value || `Sesión ${sessionId}`;
+            display.style.display = 'inline';
+            input.style.display = 'none';
+        }
+
+        function loadTemplate() {
+            const templateData = localStorage.getItem('workout_template');
+            if (!templateData) {
+                addSession();
+                return;
+            }
+
+            try {
+                const workout = JSON.parse(templateData);
+                localStorage.removeItem('workout_template');
+
+                // Crear sesión desde template
+                addSession();
+
+                const sessionCard = document.querySelector('.session-card');
+                const sections = workout.sections || [];
+
+                // Cargar intención
+                sessionCard.querySelector('.session-intention').value = workout.mindset_intention || '';
+
+                // Limpiar la pieza que se crea automáticamente
+                sessionCard.querySelector('#pieces-1').innerHTML = '';
+                pieceCounters[1] = 0;
+
+                // Cargar piezas
+                sections.forEach(section => {
+                    addPiece(1);
+                    const pieceId = `1-${pieceCounters[1]}`;
+                    const pieceCard = document.querySelector(`[data-piece-id="${pieceId}"]`);
+
+                    pieceCard.querySelector('.piece-title').value = section.title || '';
+                    pieceCard.querySelector('.piece-type').value = section.type || 'mobility';
+
+                    // Limpiar ejercicio automático
+                    pieceCard.querySelector(`#exercises-${pieceId}`).innerHTML = '';
+                    exerciseCounters[pieceId] = 0;
+
+                    // Cargar ejercicios
+                    (section.exercises || []).forEach(exercise => {
+                        addExercise(pieceId);
+                        const exerciseId = exerciseCounters[pieceId];
+                        const exerciseCard = pieceCard.querySelector(`[data-exercise-id="${exerciseId}"]`);
+
+                        exerciseCard.querySelector('.ex-name').value = exercise.name || '';
+                        exerciseCard.querySelector('.ex-structure').value = exercise.structure || 'none';
+                        exerciseCard.querySelector('.ex-video').value = exercise.video_url || '';
+                        exerciseCard.querySelector('.ex-notes').value = exercise.notes || '';
+
+                        // Trigger structure fields
+                        updateExerciseFields(pieceId, exerciseId, exercise.structure || 'none');
+
+                        // Cargar campos específicos después de crear los fields
+                        setTimeout(() => {
+                            if (exercise.sets) {
+                                const setsInput = exerciseCard.querySelector('.ex-sets');
+                                if (setsInput) setsInput.value = exercise.sets;
+                            }
+                            if (exercise.reps) {
+                                const repsInput = exerciseCard.querySelector('.ex-reps');
+                                if (repsInput) repsInput.value = exercise.reps;
+                            }
+                            if (exercise.duration) {
+                                const durationInput = exerciseCard.querySelector('.ex-duration');
+                                if (durationInput) durationInput.value = exercise.duration;
+                            }
+                            if (exercise.rest) {
+                                const restInput = exerciseCard.querySelector('.ex-rest');
+                                if (restInput) restInput.value = exercise.rest;
+                            }
+                        }, 100);
+                    });
+                });
+
+                showAlert('Template cargado. Modifica y guarda como nuevo workout.', 'success');
+
+            } catch (error) {
+                console.error('Error loading template:', error);
+                addSession();
+            }
+        }
+    </script>
+</body>
+</html>

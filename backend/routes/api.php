@@ -7,60 +7,86 @@ use App\Http\Controllers\Api\AthleteController;
 use App\Http\Controllers\Api\WorkoutController;
 use App\Http\Controllers\Api\AssignmentController;
 use App\Http\Controllers\Api\ResultController;
-use App\Http\Controllers\Api\MessageController;
+use App\Http\Controllers\Api\AnalyticsController;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes
+| API Routes - /api/v1/*
+|--------------------------------------------------------------------------
+| Laravel 11 automáticamente agrega el prefijo /api a este archivo.
+| Por eso usamos prefix('v1') aquí para obtener /api/v1/*
 |--------------------------------------------------------------------------
 */
 
 // Public routes
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
+Route::post('/v1/register/coach', [AuthController::class, 'registerCoach']);
+Route::post('/v1/login', [AuthController::class, 'login']);
+
+Route::get('/v1/health', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'COACHING API is running',
+        'version' => '1.0.0',
+        'timestamp' => now()->toIso8601String(),
+    ]);
+});
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
-    // Auth
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/me', [AuthController::class, 'me']);
+    // Authentication
+    Route::post('/v1/logout', [AuthController::class, 'logout']);
+    Route::get('/v1/me', [AuthController::class, 'me']);
+    Route::post('/v1/refresh', [AuthController::class, 'refresh']);
     
-    // Athletes
-    Route::get('/athletes', [AthleteController::class, 'index']);
-    Route::post('/athletes', [AthleteController::class, 'store']);
-    Route::get('/athletes/{id}', [AthleteController::class, 'show']);
-    Route::put('/athletes/{id}', [AthleteController::class, 'update']);
-    Route::delete('/athletes/{id}', [AthleteController::class, 'destroy']);
-    Route::get('/athletes/{id}/progress', [AthleteController::class, 'progress']);
+    // Athlete-specific endpoints
+    Route::get('/v1/my/stats', [AthleteController::class, 'myStats']);
+    Route::get('/v1/my/assignments', [AthleteController::class, 'myAssignments']);
+    Route::get('/v1/my/assignments/{id}', [AthleteController::class, 'myAssignment']);
+    Route::post('/v1/my/assignments/{id}/repeat', [AthleteController::class, 'repeatWorkout']);
+    
+    // Athletes CRUD
+    Route::get('/v1/athletes', [AthleteController::class, 'index']);
+    Route::post('/v1/athletes', [AthleteController::class, 'store']);
+    Route::get('/v1/athletes/{athlete}', [AthleteController::class, 'show']);
+    Route::put('/v1/athletes/{athlete}', [AthleteController::class, 'update']);
+    Route::patch('/v1/athletes/{athlete}', [AthleteController::class, 'update']);
+    Route::delete('/v1/athletes/{athlete}', [AthleteController::class, 'destroy']);
     
     // Workouts
-    Route::get('/workouts', [WorkoutController::class, 'index']);
-    Route::post('/workouts', [WorkoutController::class, 'store']);
-    Route::get('/workouts/{id}', [WorkoutController::class, 'show']);
-    Route::put('/workouts/{id}', [WorkoutController::class, 'update']);
-    Route::delete('/workouts/{id}', [WorkoutController::class, 'destroy']);
-    Route::get('/workouts/{id}/leaderboard', [WorkoutController::class, 'leaderboard']);
+    Route::get('/v1/workouts', [WorkoutController::class, 'index']);
+    Route::post('/v1/workouts', [WorkoutController::class, 'store']);
+    Route::get('/v1/workouts/{workout}', [WorkoutController::class, 'show']);
+    Route::put('/v1/workouts/{workout}', [WorkoutController::class, 'update']);
+    Route::patch('/v1/workouts/{workout}', [WorkoutController::class, 'update']);
+    Route::delete('/v1/workouts/{workout}', [WorkoutController::class, 'destroy']);
+    Route::get('/v1/benchmarks', [WorkoutController::class, 'benchmarks']);
     
     // Assignments
-    Route::get('/assignments', [AssignmentController::class, 'index']);
-    Route::post('/assignments', [AssignmentController::class, 'store']);
-    Route::post('/assignments/bulk', [AssignmentController::class, 'bulkStore']);
-    Route::get('/assignments/{id}', [AssignmentController::class, 'show']);
-    Route::put('/assignments/{id}', [AssignmentController::class, 'update']);
-    Route::delete('/assignments/{id}', [AssignmentController::class, 'destroy']);
+    Route::get('/v1/assignments', [AssignmentController::class, 'index']);
+    Route::post('/v1/assignments', [AssignmentController::class, 'store']);
+    Route::get('/v1/assignments/{assignment}', [AssignmentController::class, 'show']);
+    Route::put('/v1/assignments/{assignment}', [AssignmentController::class, 'update']);
+    Route::patch('/v1/assignments/{assignment}', [AssignmentController::class, 'update']);
+    Route::delete('/v1/assignments/{assignment}', [AssignmentController::class, 'destroy']);
+    Route::post('/v1/assignments/bulk', [AssignmentController::class, 'bulkAssign']);
+    Route::get('/v1/assignments/calendar', [AssignmentController::class, 'calendar']);
     
     // Results
-    Route::get('/results', [ResultController::class, 'index']);
-    Route::post('/results', [ResultController::class, 'store']);
-    Route::get('/results/{id}', [ResultController::class, 'show']);
+    Route::get('/v1/results', [ResultController::class, 'index']);
+    Route::post('/v1/results', [ResultController::class, 'store']);
+    Route::put('/v1/results/{result}', [ResultController::class, 'update']);
+    Route::get('/v1/results/workout/{workoutId}/history', [ResultController::class, 'workoutHistory']);
+    Route::get('/v1/personal-records', [ResultController::class, 'personalRecords']);
     
     // Analytics
-    Route::get('/analytics/dashboard', [ResultController::class, 'dashboardStats']);
-    
-    // Messages
-    Route::get('/messages', [MessageController::class, 'index']);
-    Route::post('/messages', [MessageController::class, 'store']);
-    Route::put('/messages/{id}/read', [MessageController::class, 'markAsRead']);
-    Route::get('/messages/unread/count', [MessageController::class, 'unreadCount']);
-    Route::get('/messages/conversations', [MessageController::class, 'conversations']);
+    Route::get('/v1/analytics/dashboard', [AnalyticsController::class, 'dashboard']);
+    Route::get('/v1/analytics/athlete/{athleteId}/progress', [AnalyticsController::class, 'athleteProgress']);
+    Route::get('/v1/analytics/workout/{workoutId}/leaderboard', [AnalyticsController::class, 'workoutLeaderboard']);
+});
+
+Route::fallback(function () {
+    return response()->json([
+        'success' => false,
+        'message' => 'Endpoint not found',
+    ], 404);
 });

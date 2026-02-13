@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Workout - COACHING</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF6B35;
+            --dark: #1A1A2E;
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, #16213E 100%);
+            min-height: 100vh;
+            color: #E8E8E8;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem 0;
+            z-index: 100;
+        }
+
+        .logo {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1.5rem;
+            color: #A0A0B0;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255, 107, 53, 0.1);
+            color: var(--primary);
+            border-left: 3px solid var(--primary);
+        }
+
+        .nav-icon {
+            margin-right: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        .header {
+            position: fixed;
+            left: 260px;
+            top: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 90;
+        }
+
+        .header-title h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.5rem;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            margin-top: 70px;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: #A0A0B0;
+        }
+
+        .workout-info {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #A0A0B0;
+            font-weight: 600;
+        }
+
+        .info-value {
+            color: #E8E8E8;
+        }
+
+        .section-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .exercise {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .exercise-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .exercise-details {
+            color: #A0A0B0;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #E85A2A;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #E8E8E8;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <h1>COACHING</h1>
+        </div>
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashboard-connected.html" class="nav-link">
+                        <span class="nav-icon">📊</span>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="athletes.html" class="nav-link">
+                        <span class="nav-icon">👥</span>
+                        Atletas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="workouts.html" class="nav-link active">
+                        <span class="nav-icon">💪</span>
+                        Workouts
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="programming.html" class="nav-link">
+                        <span class="nav-icon">📅</span>
+                        Programación
+                    </a>
+                </li>
+            
+                <li class="nav-item">
+                    <a href="exercise-library.html" class="nav-link">
+                        <span class="nav-icon">📚</span>
+                        Biblioteca
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-title">
+            <h2>Detalles del Workout</h2>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div id="loadingMessage" class="loading">Cargando workout...</div>
+            <div id="workoutContent" style="display: none;"></div>
+        </div>
+    </main>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/v1';
+        const authToken = localStorage.getItem('authToken');
+
+        if (!authToken) {
+            window.location.href = 'login-connected.html';
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const workoutId = urlParams.get('id');
+
+        if (!workoutId) {
+            alert('No se especificó el ID del workout');
+            window.location.href = 'workouts.html';
+        } else {
+            // Redirigir directamente al formulario de edición
+            window.location.href = `workout-create-advanced.html?edit=${workoutId}`;
+        }
+
+        async function loadWorkout() {
+            try {
+                const response = await fetch(`${API_URL}/workouts/${workoutId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Error al cargar workout');
+
+                const data = await response.json();
+                
+                if (!data.success) throw new Error(data.message);
+
+                renderWorkout(data.data.workout);
+
+            } catch (error) {
+                document.getElementById('loadingMessage').innerHTML = `
+                    <p style="color: #ef4444;">Error: ${error.message}</p>
+                    <button class="btn btn-secondary" onclick="window.location='workouts.html'">Volver a Workouts</button>
+                `;
+            }
+        }
+
+        function renderWorkout(workout) {
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('workoutContent').style.display = 'block';
+
+            const sections = workout.sections || [];
+
+            const html = `
+                <div class="workout-info">
+                    <div class="info-row">
+                        <span class="info-label">Nombre:</span>
+                        <span class="info-value">${workout.name}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Tipo:</span>
+                        <span class="info-value">${workout.workout_type || 'N/A'}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Formato:</span>
+                        <span class="info-value">${workout.workout_structure?.format || 'N/A'}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Dificultad:</span>
+                        <span class="info-value">${workout.difficulty_level || 'N/A'}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Intención:</span>
+                        <span class="info-value">${workout.mindset_intention || 'N/A'}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Descripción:</span>
+                        <span class="info-value">${workout.description || 'N/A'}</span>
+                    </div>
+                </div>
+
+                ${sections.length > 0 ? sections.map((section, index) => `
+                    <div class="section-card">
+                        <div class="section-header">
+                            🔷 ${section.title || `Pieza ${index + 1}`} 
+                            <span style="color: #A0A0B0; font-size: 0.9rem; font-weight: normal;">(${section.type})</span>
+                        </div>
+                        ${(section.exercises || []).map(exercise => `
+                            <div class="exercise">
+                                <div class="exercise-name">💪 ${exercise.name}</div>
+                                <div class="exercise-details">
+                                    <strong>Estructura:</strong> ${exercise.structure || 'ninguna'}
+                                    ${getExerciseDetails(exercise)}
+                                </div>
+                                ${exercise.video_url ? `<div style="margin-top: 0.5rem;"><a href="${exercise.video_url}" target="_blank" style="color: var(--primary);">🎬 Ver video</a></div>` : ''}
+                                ${exercise.notes ? `<div style="color: #A0A0B0; margin-top: 0.5rem;">📝 ${exercise.notes}</div>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `).join('') : '<p style="color: #A0A0B0;">Este workout no tiene piezas definidas.</p>'}
+
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="window.location='workouts.html'">← Volver a Workouts</button>
+                </div>
+            `;
+
+            document.getElementById('workoutContent').innerHTML = html;
+        }
+
+        function getExerciseDetails(exercise) {
+            const details = [];
+            
+            if (exercise.sets) details.push(`${exercise.sets} sets`);
+            if (exercise.reps) details.push(`${exercise.reps} reps`);
+            if (exercise.duration) details.push(`${exercise.duration}`);
+            if (exercise.weight) details.push(`${exercise.weight}`);
+            if (exercise.rest) details.push(`Descanso: ${exercise.rest}`);
+
+            return details.length > 0 ? ' • ' + details.join(' • ') : '';
+        }
+
+        function editWorkout() {
+            window.location = `workout-create-advanced.html?edit=${workoutId}`;
+        }
+    </script>
+</body>
+</html>

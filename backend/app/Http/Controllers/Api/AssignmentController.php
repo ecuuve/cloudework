@@ -458,4 +458,63 @@ class AssignmentController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Display the specified assignment.
+     */
+    public function show(Request $request, $id): JsonResponse
+    {
+        $coach = $request->user()->coach;
+
+        if (!$coach) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only coaches can view assignments',
+            ], 403);
+        }
+
+        $assignment = WorkoutAssignment::with(['workout', 'athlete.user', 'result'])
+            ->where('assigned_by_coach_id', $coach->id)
+            ->find($id);
+
+        if (!$assignment) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Assignment not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'assignment' => [
+                    'id' => $assignment->id,
+                    'workout' => [
+                        'id' => $assignment->workout->id,
+                        'name' => $assignment->workout->name,
+                        'type' => $assignment->workout->workout_type,
+                        'difficulty' => $assignment->workout->difficulty_level,
+                        'sections' => $assignment->workout->sections,
+                    ],
+                    'athlete' => $assignment->athlete ? [
+                        'id' => $assignment->athlete->id,
+                        'name' => $assignment->athlete->user->full_name,
+                        'email' => $assignment->athlete->user->email,
+                    ] : null,
+                    'scheduled_date' => $assignment->scheduled_date->format('Y-m-d'),
+                    'is_completed' => $assignment->is_completed,
+                    'priority' => $assignment->priority,
+                    'notes' => $assignment->notes,
+                    'result' => $assignment->result ? [
+                        'time_seconds' => $assignment->result->time_seconds,
+                        'rounds_completed' => $assignment->result->rounds_completed,
+                        'rx_or_scaled' => $assignment->result->rx_or_scaled,
+                        'feeling_rating' => $assignment->result->feeling_rating,
+                        'is_pr' => $assignment->result->is_pr,
+                    ] : null,
+                ],
+            ],
+        ]);
+    }
+
 }

@@ -26,6 +26,7 @@
         }
 
         body {
+            overflow-x: hidden;
             font-family: 'Work Sans', sans-serif;
             background: linear-gradient(135deg, var(--dark) 0%, #16213E 100%);
             min-height: 100vh;
@@ -38,9 +39,8 @@
             top: 0;
             width: 260px;
             height: 100vh;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1a1f35;
+            border-right: 1px solid rgba(255,255,255,0.08);
             padding: 2rem 0;
             z-index: 100;
         }
@@ -91,9 +91,8 @@
             top: 0;
             right: 0;
             height: 70px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1e2540;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
             padding: 0 2rem;
             display: flex;
             align-items: center;
@@ -190,9 +189,8 @@
         }
 
         .workout-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1e2540;
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
             padding: 1.5rem;
             transition: all 0.3s;
@@ -314,10 +312,25 @@
             background: var(--dark-light);
             border-radius: 12px;
             padding: 2rem;
-            width: 90%;
-            max-width: 700px;
-            max-height: 90vh;
+            width: 95%;
+            max-width: 900px;
+            max-height: 85vh;
             overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
         }
 
         .modal-header {
@@ -435,27 +448,15 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="programming.html" class="nav-link">
+                    <a href="calendar.html" class="nav-link">
                         <span class="nav-icon">📅</span>
                         Programación
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="calendar.html" class="nav-link">
-                        <span class="nav-icon">📆</span>
-                        Calendario
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="results.html" class="nav-link">
-                        <span class="nav-icon">🏆</span>
-                        Resultados
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="analytics.html" class="nav-link">
-                        <span class="nav-icon">📈</span>
-                        Analytics
+                    <a href="exercise-library.html" class="nav-link">
+                        <span class="nav-icon">📚</span>
+                        Biblioteca
                     </a>
                 </li>
             </ul>
@@ -500,7 +501,7 @@
                     <option value="advanced">Avanzado</option>
                 </select>
             </div>
-            <button class="btn" onclick="openCreateModal()">+ Crear Workout</button>
+            <button class="btn" onclick="window.location='workout-create-advanced.html'">+ Crear Workout</button>
         </div>
 
         <!-- Workouts Grid -->
@@ -549,10 +550,9 @@
         }
 
         function logout() {
-            if (confirm('¿Seguro que quieres salir?')) {
-                localStorage.removeItem('cloudework_user');
-                window.location.href = 'login-connected.html';
-            }
+            localStorage.removeItem('cloudework_user');
+            localStorage.removeItem('authToken');
+            window.location.href = 'login-connected.html';
         }
 
         async function fetchAPI(endpoint, options = {}) {
@@ -611,7 +611,7 @@
             container.innerHTML = `
                 <div class="workouts-grid">
                     ${workouts.map(workout => `
-                        <div class="workout-card" onclick="viewWorkout(${workout.id})">
+                        <div class="workout-card">
                             <div class="workout-header">
                                 <div>
                                     <div class="workout-name">${workout.name}</div>
@@ -629,7 +629,15 @@
                             </div>
                             <div class="workout-meta">
                                 ${workout.estimated_duration_minutes ? `<span>⏱️ ${workout.estimated_duration_minutes} min</span>` : ''}
+                                ${workout.sections && workout.sections.length > 0 ? `<span>🔷 ${workout.sections.length} pieza${workout.sections.length > 1 ? 's' : ''}</span>` : ''}
+                                ${workout.sections ? `<span>💪 ${workout.sections.reduce((total, s) => total + (s.exercises?.length || 0), 0)} ejercicio${workout.sections.reduce((total, s) => total + (s.exercises?.length || 0), 0) !== 1 ? 's' : ''}</span>` : ''}
                                 ${workout.statistics ? `<span>👥 ${workout.statistics.times_assigned || 0} asignaciones</span>` : ''}
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                                <button class="btn" style="flex: 1; padding: 0.5rem; font-size: 0.85rem;" onclick="event.stopPropagation(); viewWorkout(${workout.id})">👁️ Ver</button>
+                                <button class="btn" style="flex: 1; padding: 0.5rem; font-size: 0.85rem; background: #10b981;" onclick="event.stopPropagation(); window.location='workout-edit.html?id=${workout.id}'">✏️ Editar</button>
+                                <button class="btn" style="flex: 1; padding: 0.5rem; font-size: 0.85rem; background: var(--secondary);" onclick="event.stopPropagation(); useAsTemplate(${workout.id})">📋 Template</button>
+                                <button class="btn" style="flex: 1; padding: 0.5rem; font-size: 0.85rem; background: #f59e0b;" onclick="event.stopPropagation(); openAssignModal(${workout.id})">🎯 Asignar</button>
                             </div>
                         </div>
                     `).join('')}
@@ -647,44 +655,78 @@
 
                     let detailsHTML = `
                         <div class="workout-detail">
-                            <h4>Descripción</h4>
-                            <p>${workout.description}</p>
+                            <h4>📋 Información General</h4>
+                            <div style="display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; color: var(--text-gray);">
+                                <span><strong>Tipo:</strong></span><span>${workout.workout_type || 'N/A'}</span>
+                                <span><strong>Formato:</strong></span><span>${workout.workout_structure?.format || 'N/A'}</span>
+                                <span><strong>Dificultad:</strong></span><span>${workout.difficulty_level || 'N/A'}</span>
+                                ${workout.mindset_intention ? `<span><strong>Intención:</strong></span><span>${workout.mindset_intention}</span>` : ''}
+                            </div>
+                        </div>
+
+                        <div class="workout-detail">
+                            <h4>📝 Descripción</h4>
+                            <p>${workout.description || 'Sin descripción'}</p>
                         </div>
                     `;
 
-                    if (workout.workout_structure && workout.workout_structure.movements) {
+                    // Mostrar sections (piezas)
+                    if (workout.sections && workout.sections.length > 0) {
+                        detailsHTML += `<div class="workout-detail"><h4>🔷 Piezas del Workout</h4>`;
+                        
+                        workout.sections.forEach((section, idx) => {
+                            detailsHTML += `
+                                <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                                    <h5 style="color: var(--primary); margin-bottom: 0.75rem;">
+                                        Pieza ${idx + 1}: ${section.title || 'Sin título'} 
+                                        <span style="color: var(--text-gray); font-size: 0.9rem; font-weight: normal;">(${section.type})</span>
+                                    </h5>
+                            `;
+                            
+                            if (section.exercises && section.exercises.length > 0) {
+                                section.exercises.forEach((ex, exIdx) => {
+                                    detailsHTML += `
+                                        <div style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 6px; margin-bottom: 0.5rem;">
+                                            <div style="font-weight: 600; margin-bottom: 0.25rem;">💪 ${ex.name}</div>
+                                            <div style="color: var(--text-gray); font-size: 0.9rem;">
+                                                <strong>Estructura:</strong> ${ex.structure || 'ninguna'}
+                                                ${ex.sets ? ` • ${ex.sets} sets` : ''}
+                                                ${ex.reps ? ` • ${ex.reps} reps` : ''}
+                                                ${ex.duration ? ` • ${ex.duration}` : ''}
+                                                ${ex.weight ? ` • ${ex.weight}` : ''}
+                                                ${ex.rest ? ` • Descanso: ${ex.rest}` : ''}
+                                            </div>
+                                            ${ex.video_url ? `<div style="margin-top: 0.5rem;"><a href="${ex.video_url}" target="_blank" style="color: var(--primary); font-size: 0.9rem;">🎬 Ver video</a></div>` : ''}
+                                            ${ex.notes ? `<div style="color: var(--text-gray); margin-top: 0.5rem; font-size: 0.85rem;">📝 ${ex.notes}</div>` : ''}
+                                        </div>
+                                    `;
+                                });
+                            } else {
+                                detailsHTML += `<p style="color: var(--text-gray); font-style: italic;">Sin ejercicios definidos</p>`;
+                            }
+                            
+                            detailsHTML += `</div>`;
+                        });
+                        
+                        detailsHTML += `</div>`;
+                    } else {
                         detailsHTML += `
                             <div class="workout-detail">
-                                <h4>Movimientos</h4>
-                                <ul class="movements-list">
-                                    ${workout.workout_structure.movements.map(m => `
-                                        <li>
-                                            <span>${m.name}</span>
-                                            <span>${m.reps ? m.reps + ' reps' : ''} ${m.weight ? '@ ' + JSON.stringify(m.weight) : ''}</span>
-                                        </li>
-                                    `).join('')}
-                                </ul>
+                                <h4>🔷 Piezas del Workout</h4>
+                                <p style="color: var(--text-gray); font-style: italic;">Este workout no tiene piezas definidas</p>
                             </div>
                         `;
                     }
 
-                    if (workout.scaling_options) {
-                        detailsHTML += `
-                            <div class="workout-detail">
-                                <h4>Opciones de Escalado</h4>
-                                <p>${JSON.stringify(workout.scaling_options)}</p>
-                            </div>
-                        `;
-                    }
-
+                    // Estadísticas
                     if (workout.statistics) {
                         detailsHTML += `
                             <div class="workout-detail">
-                                <h4>Estadísticas</h4>
-                                <div class="workout-meta" style="border: none; padding: 0;">
-                                    <span>Asignado: ${workout.statistics.times_assigned || 0} veces</span>
-                                    <span>Completado: ${workout.statistics.times_completed || 0} veces</span>
-                                    ${workout.statistics.average_time ? `<span>Tiempo promedio: ${Math.floor(workout.statistics.average_time / 60)}:${(workout.statistics.average_time % 60).toString().padStart(2, '0')}</span>` : ''}
+                                <h4>📊 Estadísticas</h4>
+                                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                                    <span>👥 Asignado: ${workout.statistics.times_assigned || 0} veces</span>
+                                    <span>✅ Completado: ${workout.statistics.times_completed || 0} veces</span>
+                                    ${workout.statistics.average_time_seconds ? `<span>⏱️ Promedio: ${Math.floor(workout.statistics.average_time_seconds / 60)}:${(workout.statistics.average_time_seconds % 60).toString().padStart(2, '0')}</span>` : ''}
                                 </div>
                             </div>
                         `;
@@ -694,6 +736,7 @@
                     document.getElementById('workoutModal').classList.add('active');
                 }
             } catch (error) {
+                console.error('Error loading workout:', error);
                 showAlert('Error cargando detalles del workout', 'error');
             }
         }
@@ -730,6 +773,165 @@
         if (checkAuth()) {
             loadWorkouts();
         }
+        async function useAsTemplate(workoutId) {
+            try {
+                const data = await fetchAPI(`/workouts/${workoutId}`);
+                
+                if (data.success) {
+                    const workout = data.data.workout;
+                    
+                    // Guardar en localStorage para cargar en el formulario
+                    localStorage.setItem('workout_template', JSON.stringify(workout));
+                    
+                    // Redirigir al formulario
+                    window.location.href = 'workout-create-advanced.html?template=true';
+                }
+            } catch (error) {
+                alert('Error al cargar template: ' + error.message);
+            }
+        }
+
+        // ============ ASSIGNMENT FUNCTIONS ============
+        let assigningWorkoutId = null;
+
+        async function openAssignModal(workoutId) {
+            assigningWorkoutId = workoutId;
+            
+            // Set default date to today
+            document.getElementById('assignDate').value = new Date().toISOString().split('T')[0];
+            
+            // Load athletes
+            try {
+                const data = await fetchAPI('/athletes');
+                if (data.success && data.data.athletes) {
+                    renderAthletesList(data.data.athletes);
+                    document.getElementById('assignModal').classList.add('active');
+                } else {
+                    showAlert('No se pudieron cargar los atletas', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading athletes:', error);
+                showAlert('Error al cargar atletas', 'error');
+            }
+        }
+
+        function renderAthletesList(athletes) {
+            const container = document.getElementById('athletesList');
+            
+            if (athletes.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-gray); text-align: center; padding: 2rem;">No tienes atletas registrados</p>';
+                return;
+            }
+            
+            container.innerHTML = athletes.map(athlete => {
+                // El backend puede retornar: athlete.name, athlete.full_name, o athlete.user.full_name
+                const name = athlete.name || athlete.full_name || athlete.user?.full_name || 'Atleta';
+                const email = athlete.email || athlete.user?.email || '';
+                
+                return `
+                    <label style="display: flex; align-items: center; padding: 0.75rem; margin-bottom: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 6px; cursor: pointer; transition: background 0.2s;">
+                        <input type="checkbox" class="athlete-checkbox" value="${athlete.id}" style="margin-right: 0.75rem; width: 18px; height: 18px; cursor: pointer;">
+                        <div>
+                            <div style="font-weight: 600;">${name}</div>
+                            ${email ? `<div style="font-size: 0.85rem; color: var(--text-gray);">${email}</div>` : ''}
+                        </div>
+                    </label>
+                `;
+            }).join('');
+        }
+
+        function selectAllAthletes() {
+            const checkboxes = document.querySelectorAll('.athlete-checkbox');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            checkboxes.forEach(cb => cb.checked = !allChecked);
+        }
+
+        function closeAssignModal() {
+            document.getElementById('assignModal').classList.remove('active');
+            assigningWorkoutId = null;
+            document.getElementById('assignNotes').value = '';
+        }
+
+        async function confirmAssignment() {
+            const selectedAthletes = Array.from(document.querySelectorAll('.athlete-checkbox:checked'))
+                .map(cb => parseInt(cb.value));
+            
+            if (selectedAthletes.length === 0) {
+                showAlert('Selecciona al menos un atleta', 'error');
+                return;
+            }
+            
+            const date = document.getElementById('assignDate').value;
+            if (!date) {
+                showAlert('Selecciona una fecha', 'error');
+                return;
+            }
+            
+            const notes = document.getElementById('assignNotes').value.trim();
+            
+            try {
+                const response = await fetch(`${API_URL}/assignments/bulk`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        workout_id: assigningWorkoutId,
+                        athlete_ids: selectedAthletes,
+                        scheduled_date: date,
+                        notes: notes || null,
+                        priority: 'medium'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert(`✅ Workout asignado a ${selectedAthletes.length} atleta${selectedAthletes.length > 1 ? 's' : ''}`, 'success');
+                    closeAssignModal();
+                } else {
+                    showAlert(data.message || 'Error al asignar workout', 'error');
+                }
+            } catch (error) {
+                console.error('Error assigning workout:', error);
+                showAlert('Error al asignar workout', 'error');
+            }
+        }
     </script>
+    <!-- Assignment Modal -->
+    <div id="assignModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Asignar Workout a Atletas</h3>
+                <button class="close-btn" onclick="closeAssignModal()">×</button>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Selecciona Atletas</label>
+                <div id="athletesList" style="max-height: 300px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 1rem;">
+                    <!-- Lista de atletas se carga aquí -->
+                </div>
+                <button onclick="selectAllAthletes()" style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border: none; border-radius: 4px; color: white; cursor: pointer;">Seleccionar Todos</button>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Fecha de Asignación</label>
+                <input type="date" id="assignDate" style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white;">
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Notas (Opcional)</label>
+                <textarea id="assignNotes" rows="3" style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; resize: vertical;"></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn" style="flex: 1; background: var(--primary);" onclick="confirmAssignment()">Confirmar Asignación</button>
+                <button class="btn" style="flex: 1; background: rgba(255,255,255,0.1);" onclick="closeAssignModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

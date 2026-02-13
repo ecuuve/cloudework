@@ -91,6 +91,9 @@ class WorkoutController extends Controller
                 'tags' => $workout->tags,
                 'times_assigned' => $workout->times_assigned,
                 'average_time' => $workout->average_time,
+                'workout_structure' => $workout->workout_structure,
+                'sections' => $workout->sections,
+                'mindset_intention' => $workout->mindset_intention,
                 'created_at' => $workout->created_at->format('Y-m-d'),
             ];
         });
@@ -130,11 +133,13 @@ class WorkoutController extends Controller
             'difficulty_level' => 'required|in:beginner,intermediate,rx,advanced',
             'estimated_duration_minutes' => 'nullable|integer|min:1|max:180',
             'workout_structure' => 'required|array',
-            'workout_structure.format' => 'required|in:for_time,amrap,emom,tabata,rounds,chipper,strength',
+            'workout_structure.format' => 'required|in:for_time,amrap,emom,tabata,rounds,chipper,strength,custom,endurance,gymnastics',
             'scaling_options' => 'nullable|array',
             'equipment_needed' => 'nullable|array',
             'tags' => 'nullable|array',
             'notes' => 'nullable|string',
+            'sections' => 'nullable|array',
+            'mindset_intention' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -146,9 +151,19 @@ class WorkoutController extends Controller
         }
 
         try {
+            // Generate unique slug
+            $baseSlug = Str::slug($request->name);
+            $slug = $baseSlug;
+            $counter = 1;
+            
+            while (Workout::where('slug', $slug)->exists()) {
+                $slug = $baseSlug . '-' . $counter;
+                $counter++;
+            }
+            
             $workout = Workout::create([
                 'name' => $request->name,
-                'slug' => Str::slug($request->name),
+                'slug' => $slug,
                 'description' => $request->description,
                 'workout_type' => $request->workout_type,
                 'benchmark_category' => $request->benchmark_category,
@@ -162,6 +177,8 @@ class WorkoutController extends Controller
                 'equipment_needed' => $request->equipment_needed,
                 'tags' => $request->tags,
                 'notes' => $request->notes,
+                'sections' => $request->sections,
+                'mindset_intention' => $request->mindset_intention,
             ]);
 
             return response()->json([
@@ -231,6 +248,8 @@ class WorkoutController extends Controller
                     'equipment_needed' => $workout->equipment_needed,
                     'tags' => $workout->tags,
                     'notes' => $workout->notes,
+                    'sections' => $workout->sections,
+                    'mindset_intention' => $workout->mindset_intention,
                     'statistics' => [
                         'times_assigned' => $totalAssignments,
                         'times_completed' => $totalCompletions,
@@ -280,6 +299,8 @@ class WorkoutController extends Controller
             'equipment_needed' => 'nullable|array',
             'tags' => 'nullable|array',
             'notes' => 'nullable|string',
+            'sections' => 'nullable|array',
+            'mindset_intention' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -302,11 +323,23 @@ class WorkoutController extends Controller
                 'equipment_needed',
                 'tags',
                 'notes',
+                'sections',
+                'mindset_intention',
             ]));
 
             // Update slug if name changed
-            if ($request->has('name')) {
-                $workout->slug = Str::slug($request->name);
+            if ($request->has('name') && $request->name !== $workout->getOriginal('name')) {
+                $baseSlug = Str::slug($request->name);
+                $slug = $baseSlug;
+                $counter = 1;
+                
+                // Check if slug exists (excluding current workout)
+                while (Workout::where('slug', $slug)->where('id', '!=', $workout->id)->exists()) {
+                    $slug = $baseSlug . '-' . $counter;
+                    $counter++;
+                }
+                
+                $workout->slug = $slug;
                 $workout->save();
             }
 

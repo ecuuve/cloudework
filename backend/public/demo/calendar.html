@@ -10,22 +10,16 @@
 
         :root {
             --primary: #FF6B35;
-            --primary-dark: #E85A2A;
-            --secondary: #004E89;
             --dark: #1A1A2E;
-            --dark-light: #252541;
-            --accent: #FFD23F;
-            --text-light: #E8E8E8;
-            --text-gray: #A0A0B0;
-            --success: #2ECC71;
-            --danger: #E74C3C;
+            --success: #10b981;
         }
 
         body {
+            overflow-x: hidden;
             font-family: 'Work Sans', sans-serif;
             background: linear-gradient(135deg, var(--dark) 0%, #16213E 100%);
             min-height: 100vh;
-            color: var(--text-light);
+            color: #E8E8E8;
         }
 
         .sidebar {
@@ -34,9 +28,8 @@
             top: 0;
             width: 260px;
             height: 100vh;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1a1f35;
+            border-right: 1px solid rgba(255,255,255,0.08);
             padding: 2rem 0;
             z-index: 100;
         }
@@ -53,12 +46,14 @@
         }
 
         .nav-menu { list-style: none; }
+
         .nav-item { margin-bottom: 0.5rem; }
+
         .nav-link {
             display: flex;
             align-items: center;
             padding: 0.875rem 1.5rem;
-            color: var(--text-gray);
+            color: #A0A0B0;
             text-decoration: none;
             transition: all 0.3s;
         }
@@ -69,7 +64,10 @@
             border-left: 3px solid var(--primary);
         }
 
-        .nav-icon { margin-right: 0.75rem; font-size: 1.2rem; }
+        .nav-icon {
+            margin-right: 0.75rem;
+            font-size: 1.2rem;
+        }
 
         .header {
             position: fixed;
@@ -77,9 +75,8 @@
             top: 0;
             right: 0;
             height: 70px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1e2540;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
             padding: 0 2rem;
             display: flex;
             align-items: center;
@@ -87,7 +84,10 @@
             z-index: 90;
         }
 
-        .header-title h2 { font-family: 'Oswald', sans-serif; font-size: 1.5rem; }
+        .header-title h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.5rem;
+        }
 
         .main-content {
             margin-left: 260px;
@@ -95,147 +95,138 @@
             padding: 2rem;
         }
 
-        .toolbar {
+        .calendar-controls {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
+            flex-wrap: wrap;
             gap: 1rem;
         }
 
-        .view-tabs {
+        .view-selector {
             display: flex;
             gap: 0.5rem;
         }
 
-        .tab {
-            padding: 0.5rem 1rem;
+        .view-btn {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
             background: rgba(255, 255, 255, 0.05);
-            border: none;
-            border-radius: 6px;
-            color: var(--text-gray);
+            color: white;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
 
-        .tab.active {
+        .view-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .view-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .week-nav {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
             background: var(--primary);
             color: white;
         }
 
-        .filters {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        select {
-            padding: 0.5rem 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            color: var(--text-light);
-            cursor: pointer;
-        }
-
-        .nav-buttons {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .btn-icon {
-            padding: 0.5rem 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: none;
-            border-radius: 6px;
-            color: var(--text-light);
-            cursor: pointer;
-        }
-
-        .btn-icon:hover { background: var(--primary); }
-
-        .current-date {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
         .calendar-grid {
             display: grid;
+            grid-template-columns: repeat(7, 1fr);
             gap: 1rem;
         }
 
-        .day-view { grid-template-columns: 1fr; }
-        .week-view { grid-template-columns: repeat(7, 1fr); }
-        .month-view { grid-template-columns: repeat(7, 1fr); }
+        .calendar-grid.month-view {
+            grid-template-rows: repeat(5, 1fr);
+        }
 
-        .day-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 1rem;
+        .calendar-grid.month-view .day-card {
             min-height: 150px;
         }
 
+        .day-card {
+            background: #1e2540;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 1rem;
+            min-height: 200px;
+        }
+
+        .day-card.today {
+            border-color: var(--primary);
+            background: rgba(255, 107, 53, 0.1);
+        }
+
         .day-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
             padding-bottom: 0.5rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .day-name {
-            font-weight: 600;
+        .day-date {
+            font-size: 1.5rem;
             color: var(--primary);
         }
 
-        .day-date {
-            color: var(--text-gray);
-            font-size: 0.9rem;
-        }
-
-        .assignment-item {
-            background: rgba(255, 107, 53, 0.1);
-            border-left: 3px solid var(--primary);
-            padding: 0.5rem;
-            margin-bottom: 0.5rem;
-            border-radius: 4px;
+        .day-name {
             font-size: 0.85rem;
+            color: #A0A0B0;
         }
 
-        .athlete-name {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
+        .assignment {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.5rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .workout-name {
-            color: var(--text-gray);
+        .assignment:hover {
+            background: rgba(255, 107, 53, 0.2);
         }
 
-        .loading {
-            text-align: center;
-            padding: 3rem;
+        .assignment.completed {
+            border-left: 3px solid var(--success);
         }
 
-        .spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .stats {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: #A0A0B0;
         }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
+    <!-- Sidebar -->
     <aside class="sidebar">
-        <div class="logo"><h1>COACHING</h1></div>
+        <div class="logo">
+            <h1>COACHING</h1>
+        </div>
         <nav>
-                        <ul class="nav-menu">
+            <ul class="nav-menu">
                 <li class="nav-item">
                     <a href="dashboard-connected.html" class="nav-link">
                         <span class="nav-icon">📊</span>
@@ -255,222 +246,229 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="programming.html" class="nav-link">
+                    <a href="calendar.html" class="nav-link active">
                         <span class="nav-icon">📅</span>
                         Programación
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="calendar.html" class="nav-link active">
-                        <span class="nav-icon">📆</span>
-                        Calendario
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="results.html" class="nav-link">
-                        <span class="nav-icon">🏆</span>
-                        Resultados
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="analytics.html" class="nav-link">
-                        <span class="nav-icon">📈</span>
-                        Analytics
+                    <a href="exercise-library.html" class="nav-link">
+                        <span class="nav-icon">📚</span>
+                        Biblioteca
                     </a>
                 </li>
             </ul>
         </nav>
     </aside>
 
+    <!-- Header -->
     <header class="header">
-        <div class="header-title"><h2>Calendario de Entrenamientos</h2></div>
-        <div class="user-menu">
-            <div id="userName">Cargando...</div>
-            <button onclick="logout()" style="padding: 0.5rem 1rem; background: var(--danger); color: white; border: none; border-radius: 6px; cursor: pointer;">Salir</button>
+        <div class="header-title">
+            <h2>Calendario de Programación</h2>
         </div>
     </header>
 
+    <!-- Main Content -->
     <main class="main-content">
-        <div class="toolbar">
-            <div class="view-tabs">
-                <button class="tab" onclick="changeView('day')">Día</button>
-                <button class="tab active" onclick="changeView('week')">Semana</button>
-                <button class="tab" onclick="changeView('month')">Mes</button>
+        <div class="calendar-controls">
+            <div class="view-selector">
+                <button class="view-btn active" onclick="changeView('week')" id="weekViewBtn">📅 Semanal</button>
+                <button class="view-btn" onclick="changeView('month')" id="monthViewBtn">📆 Mensual</button>
             </div>
-
-            <div class="filters">
-                <select id="athleteFilter" onchange="loadCalendar()">
-                    <option value="">Todos los atletas</option>
-                </select>
+            <div class="week-nav">
+                <button class="btn" onclick="previousPeriod()">←</button>
+                <button class="btn btn-primary" onclick="currentPeriod()">Hoy</button>
+                <button class="btn" onclick="nextPeriod()">→</button>
             </div>
-
-            <div class="nav-buttons">
-                <button class="btn-icon" onclick="navigate(-1)">◀ Anterior</button>
-                <span class="current-date" id="currentDate">Enero 2026</span>
-                <button class="btn-icon" onclick="navigate(1)">Siguiente ▶</button>
-                <button class="btn-icon" onclick="goToToday()">Hoy</button>
-            </div>
+            <div id="periodRange" style="font-size: 1.1rem; font-weight: 600;"></div>
         </div>
 
-        <div id="calendar" class="calendar-grid week-view">
-            <div class="loading"><div class="spinner"></div></div>
+        <div class="calendar-grid" id="calendarGrid">
+            <!-- Days loaded here -->
         </div>
     </main>
 
     <script>
         const API_URL = 'http://localhost:8000/api/v1';
-        let authToken = null;
-        let currentUser = null;
-        let currentDate = new Date();
-        let currentView = 'week';
+        const authToken = localStorage.getItem('authToken');
 
-        function checkAuth() {
-            const userData = localStorage.getItem('cloudework_user');
-            if (!userData) {
-                window.location.href = 'login-connected.html';
-                return false;
-            }
-            try {
-                currentUser = JSON.parse(userData);
-                authToken = currentUser.token;
-                document.getElementById('userName').textContent = currentUser.first_name;
-                return true;
-            } catch (e) {
-                window.location.href = 'login-connected.html';
-                return false;
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem('cloudework_user');
+        if (!authToken) {
             window.location.href = 'login-connected.html';
         }
 
-        async function fetchAPI(endpoint) {
-            const response = await fetch(`${API_URL}${endpoint}`, {
-                headers: {
-                    'Authorization': `Bearer ${authToken}`,
-                    'Accept': 'application/json'
-                }
-            });
-            if (response.status === 401) logout();
-            return await response.json();
-        }
+        let currentDate = new Date();
+        let currentView = 'week'; // 'week' or 'month'
+
+        loadCalendar();
 
         function changeView(view) {
             currentView = view;
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
             
-            const calendar = document.getElementById('calendar');
-            calendar.className = `calendar-grid ${view}-view`;
+            // Update button states
+            document.getElementById('weekViewBtn').classList.toggle('active', view === 'week');
+            document.getElementById('monthViewBtn').classList.toggle('active', view === 'month');
             
-            loadCalendar();
-        }
-
-        function navigate(direction) {
-            if (currentView === 'day') {
-                currentDate.setDate(currentDate.getDate() + direction);
-            } else if (currentView === 'week') {
-                currentDate.setDate(currentDate.getDate() + (direction * 7));
+            // Update grid class
+            const grid = document.getElementById('calendarGrid');
+            if (view === 'month') {
+                grid.classList.add('month-view');
             } else {
-                currentDate.setMonth(currentDate.getMonth() + direction);
+                grid.classList.remove('month-view');
             }
+            
             loadCalendar();
         }
 
-        function goToToday() {
+        function getWeekDates() {
+            const start = new Date(currentDate);
+            start.setDate(start.getDate() - start.getDay() + 1); // Monday
+            
+            const dates = [];
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(start);
+                date.setDate(start.getDate() + i);
+                dates.push(date);
+            }
+            return dates;
+        }
+
+        function getMonthDates() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            // First day of month
+            const firstDay = new Date(year, month, 1);
+            // Last day of month
+            const lastDay = new Date(year, month + 1, 0);
+            
+            // Start from Monday of first week
+            const start = new Date(firstDay);
+            start.setDate(start.getDate() - (start.getDay() === 0 ? 6 : start.getDay() - 1));
+            
+            const dates = [];
+            const current = new Date(start);
+            
+            // Get 5-6 weeks (35-42 days)
+            for (let i = 0; i < 35; i++) {
+                dates.push(new Date(current));
+                current.setDate(current.getDate() + 1);
+            }
+            
+            return dates;
+        }
+
+        function currentPeriod() {
             currentDate = new Date();
             loadCalendar();
         }
 
-        async function loadCalendar() {
-            const athleteId = document.getElementById('athleteFilter').value;
-            let startDate, endDate;
-
-            if (currentView === 'day') {
-                startDate = endDate = currentDate.toISOString().split('T')[0];
-            } else if (currentView === 'week') {
-                const weekStart = new Date(currentDate);
-                weekStart.setDate(currentDate.getDate() - currentDate.getDay());
-                const weekEnd = new Date(weekStart);
-                weekEnd.setDate(weekStart.getDate() + 6);
-                startDate = weekStart.toISOString().split('T')[0];
-                endDate = weekEnd.toISOString().split('T')[0];
+        function previousPeriod() {
+            if (currentView === 'month') {
+                currentDate.setMonth(currentDate.getMonth() - 1);
             } else {
-                const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-                const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-                startDate = monthStart.toISOString().split('T')[0];
-                endDate = monthEnd.toISOString().split('T')[0];
+                currentDate.setDate(currentDate.getDate() - 7);
+            }
+            loadCalendar();
+        }
+
+        function nextPeriod() {
+            if (currentView === 'month') {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+            } else {
+                currentDate.setDate(currentDate.getDate() + 7);
+            }
+            loadCalendar();
+        }
+
+        async function loadCalendar() {
+            const dates = currentView === 'month' ? getMonthDates() : getWeekDates();
+            const startDate = dates[0].toISOString().split('T')[0];
+            const endDate = dates[dates.length - 1].toISOString().split('T')[0];
+
+            if (currentView === 'month') {
+                const monthName = currentDate.toLocaleDateString('es-ES', {month: 'long', year: 'numeric'});
+                document.getElementById('periodRange').textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+            } else {
+                document.getElementById('periodRange').textContent = 
+                    `${dates[0].toLocaleDateString('es-ES', {day: 'numeric', month: 'short'})} - ${dates[6].toLocaleDateString('es-ES', {day: 'numeric', month: 'short', year: 'numeric'})}`;
             }
 
-            document.getElementById('currentDate').textContent = 
-                currentView === 'day' ? currentDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) :
-                currentView === 'week' ? `Semana del ${startDate} al ${endDate}` :
-                currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-
             try {
-                let url = `/assignments?start_date=${startDate}&end_date=${endDate}&per_page=200`;
-                if (athleteId) url += `&athlete_id=${athleteId}`;
+                const response = await fetch(`${API_URL}/assignments/calendar?start_date=${startDate}&end_date=${endDate}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Accept': 'application/json'
+                    }
+                });
 
-                const data = await fetchAPI(url);
-                renderCalendar(data.data.assignments || [], startDate, endDate);
+                const data = await response.json();
+                
+                console.log('Calendar response:', data);
+                
+                if (data.success) {
+                    const calendarData = data.data?.calendar || [];
+                    console.log('Calendar data:', calendarData);
+                    renderCalendar(dates, calendarData);
+                } else {
+                    console.error('Calendar error:', data.message);
+                    renderCalendar(dates, []);
+                }
             } catch (error) {
                 console.error('Error loading calendar:', error);
+                renderCalendar(dates, []);
             }
         }
 
-        function renderCalendar(assignments, startDate, endDate) {
-            const calendar = document.getElementById('calendar');
-            const days = [];
-            const start = new Date(startDate);
-            const end = new Date(endDate);
+        function renderCalendar(dates, calendarData) {
+            const today = new Date().toISOString().split('T')[0];
+            const dayNames = currentView === 'month' ? 
+                ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'] :
+                ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+            
+            const currentMonth = currentDate.getMonth();
 
-            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-                days.push(new Date(d));
-            }
-
-            calendar.innerHTML = days.map(day => {
-                const dateStr = day.toISOString().split('T')[0];
-                const dayAssignments = assignments.filter(a => a.scheduled_date === dateStr);
+            document.getElementById('calendarGrid').innerHTML = dates.map((date, idx) => {
+                const dateStr = date.toISOString().split('T')[0];
+                const dayData = calendarData.find(d => d.date === dateStr);
+                const isToday = dateStr === today;
+                const isCurrentMonth = date.getMonth() === currentMonth;
+                const dayNameIdx = date.getDay() === 0 ? 6 : date.getDay() - 1; // Adjust for Monday start
 
                 return `
-                    <div class="day-card">
+                    <div class="day-card ${isToday ? 'today' : ''}" style="${currentView === 'month' && !isCurrentMonth ? 'opacity: 0.5;' : ''}">
                         <div class="day-header">
-                            <div class="day-name">${day.toLocaleDateString('es-ES', { weekday: 'short' }).toUpperCase()}</div>
-                            <div class="day-date">${day.getDate()}/${day.getMonth() + 1}</div>
+                            ${currentView === 'month' || idx < 7 ? `<div class="day-name">${dayNames[dayNameIdx]}</div>` : ''}
+                            <div class="day-date">${date.getDate()}</div>
                         </div>
-                        ${dayAssignments.map(a => `
-                            <div class="assignment-item">
-                                <div class="athlete-name">${a.athlete?.user?.full_name || 'Atleta'}</div>
-                                <div class="workout-name">${a.workout?.name || 'Workout'}</div>
+                        
+                        ${dayData ? `
+                            <div style="margin-top: 0.5rem;">
+                                ${dayData.assignments.slice(0, currentView === 'month' ? 2 : 10).map(a => `
+                                    <div class="assignment ${a.is_completed ? 'completed' : ''}" onclick="viewAssignment(${a.id})">
+                                        <div style="font-weight: 600; font-size: 0.8rem;">${a.workout_name}</div>
+                                        ${currentView === 'week' ? `<div style="font-size: 0.7rem; color: #A0A0B0;">${a.athlete_name}</div>` : ''}
+                                    </div>
+                                `).join('')}
+                                ${currentView === 'month' && dayData.assignments.length > 2 ? `
+                                    <div style="font-size: 0.7rem; color: #A0A0B0; margin-top: 0.25rem;">+${dayData.assignments.length - 2} más</div>
+                                ` : ''}
                             </div>
-                        `).join('') || '<p style="color: var(--text-gray); font-size: 0.85rem; text-align: center;">Sin workouts</p>'}
+                            ${currentView === 'week' ? `
+                                <div class="stats">
+                                    <span>📋 ${dayData.total_assignments}</span>
+                                    <span>✅ ${dayData.completed}</span>
+                                    <span>⏳ ${dayData.pending}</span>
+                                </div>
+                            ` : ''}
+                        ` : '<div style="color: #A0A0B0; font-size: 0.75rem; margin-top: 1rem; text-align: center;">-</div>'}
                     </div>
                 `;
             }).join('');
         }
 
-        async function loadAthletes() {
-            try {
-                const data = await fetchAPI('/athletes?per_page=100');
-                const select = document.getElementById('athleteFilter');
-                if (data.success && data.data.athletes) {
-                    data.data.athletes.forEach(athlete => {
-                        const option = document.createElement('option');
-                        option.value = athlete.id;
-                        option.textContent = athlete.user.full_name;
-                        select.appendChild(option);
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading athletes:', error);
-            }
-        }
-
-        if (checkAuth()) {
-            loadAthletes();
-            loadCalendar();
+        function viewAssignment(id) {
+            // TODO: Implement view assignment details
+            alert('Ver asignación #' + id);
         }
     </script>
 </body>

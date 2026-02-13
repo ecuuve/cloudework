@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca de Ejercicios - COACHING</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #FF6B35;
+            --dark: #1A1A2E;
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, #16213E 100%);
+            min-height: 100vh;
+            color: #E8E8E8;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem 0;
+            z-index: 100;
+        }
+
+        .logo {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+
+        .nav-menu { list-style: none; }
+        .nav-item { margin-bottom: 0.5rem; }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1.5rem;
+            color: #A0A0B0;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255, 107, 53, 0.1);
+            color: var(--primary);
+            border-left: 3px solid var(--primary);
+        }
+
+        .nav-icon {
+            margin-right: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        .header {
+            position: fixed;
+            left: 260px;
+            top: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 90;
+        }
+
+        .header-title h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.5rem;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            margin-top: 70px;
+            padding: 2rem;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            padding: 0.75rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .exercises-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .exercise-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+        }
+
+        .exercise-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .exercise-meta {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+            color: #A0A0B0;
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: rgba(26, 26, 46, 0.95);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo">
+            <h1>COACHING</h1>
+        </div>
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashboard-connected.html" class="nav-link">
+                        <span class="nav-icon">📊</span>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="athletes.html" class="nav-link">
+                        <span class="nav-icon">👥</span>
+                        Atletas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="workouts.html" class="nav-link">
+                        <span class="nav-icon">💪</span>
+                        Workouts
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="calendar.html" class="nav-link">
+                        <span class="nav-icon">📅</span>
+                        Programación
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="exercise-library.html" class="nav-link active">
+                        <span class="nav-icon">📚</span>
+                        Biblioteca
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <header class="header">
+        <div class="header-title">
+            <h2>Biblioteca de Ejercicios</h2>
+        </div>
+        <button class="btn btn-primary" onclick="openCreateModal()">+ Nuevo Ejercicio</button>
+    </header>
+
+    <main class="main-content">
+        <div class="filters">
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Buscar ejercicio...">
+            <select id="categoryFilter" class="filter-select" onchange="loadExercises()">
+                <option value="">Todas las Categorías</option>
+                <option value="gymnastics">Gymnastics</option>
+                <option value="strength">Strength</option>
+                <option value="weightlifting">Weightlifting</option>
+                <option value="metcon">MetCon</option>
+                <option value="cardio">Cardio</option>
+                <option value="mobility">Mobility</option>
+            </select>
+            <select id="difficultyFilter" class="filter-select" onchange="loadExercises()">
+                <option value="">Todas las Dificultades</option>
+                <option value="beginner">Principiante</option>
+                <option value="intermediate">Intermedio</option>
+                <option value="advanced">Avanzado</option>
+            </select>
+        </div>
+
+        <div class="exercises-grid" id="exercisesGrid">
+            <div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #A0A0B0;">
+                Cargando ejercicios...
+            </div>
+        </div>
+    </main>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Ejercicio</h3>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/v1';
+        const authToken = localStorage.getItem('authToken');
+        let searchTimeout;
+
+        if (!authToken) {
+            window.location.href = 'login-connected.html';
+        }
+
+        loadExercises();
+
+        document.getElementById('searchInput').addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(loadExercises, 500);
+        });
+
+        async function loadExercises() {
+            const search = document.getElementById('searchInput').value;
+            const category = document.getElementById('categoryFilter').value;
+            const difficulty = document.getElementById('difficultyFilter').value;
+
+            let url = `${API_URL}/exercises?per_page=100`;
+            if (search) url += `&search=${search}`;
+            if (category) url += `&category=${category}`;
+            if (difficulty) url += `&difficulty_level=${difficulty}`;
+
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    renderExercises(data.data.exercises);
+                }
+            } catch (error) {
+                console.error('Error loading exercises:', error);
+            }
+        }
+
+        function renderExercises(exercises) {
+            const grid = document.getElementById('exercisesGrid');
+
+            if (exercises.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #A0A0B0;">No se encontraron ejercicios</div>';
+                return;
+            }
+
+            grid.innerHTML = exercises.map(ex => `
+                <div class="exercise-card" onclick="viewExercise(${ex.id})">
+                    <div class="exercise-name">${ex.name}</div>
+                    <div class="exercise-meta">
+                        <span class="badge" style="background: rgba(255,107,53,0.2); color: var(--primary);">${ex.category || 'N/A'}</span>
+                        <span class="badge" style="background: rgba(16,185,129,0.2); color: #10b981;">${ex.difficulty_level || 'intermediate'}</span>
+                    </div>
+                    ${ex.description ? `<p style="margin-top: 0.75rem; color: #A0A0B0; font-size: 0.9rem;">${ex.description.substring(0, 80)}...</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        async function viewExercise(id) {
+            try {
+                const response = await fetch(`${API_URL}/exercises/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showExerciseModal(data.data.exercise);
+                }
+            } catch (error) {
+                console.error('Error loading exercise:', error);
+            }
+        }
+
+        function showExerciseModal(exercise) {
+            document.getElementById('modalTitle').textContent = exercise.name;
+            document.getElementById('modalBody').innerHTML = `
+                <div style="margin-bottom: 1rem;">
+                    <strong>Categoría:</strong> ${exercise.category || 'N/A'}
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <strong>Dificultad:</strong> ${exercise.difficulty_level || 'intermediate'}
+                </div>
+                ${exercise.equipment && exercise.equipment.length > 0 ? `
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Equipamiento:</strong> ${exercise.equipment.join(', ')}
+                    </div>
+                ` : ''}
+                ${exercise.muscle_groups && exercise.muscle_groups.length > 0 ? `
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Músculos:</strong> ${exercise.muscle_groups.join(', ')}
+                    </div>
+                ` : ''}
+                ${exercise.description ? `
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Descripción:</strong><br>
+                        ${exercise.description}
+                    </div>
+                ` : ''}
+                ${exercise.video_url ? `
+                    <div style="margin-top: 1.5rem;">
+                        <a href="${exercise.video_url}" target="_blank" class="btn btn-primary">🎬 Ver Video</a>
+                    </div>
+                ` : ''}
+            `;
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+
+        function openCreateModal() {
+            alert('Función de crear ejercicio próximamente');
+        }
+    </script>
+</body>
+</html>

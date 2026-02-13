@@ -26,6 +26,7 @@
         }
 
         body {
+            overflow-x: hidden;
             font-family: 'Work Sans', sans-serif;
             background: linear-gradient(135deg, var(--dark) 0%, #16213E 100%);
             min-height: 100vh;
@@ -38,9 +39,8 @@
             top: 0;
             width: 260px;
             height: 100vh;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1a1f35;
+            border-right: 1px solid rgba(255,255,255,0.08);
             padding: 2rem 0;
             z-index: 100;
         }
@@ -91,9 +91,8 @@
             top: 0;
             right: 0;
             height: 70px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1e2540;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
             padding: 0 2rem;
             display: flex;
             align-items: center;
@@ -177,9 +176,8 @@
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1e2540;
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
             padding: 1.5rem;
         }
@@ -423,6 +421,36 @@
         .page-btn.active {
             background: var(--primary);
         }
+    
+        /* Dropdown Styles - High Contrast */
+        select {
+            background: #1e293b !important;
+            color: #f1f5f9 !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            padding: 0.75rem !important;
+            border-radius: 8px !important;
+            font-size: 1rem !important;
+            cursor: pointer !important;
+        }
+
+        select:focus {
+            outline: none !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2) !important;
+        }
+
+        select option {
+            background: #1e293b !important;
+            color: #f1f5f9 !important;
+            padding: 0.5rem !important;
+        }
+
+        select option:hover,
+        select option:checked {
+            background: #334155 !important;
+            color: #ffffff !important;
+        }
+
     </style>
 </head>
 <body>
@@ -452,27 +480,15 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="programming.html" class="nav-link">
+                    <a href="calendar.html" class="nav-link">
                         <span class="nav-icon">📅</span>
                         Programación
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="calendar.html" class="nav-link">
-                        <span class="nav-icon">📆</span>
-                        Calendario
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="results.html" class="nav-link">
-                        <span class="nav-icon">🏆</span>
-                        Resultados
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="analytics.html" class="nav-link">
-                        <span class="nav-icon">📈</span>
-                        Analytics
+                    <a href="exercise-library.html" class="nav-link">
+                        <span class="nav-icon">📚</span>
+                        Biblioteca
                     </a>
                 </li>
             </ul>
@@ -621,10 +637,9 @@
         }
 
         function logout() {
-            if (confirm('¿Seguro que quieres salir?')) {
-                localStorage.removeItem('cloudework_user');
-                window.location.href = 'login-connected.html';
-            }
+            localStorage.removeItem('cloudework_user');
+            localStorage.removeItem('authToken');
+            window.location.href = 'login-connected.html';
         }
 
         // Fetch with auth

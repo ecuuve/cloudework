@@ -26,6 +26,7 @@
         }
 
         body {
+            overflow-x: hidden;
             font-family: 'Work Sans', sans-serif;
             background: linear-gradient(135deg, var(--dark) 0%, #16213E 100%);
             min-height: 100vh;
@@ -39,9 +40,8 @@
             top: 0;
             width: 260px;
             height: 100vh;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1a1f35;
+            border-right: 1px solid rgba(255,255,255,0.08);
             padding: 2rem 0;
             z-index: 100;
         }
@@ -93,9 +93,8 @@
             top: 0;
             right: 0;
             height: 70px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1e2540;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
             padding: 0 2rem;
             display: flex;
             align-items: center;
@@ -143,6 +142,8 @@
             margin-left: 260px;
             margin-top: 70px;
             padding: 2rem;
+            min-height: calc(100vh - 70px);
+            overflow-y: auto;
         }
 
         /* KPI Cards */
@@ -154,9 +155,8 @@
         }
 
         .kpi-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1e2540;
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
             padding: 1.5rem;
             transition: transform 0.3s;
@@ -210,9 +210,8 @@
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1e2540;
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
             padding: 1.5rem;
         }
@@ -317,27 +316,15 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="programming.html" class="nav-link">
+                    <a href="calendar.html" class="nav-link">
                         <span class="nav-icon">📅</span>
                         Programación
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="calendar.html" class="nav-link">
-                        <span class="nav-icon">📆</span>
-                        Calendario
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="results.html" class="nav-link">
-                        <span class="nav-icon">🏆</span>
-                        Resultados
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="analytics.html" class="nav-link">
-                        <span class="nav-icon">📈</span>
-                        Analytics
+                    <a href="exercise-library.html" class="nav-link">
+                        <span class="nav-icon">📚</span>
+                        Biblioteca
                     </a>
                 </li>
             </ul>
@@ -399,31 +386,35 @@
         let authToken = null;
         let currentUser = null;
 
-        // Check authentication
+        // Check authentication - acepta tanto 'cloudework_user' como 'authToken' (compatibilidad)
         function checkAuth() {
+            // Intentar con cloudework_user primero
             const userData = localStorage.getItem('cloudework_user');
-            if (!userData) {
-                window.location.href = 'login-connected.html';
-                return false;
+            if (userData) {
+                try {
+                    currentUser = JSON.parse(userData);
+                    authToken = currentUser.token;
+                    document.getElementById('userName').textContent =
+                        (currentUser.first_name || '') + ' ' + (currentUser.last_name || '');
+                    return true;
+                } catch (e) {}
             }
-
-            try {
-                currentUser = JSON.parse(userData);
-                authToken = currentUser.token;
-                document.getElementById('userName').textContent = currentUser.first_name + ' ' + currentUser.last_name;
+            // Fallback: solo authToken
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                authToken = token;
+                document.getElementById('userName').textContent = 'Coach';
                 return true;
-            } catch (e) {
-                window.location.href = 'login-connected.html';
-                return false;
             }
+            window.location.href = 'login-connected.html';
+            return false;
         }
 
         // Logout
         function logout() {
-            if (confirm('¿Seguro que quieres salir?')) {
-                localStorage.removeItem('cloudework_user');
-                window.location.href = 'login-connected.html';
-            }
+            localStorage.removeItem('cloudework_user');
+            localStorage.removeItem('authToken');
+            window.location.href = 'login-connected.html';
         }
 
         // Fetch with auth
@@ -459,37 +450,38 @@
             return data;
         }
 
-        // Load Dashboard Data
+        // Load Dashboard Data - versión robusta, nunca deja spinners
         async function loadDashboard() {
+            // Cargar KPIs y actividad
             try {
-                // Load KPIs
                 const dashboardData = await fetchAPI('/analytics/dashboard');
-                renderKPIs(dashboardData.data.statistics || dashboardData.data.kpis);
+                renderKPIs(dashboardData.data.statistics || dashboardData.data.kpis || {});
                 renderRecentActivity(dashboardData.data.recent_activity || []);
+            } catch (error) {
+                console.warn('analytics/dashboard falló:', error.message);
+                renderKPIs({});           // Muestra zeros en vez de spinner
+                renderRecentActivity([]); // Muestra "Sin actividad"
+            }
 
-                // Load Athletes
+            // Cargar atletas (independiente del error anterior)
+            try {
                 const athletesData = await fetchAPI('/athletes?per_page=5');
                 renderAthletes(athletesData.data.athletes || []);
-
             } catch (error) {
-                console.error('Error loading dashboard:', error);
-                showError('Error cargando datos. Asegúrate que el servidor esté corriendo.');
+                console.warn('athletes falló:', error.message);
+                renderAthletes([]); // Muestra "No hay atletas"
             }
         }
 
         function renderKPIs(kpis) {
             const kpiGrid = document.getElementById('kpiGrid');
-            
-            if (!kpis) {
-                console.error('No KPIs data received');
-                return;
-            }
+            if (!kpis) kpis = {};  // Nunca fallar - usar objeto vacío
             
             // API returns simple values, not objects
-            const totalAthletes = kpis.total_athletes || 0;
-            const workoutsWeek = kpis.workouts_this_week || 0;
-            const completionRate = kpis.completion_rate || 0;
-            const prsMonth = kpis.prs_this_month || 0;
+            const totalAthletes = kpis.total_athletes?.value || 0;
+            const workoutsWeek = kpis.workouts_this_week?.value || 0;
+            const completionRate = kpis.completion_rate?.value || 0;
+            const prsMonth = kpis.prs_this_month?.value || 0;
             
             kpiGrid.innerHTML = `
                 <div class="kpi-card">
