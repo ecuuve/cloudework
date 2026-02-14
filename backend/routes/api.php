@@ -64,12 +64,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Assignments
     Route::get('/v1/assignments', [AssignmentController::class, 'index']);
     Route::post('/v1/assignments', [AssignmentController::class, 'store']);
+    Route::get('/v1/assignments/calendar', [AssignmentController::class, 'calendar']);
     Route::get('/v1/assignments/{assignment}', [AssignmentController::class, 'show']);
     Route::put('/v1/assignments/{assignment}', [AssignmentController::class, 'update']);
     Route::patch('/v1/assignments/{assignment}', [AssignmentController::class, 'update']);
     Route::delete('/v1/assignments/{assignment}', [AssignmentController::class, 'destroy']);
     Route::post('/v1/assignments/bulk', [AssignmentController::class, 'bulkAssign']);
-    Route::get('/v1/assignments/calendar', [AssignmentController::class, 'calendar']);
     
     // Results
     Route::get('/v1/results', [ResultController::class, 'index']);

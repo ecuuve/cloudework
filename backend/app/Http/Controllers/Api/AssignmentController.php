@@ -369,7 +369,7 @@ class AssignmentController extends Controller
         if (!$assignment) {
             return response()->json([
                 'success' => false,
-                'message' => 'Assignment not found',
+                'message' => 'Assignment not found.',
             ], 404);
         }
 
@@ -430,7 +430,7 @@ class AssignmentController extends Controller
         if (!$assignment) {
             return response()->json([
                 'success' => false,
-                'message' => 'Assignment not found',
+                'message' => 'Assignment not found..',
             ], 404);
         }
 
@@ -480,7 +480,7 @@ class AssignmentController extends Controller
         if (!$assignment) {
             return response()->json([
                 'success' => false,
-                'message' => 'Assignment not found',
+                'message' => 'Assignment not found...',
             ], 404);
         }
 
