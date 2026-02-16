@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Mood API</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #1a1f35; color: #fff; }
+        .btn { padding: 10px 20px; margin: 5px; cursor: pointer; background: #FF6B35; border: none; color: white; border-radius: 5px; }
+        .result { background: #2a3f5f; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        input, textarea { padding: 8px; margin: 5px; border-radius: 5px; border: 1px solid #444; background: #1a1f35; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🎭 Test Mood Tracking API</h1>
+    
+    <div>
+        <h3>1. Registrar Mood</h3>
+        <select id="moodLevel">
+            <option value="7">😄 7 - Excelente</option>
+            <option value="6">🙂 6 - Muy bien</option>
+            <option value="5">😊 5 - Bien</option>
+            <option value="4" selected>😐 4 - Normal</option>
+            <option value="3">😕 3 - Regular</option>
+            <option value="2">☹️ 2 - Mal</option>
+            <option value="1">😞 1 - Muy mal</option>
+        </select>
+        <br>
+        <textarea id="notes" placeholder="Nota opcional..." rows="3" cols="40"></textarea>
+        <br>
+        <button class="btn" onclick="saveMood()">💾 Guardar Mood</button>
+    </div>
+
+    <div>
+        <h3>2. Ver Historial</h3>
+        <button class="btn" onclick="loadMoods()">📊 Cargar Últimos 30 Días</button>
+    </div>
+
+    <div id="result" class="result"></div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/v1';
+        const token = localStorage.getItem('authToken');
+
+        if (!token) {
+            document.body.innerHTML = '<h2>⚠️ No hay token. Login primero en <a href="login-connected.html">login</a></h2>';
+        }
+
+        async function saveMood() {
+            const moodLevel = document.getElementById('moodLevel').value;
+            const notes = document.getElementById('notes').value;
+
+            try {
+                const response = await fetch(`${API_URL}/my/mood`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        mood_level: parseInt(moodLevel),
+                        notes: notes || null
+                    })
+                });
+
+                const data = await response.json();
+                document.getElementById('result').innerHTML = `
+                    <h3>Resultado:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+
+                if (data.success) {
+                    document.getElementById('notes').value = '';
+                    alert('✅ Mood guardado!');
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<p style="color: red;">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        async function loadMoods() {
+            try {
+                const response = await fetch(`${API_URL}/my/mood?days=30`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    const html = `
+                        <h3>📊 Estadísticas:</h3>
+                        <p>Total registros: ${data.data.stats.total_logs}</p>
+                        <p>Promedio: ${data.data.stats.average_mood}/7</p>
+                        <p>Días rastreados: ${data.data.stats.days_tracked}</p>
+                        
+                        <h3>📈 Promedios Diarios:</h3>
+                        ${data.data.daily_averages.map(day => `
+                            <div style="padding: 5px; border-bottom: 1px solid #444;">
+                                ${day.date}: ${day.average}/7 (${day.count} registros, min: ${day.min}, max: ${day.max})
+                            </div>
+                        `).join('')}
+                        
+                        <h3>📝 Todos los registros:</h3>
+                        ${data.data.mood_logs.map(log => `
+                            <div style="padding: 8px; margin: 5px 0; background: #1a2540; border-radius: 5px;">
+                                ${log.mood_emoji} ${log.mood_level}/7 - ${log.mood_label}<br>
+                                <small>${log.created_at}</small><br>
+                                ${log.notes ? `<em>"${log.notes}"</em>` : '<em>Sin nota</em>'}
+                            </div>
+                        `).join('')}
+                    `;
+                    
+                    document.getElementById('result').innerHTML = html;
+                } else {
+                    document.getElementById('result').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<p style="color: red;">❌ Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

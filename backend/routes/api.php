@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\WorkoutController;
 use App\Http\Controllers\Api\AssignmentController;
 use App\Http\Controllers\Api\ResultController;
 use App\Http\Controllers\Api\AnalyticsController;
+use App\Http\Controllers\Api\MoodController;
 
 /*
 |--------------------------------------------------------------------------
@@ -82,6 +83,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/v1/analytics/dashboard', [AnalyticsController::class, 'dashboard']);
     Route::get('/v1/analytics/athlete/{athleteId}/progress', [AnalyticsController::class, 'athleteProgress']);
     Route::get('/v1/analytics/workout/{workoutId}/leaderboard', [AnalyticsController::class, 'workoutLeaderboard']);
+    // Mood tracking
+    Route::get('/v1/my/mood', [MoodController::class, 'index']);
+    Route::post('/v1/my/mood', [MoodController::class, 'store']);
+    Route::put('/v1/my/mood/{id}', [MoodController::class, 'update']);
+    Route::delete('/v1/my/mood/{id}', [MoodController::class, 'destroy']);
+
 });
 
 Route::fallback(function () {

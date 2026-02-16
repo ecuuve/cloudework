@@ -107,22 +107,13 @@
     </div>
     <nav>
         <ul class="nav-menu">
-                    <li class="nav-item"><a href="athlete-dashboard.html" class="nav-link"><span class="nav-icon">🏠</span> Mi Dashboard</a></li>
-        <li class="nav-item"><a href="athlete-calendar.html" class="nav-link"><span class="nav-icon">📅</span> Calendario</a></li>
-        <li class="nav-item"><a href="athlete-history.html" class="nav-link active"><span class="nav-icon">📊</span> Mi Historial</a></li>
+            <li class="nav-item"><a href="athlete-dashboard.html" class="nav-link"><span class="nav-icon">🏠</span> Mi Dashboard</a></li>
+            <li class="nav-item"><a href="athlete-calendar.html" class="nav-link"><span class="nav-icon">📅</span> Calendario</a></li>
+            <li class="nav-item"><a href="athlete-history.html" class="nav-link active"><span class="nav-icon">📊</span> Mi Historial</a></li>
+            <li class="nav-item"><a href="athlete-mood.html" class="nav-link"><span class="nav-icon">🎭</span> Mi Estado de Ánimo</a></li>
         </ul>
     </nav>
-    <div class="sidebar-bottom">
-        <div class="user-info">
-            <div class="avatar" id="avatarInit">A</div>
-            <div>
-                <div class="user-name" id="sidebarName">Cargando...</div>
-                <div class="user-role">Atleta</div>
-            </div>
-        </div>
-        <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
-    </div>
-</aside>
+    </aside>
 
 <header class="header">
     <div>
@@ -208,7 +199,7 @@ async function loadUserInfo() {
             const u = data.data.user;
             document.getElementById('sidebarName').textContent =
                 u.full_name || `${u.first_name||''} ${u.last_name||''}`.trim() || u.email;
-            document.getElementById('avatarInit').textContent =
+            document.getElementById('headerAvatar').textContent =
                 (u.first_name || u.email || 'A')[0].toUpperCase();
         }
     } catch(e) { /* silencioso */ }

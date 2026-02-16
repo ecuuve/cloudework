@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Estado de Ánimo - COACHING</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --primary:#FF6B35; --dark:#1A1A2E; --dark-light:#16213E;
+            --card-bg:rgba(255,255,255,0.05); --card-border:rgba(255,255,255,0.1);
+            --success:#10b981; --warning:#f59e0b; --danger:#ef4444; --info:#3b82f6;
+            --text-muted:#94a3b8; --text-main:#e2e8f0;
+        }
+        body { overflow-x:hidden; font-family:'Work Sans',sans-serif; background:linear-gradient(135deg,var(--dark) 0%,var(--dark-light) 100%); min-height:100vh; color:var(--text-main); }
+        .sidebar { position:fixed; left:0; top:0; width:250px; height:100vh; background:#0f172a; border-right:1px solid var(--card-border); padding:1.75rem 0; z-index:100; display:flex; flex-direction:column; }
+        .logo { padding:0 1.5rem; margin-bottom:2rem; }
+        .logo h1 { font-family:'Oswald',sans-serif; font-size:1.6rem; color:var(--primary); letter-spacing:2px; }
+        .nav-menu { list-style:none; flex:1; }
+        .nav-item { margin-bottom:2px; }
+        .nav-link { display:flex; align-items:center; padding:0.7rem 1.5rem; color:var(--text-muted); text-decoration:none; transition:all 0.25s; font-size:0.95rem; border-left:3px solid transparent; }
+        .nav-link:hover { background:rgba(255,107,53,0.08); color:#fff; }
+        .nav-link.active { background:rgba(255,107,53,0.12); color:var(--primary); border-left-color:var(--primary); }
+        .nav-icon { margin-right:0.75rem; font-size:1.1rem; width:1.3rem; text-align:center; }
+        .sidebar-bottom { padding:1.5rem; border-top:1px solid var(--card-border); }
+        .user-info { display:flex; align-items:center; gap:0.75rem; }
+        .avatar { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--primary),#e04a1e); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.95rem; color:#fff; }
+        .user-name { font-size:0.88rem; font-weight:600; color:var(--text-main); }
+        .user-role { font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; }
+        .logout-btn { margin-top:0.75rem; width:100%; background:none; border:1px solid var(--card-border); color:var(--text-muted); padding:0.5rem; border-radius:8px; cursor:pointer; font-size:0.8rem; transition:all 0.2s; font-family:inherit; }
+        .logout-btn:hover { border-color:var(--danger); color:var(--danger); }
+
+        .header { position:fixed; left:250px; top:0; right:0; height:64px; background:rgba(15,23,42,0.75); border-bottom:1px solid var(--card-border); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; z-index:90; }
+        .header-left h2 { font-family:'Oswald',sans-serif; font-size:1.3rem; font-weight:600; }
+
+        .main { margin-left:250px; margin-top:64px; padding:1.75rem 2rem; max-width:1200px; }
+
+        .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin-bottom:2rem; }
+        .stat-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:12px; padding:1.25rem; }
+        .stat-label { font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.5rem; }
+        .stat-value { font-size:2rem; font-weight:700; color:var(--primary); font-family:'Oswald',sans-serif; }
+
+        .chart-section { background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px; padding:1.5rem; margin-bottom:2rem; }
+        .section-title { font-family:'Oswald',sans-serif; font-size:1.1rem; margin-bottom:1.5rem; }
+
+        .mood-chart { height:250px; display:flex; align-items:flex-end; gap:8px; margin-bottom:2rem; }
+        .mood-bar { flex:1; background:linear-gradient(to top,var(--primary),rgba(255,107,53,0.5)); border-radius:4px 4px 0 0; position:relative; min-height:20px; cursor:pointer; transition:all 0.3s; }
+        .mood-bar:hover { transform:scaleY(1.05); filter:brightness(1.2); }
+        .mood-bar-label { position:absolute; bottom:-25px; left:50%; transform:translateX(-50%); font-size:0.7rem; color:var(--text-muted); white-space:nowrap; }
+        .mood-bar-value { position:absolute; top:-20px; left:50%; transform:translateX(-50%); font-size:0.75rem; font-weight:600; }
+
+        .mood-list { display:flex; flex-direction:column; gap:0.75rem; }
+        .mood-item { background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:12px; padding:1rem; display:flex; align-items:center; gap:1rem; transition:all 0.2s; }
+        .mood-item:hover { background:rgba(255,255,255,0.06); border-color:rgba(255,107,53,0.3); }
+        .mood-emoji { font-size:2rem; }
+        .mood-details { flex:1; }
+        .mood-level-text { font-weight:600; font-size:1rem; margin-bottom:0.25rem; }
+        .mood-time { font-size:0.75rem; color:var(--text-muted); }
+        .mood-notes { font-size:0.85rem; color:var(--text-muted); margin-top:0.5rem; font-style:italic; }
+        .mood-actions { display:flex; gap:0.5rem; }
+        .btn-icon { width:32px; height:32px; border:none; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:0.9rem; transition:all 0.2s; }
+        .btn-edit { background:rgba(59,130,246,0.15); color:var(--info); }
+        .btn-edit:hover { background:rgba(59,130,246,0.25); }
+        .btn-delete { background:rgba(239,68,68,0.15); color:var(--danger); }
+        .btn-delete:hover { background:rgba(239,68,68,0.25); }
+
+        .fab { position:fixed; bottom:2rem; right:2rem; width:60px; height:60px; border-radius:50%; background:var(--primary); color:white; border:none; font-size:1.5rem; cursor:pointer; box-shadow:0 4px 12px rgba(255,107,53,0.4); transition:all 0.3s; z-index:1000; }
+        .fab:hover { transform:scale(1.1); box-shadow:0 6px 20px rgba(255,107,53,0.6); }
+
+        .modal { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:2000; align-items:center; justify-content:center; }
+        .modal.show { display:flex; }
+        .modal-content { background:var(--dark); border:1px solid var(--card-border); border-radius:16px; padding:2rem; max-width:500px; width:90%; }
+        .modal-title { font-family:'Oswald',sans-serif; font-size:1.5rem; margin-bottom:1.5rem; }
+        .form-group { margin-bottom:1.25rem; }
+        .form-label { display:block; margin-bottom:0.5rem; font-size:0.9rem; color:var(--text-muted); }
+        .mood-selector { display:grid; grid-template-columns:repeat(7,1fr); gap:0.5rem; }
+        .mood-option { padding:0.75rem; border:2px solid var(--card-border); border-radius:8px; text-align:center; cursor:pointer; transition:all 0.2s; background:var(--card-bg); }
+        .mood-option:hover { border-color:var(--primary); }
+        .mood-option.selected { border-color:var(--primary); background:rgba(255,107,53,0.15); }
+        .mood-option-emoji { font-size:1.5rem; display:block; margin-bottom:0.25rem; }
+        .mood-option-level { font-size:0.7rem; color:var(--text-muted); }
+        textarea { width:100%; padding:0.75rem; background:var(--card-bg); border:1px solid var(--card-border); border-radius:8px; color:var(--text-main); font-family:inherit; resize:vertical; }
+        .modal-actions { display:flex; gap:0.75rem; margin-top:1.5rem; }
+        .btn { flex:1; padding:0.75rem; border:none; border-radius:8px; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+        .btn-primary { background:var(--primary); color:white; }
+        .btn-primary:hover { background:#e05a24; }
+        .btn-secondary { background:var(--card-bg); color:var(--text-muted); border:1px solid var(--card-border); }
+        .btn-secondary:hover { border-color:var(--primary); color:var(--primary); }
+
+        .empty-state { text-align:center; padding:3rem 1rem; color:var(--text-muted); }
+        .empty-icon { font-size:3rem; margin-bottom:1rem; }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="logo"><h1>COACHING</h1></div>
+    <nav><ul class="nav-menu">
+        <li class="nav-item"><a href="athlete-dashboard.html" class="nav-link"><span class="nav-icon">🏠</span> Mi Dashboard</a></li>
+        <li class="nav-item"><a href="athlete-calendar.html" class="nav-link"><span class="nav-icon">📅</span> Calendario</a></li>
+        <li class="nav-item"><a href="athlete-history.html" class="nav-link"><span class="nav-icon">📊</span> Mi Historial</a></li>
+        <li class="nav-item"><a href="athlete-mood.html" class="nav-link active"><span class="nav-icon">🎭</span> Mi Estado de Ánimo</a></li>
+    </ul></nav>
+    </aside>
+
+<header class="header">
+    <div class="header-left"><h2>🎭 Mi Estado de Ánimo</h2></div>
+    <div class="header-right" style="display:flex;align-items:center;gap:1rem;">
+        <div class="user-info" style="display:flex;align-items:center;gap:0.75rem;">
+            <div style="text-align:right;">
+                <div class="user-name" id="headerName" style="font-size:0.88rem;font-weight:600;color:var(--text-main);">Cargando...</div>
+                <div class="user-role" style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;">Atleta</div>
+            </div>
+            <div class="avatar" id="headerAvatar" style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#e04a1e);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.95rem;color:#fff;">A</div>
+        </div>
+        <button onclick="logout()" style="padding:0.5rem 1rem;background:none;border:1px solid var(--card-border);color:var(--text-muted);border-radius:8px;cursor:pointer;font-size:0.8rem;transition:all 0.2s;font-family:inherit;" onmouseover="this.style.borderColor='var(--danger)';this.style.color='var(--danger)'" onmouseout="this.style.borderColor='var(--card-border)';this.style.color='var(--text-muted)'">Cerrar sesión</button>
+    </div>
+</header>
+
+<main class="main">
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Registros</div>
+            <div class="stat-value" id="totalLogs">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Promedio</div>
+            <div class="stat-value" id="avgMood">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Días Rastreados</div>
+            <div class="stat-value" id="daysTracked">0</div>
+        </div>
+    </div>
+
+    <div class="chart-section">
+        <div class="section-title">📈 Últimos 30 Días</div>
+        <div class="mood-chart" id="moodChart"></div>
+    </div>
+
+    <div class="chart-section">
+        <div class="section-title">📝 Historial de Registros</div>
+        <div class="mood-list" id="moodList"></div>
+    </div>
+</main>
+
+<button class="fab" onclick="openMoodModal()">➕</button>
+
+<div class="modal" id="moodModal">
+    <div class="modal-content">
+        <div class="modal-title" id="modalTitle">Registrar Estado de Ánimo</div>
+        <div class="form-group">
+            <div class="form-label">¿Cómo te sientes?</div>
+            <div class="mood-selector" id="moodSelector"></div>
+        </div>
+        <div class="form-group">
+            <div class="form-label">Nota (opcional)</div>
+            <textarea id="moodNotes" rows="3" placeholder="¿Qué influyó en tu estado de ánimo hoy?"></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeMoodModal()">Cancelar</button>
+            <button class="btn btn-primary" onclick="saveMood()">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_URL = 'http://localhost:8000/api/v1';
+const authToken = localStorage.getItem('authToken');
+
+if (!authToken) window.location.href = 'login-connected.html';
+
+const MOOD_LEVELS = [
+    { level: 7, emoji: '😄', label: 'Excelente' },
+    { level: 6, emoji: '🙂', label: 'Muy bien' },
+    { level: 5, emoji: '😊', label: 'Bien' },
+    { level: 4, emoji: '😐', label: 'Normal' },
+    { level: 3, emoji: '😕', label: 'Regular' },
+    { level: 2, emoji: '☹️', label: 'Mal' },
+    { level: 1, emoji: '😞', label: 'Muy mal' },
+];
+
+let selectedMoodLevel = null;
+let editingMoodId = null;
+
+// Load user info
+fetch(`${API_URL}/me`, { headers: authHeaders() })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const u = data.data.user;
+            document.getElementById('headerName').textContent = u.full_name || u.email;
+            document.getElementById('headerAvatar').textContent = (u.first_name || u.email)[0].toUpperCase();
+        }
+    });
+
+loadMoodData();
+
+function loadMoodData() {
+    fetch(`${API_URL}/my/mood?days=30`, { headers: authHeaders() })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                renderStats(data.data.stats);
+                renderChart(data.data.daily_averages);
+                renderMoodList(data.data.mood_logs);
+            }
+        })
+        .catch(e => console.error(e));
+}
+
+function renderStats(stats) {
+    document.getElementById('totalLogs').textContent = stats.total_logs;
+    document.getElementById('avgMood').textContent = stats.average_mood || '0';
+    document.getElementById('daysTracked').textContent = stats.days_tracked;
+}
+
+function renderChart(dailyAverages) {
+    const chart = document.getElementById('moodChart');
+    if (!dailyAverages.length) {
+        chart.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><p>No hay datos para mostrar</p></div>';
+        return;
+    }
+    
+    const maxValue = 7;
+    chart.innerHTML = dailyAverages.slice(-14).map(day => {
+        const height = (day.average / maxValue) * 100;
+        const date = new Date(day.date);
+        const label = date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+        return `
+            <div class="mood-bar" style="height:${height}%" title="${day.date}: ${day.average}/7">
+                <div class="mood-bar-value">${day.average}</div>
+                <div class="mood-bar-label">${label}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderMoodList(moodLogs) {
+    const list = document.getElementById('moodList');
+    if (!moodLogs.length) {
+        list.innerHTML = '<div class="empty-state"><div class="empty-icon">🎭</div><p>Aún no has registrado tu estado de ánimo</p></div>';
+        return;
+    }
+    
+    list.innerHTML = moodLogs.map(log => `
+        <div class="mood-item">
+            <div class="mood-emoji">${log.mood_emoji}</div>
+            <div class="mood-details">
+                <div class="mood-level-text">${log.mood_level}/7 - ${log.mood_label}</div>
+                <div class="mood-time">${new Date(log.created_at).toLocaleString('es-ES')}</div>
+                ${log.notes ? `<div class="mood-notes">"${log.notes}"</div>` : ''}
+            </div>
+            <div class="mood-actions">
+                <button class="btn-icon btn-edit" onclick="editMood(${log.id}, ${log.mood_level}, '${(log.notes || '').replace(/'/g, "\\'")}')">✏️</button>
+                <button class="btn-icon btn-delete" onclick="deleteMood(${log.id})">🗑️</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function openMoodModal() {
+    document.getElementById('modalTitle').textContent = 'Registrar Estado de Ánimo';
+    editingMoodId = null;
+    selectedMoodLevel = null;
+    document.getElementById('moodNotes').value = '';
+    
+    document.getElementById('moodSelector').innerHTML = MOOD_LEVELS.map(m => `
+        <div class="mood-option" onclick="selectMood(${m.level})">
+            <span class="mood-option-emoji">${m.emoji}</span>
+            <span class="mood-option-level">${m.level}</span>
+        </div>
+    `).join('');
+    
+    document.getElementById('moodModal').classList.add('show');
+}
+
+function closeMoodModal() {
+    document.getElementById('moodModal').classList.remove('show');
+}
+
+function selectMood(level) {
+    selectedMoodLevel = level;
+    document.querySelectorAll('.mood-option').forEach((el, idx) => {
+        el.classList.toggle('selected', MOOD_LEVELS[idx].level === level);
+    });
+}
+
+function saveMood() {
+    if (!selectedMoodLevel) {
+        alert('Selecciona un nivel de estado de ánimo');
+        return;
+    }
+    
+    const notes = document.getElementById('moodNotes').value;
+    const method = editingMoodId ? 'PUT' : 'POST';
+    const url = editingMoodId ? `${API_URL}/my/mood/${editingMoodId}` : `${API_URL}/my/mood`;
+    
+    fetch(url, {
+        method: method,
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mood_level: selectedMoodLevel, notes: notes || null })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            closeMoodModal();
+            loadMoodData();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(e => alert('Error al guardar'));
+}
+
+function editMood(id, level, notes) {
+    editingMoodId = id;
+    selectedMoodLevel = level;
+    document.getElementById('modalTitle').textContent = 'Editar Estado de Ánimo';
+    document.getElementById('moodNotes').value = notes;
+    
+    document.getElementById('moodSelector').innerHTML = MOOD_LEVELS.map(m => `
+        <div class="mood-option ${m.level === level ? 'selected' : ''}" onclick="selectMood(${m.level})">
+            <span class="mood-option-emoji">${m.emoji}</span>
+            <span class="mood-option-level">${m.level}</span>
+        </div>
+    `).join('');
+    
+    document.getElementById('moodModal').classList.add('show');
+}
+
+function deleteMood(id) {
+    if (!confirm('¿Eliminar este registro?')) return;
+    
+    fetch(`${API_URL}/my/mood/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) loadMoodData();
+        else alert('Error al eliminar');
+    });
+}
+
+function logout() { localStorage.removeItem('authToken'); localStorage.removeItem('cloudework_user'); window.location.href = 'login-connected.html'; }
+function authHeaders() { return {'Authorization':`Bearer ${authToken}`,'Accept':'application/json'}; }
+</script>
+</body>
+</html>
