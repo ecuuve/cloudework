@@ -105,20 +105,43 @@
             flex: 1;
             min-width: 300px;
             padding: 0.75rem 1rem;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
-            color: white;
+            color: #f1f5f9;
             font-size: 1rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+        }
+
+        .search-box::placeholder {
+            color: #94a3b8;
         }
 
         .filter-select {
             padding: 0.75rem 1rem;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
-            color: white;
+            color: #f1f5f9;
             cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+        }
+
+        .filter-select option {
+            background: #1e293b;
+            color: #f1f5f9;
+            padding: 0.5rem;
         }
 
         .btn {
@@ -214,6 +237,36 @@
             font-size: 2rem;
             cursor: pointer;
         }
+    
+        /* Dropdown Styles - High Contrast */
+        select {
+            background: #1e293b !important;
+            color: #f1f5f9 !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            padding: 0.75rem !important;
+            border-radius: 8px !important;
+            font-size: 1rem !important;
+            cursor: pointer !important;
+        }
+
+        select:focus {
+            outline: none !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2) !important;
+        }
+
+        select option {
+            background: #1e293b !important;
+            color: #f1f5f9 !important;
+            padding: 0.5rem !important;
+        }
+
+        select option:hover,
+        select option:checked {
+            background: #334155 !important;
+            color: #ffffff !important;
+        }
+
     </style>
 </head>
 <body>
@@ -426,6 +479,12 @@
         function openCreateModal() {
             alert('Función de crear ejercicio próximamente');
         }
-    </script>
+    
+function logout() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('cloudework_user');
+    window.location.href = 'login-connected.html';
+}
+</script>
 </body>
 </html>

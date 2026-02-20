@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workouts del Día - COACHING</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --primary:#FF6B35; --dark:#1A1A2E; --dark-light:#16213E;
+            --card-bg:rgba(255,255,255,0.05); --card-border:rgba(255,255,255,0.1);
+            --success:#10b981; --warning:#f59e0b; --danger:#ef4444; --info:#3b82f6;
+            --text-muted:#94a3b8; --text-main:#e2e8f0;
+        }
+        body { overflow-x:hidden; font-family:'Work Sans',sans-serif; background:linear-gradient(135deg,var(--dark) 0%,var(--dark-light) 100%); min-height:100vh; color:var(--text-main); }
+        
+        .sidebar { position:fixed; left:0; top:0; width:250px; height:100vh; background:#0f172a; border-right:1px solid var(--card-border); padding:1.75rem 0; z-index:100; display:flex; flex-direction:column; }
+        .logo { padding:0 1.5rem; margin-bottom:2rem; }
+        .logo h1 { font-family:'Oswald',sans-serif; font-size:1.6rem; color:var(--primary); letter-spacing:2px; }
+        .nav-menu { list-style:none; flex:1; }
+        .nav-item { margin-bottom:2px; }
+        .nav-link { display:flex; align-items:center; padding:0.7rem 1.5rem; color:var(--text-muted); text-decoration:none; transition:all 0.25s; font-size:0.95rem; border-left:3px solid transparent; }
+        .nav-link:hover { background:rgba(255,107,53,0.08); color:#fff; }
+        .nav-link.active { background:rgba(255,107,53,0.12); color:var(--primary); border-left-color:var(--primary); }
+        .nav-icon { margin-right:0.75rem; font-size:1.1rem; width:1.3rem; text-align:center; }
+
+        .header { position:fixed; left:250px; top:0; right:0; height:64px; background:rgba(15,23,42,0.75); border-bottom:1px solid var(--card-border); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; z-index:90; }
+        .header-left h2 { font-family:'Oswald',sans-serif; font-size:1.3rem; font-weight:600; }
+        .header-date { color:var(--text-muted); font-size:0.82rem; margin-top:1px; }
+        .back-btn { background:none; border:1px solid var(--card-border); color:var(--text-muted); padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-size:0.85rem; transition:all 0.2s; margin-right:1rem; }
+        .back-btn:hover { border-color:var(--primary); color:var(--primary); }
+
+        .main { margin-left:250px; margin-top:64px; padding:1.75rem 2rem; max-width:1200px; }
+
+        .workouts-list { display:flex; flex-direction:column; gap:1.5rem; }
+        .workout-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px; padding:1.5rem; transition:all 0.25s; cursor:pointer; position:relative; overflow:hidden; }
+        .workout-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--primary); opacity:0; transition:opacity 0.25s; }
+        .workout-card:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,0.25); }
+        .workout-card:hover::before { opacity:1; }
+        .workout-card.completed { border-color:rgba(16,185,129,0.3); background:rgba(16,185,129,0.06); }
+        .workout-card.completed::before { background:var(--success); opacity:1; }
+        
+        .card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; }
+        .card-title { font-size:1.3rem; font-weight:700; color:var(--text-main); font-family:'Oswald',sans-serif; }
+        .badge { font-size:0.7rem; font-weight:600; text-transform:uppercase; padding:0.3rem 0.65rem; border-radius:20px; letter-spacing:0.4px; }
+        .badge-pending { background:rgba(245,158,11,0.15); color:var(--warning); }
+        .badge-done { background:rgba(16,185,129,0.15); color:var(--success); }
+        .badge-high { background:rgba(239,68,68,0.15); color:var(--danger); }
+        
+        .card-meta { display:flex; gap:1.5rem; flex-wrap:wrap; margin-bottom:1rem; }
+        .card-meta span { font-size:0.85rem; color:var(--text-muted); display:flex; align-items:center; gap:0.4rem; }
+        .card-notes { font-size:0.85rem; color:var(--text-muted); background:rgba(0,0,0,0.2); border-radius:8px; padding:0.6rem 0.85rem; margin-bottom:1rem; }
+        
+        .card-actions { display:flex; gap:0.75rem; }
+        .btn { flex:1; padding:0.75rem 1rem; border:none; border-radius:8px; font-weight:600; font-size:0.85rem; cursor:pointer; transition:all 0.2s; text-align:center; font-family:'Work Sans',sans-serif; }
+        .btn-primary { background:var(--primary); color:#fff; }
+        .btn-primary:hover { background:#e05a24; }
+        .btn-outline { background:transparent; color:var(--text-muted); border:1px solid var(--card-border); }
+        .btn-outline:hover { border-color:var(--primary); color:var(--primary); }
+        .btn-done { background:var(--success); color:#fff; opacity:0.7; cursor:default; }
+
+        .empty-state { text-align:center; padding:3rem 1rem; color:var(--text-muted); }
+        .empty-icon { font-size:3rem; margin-bottom:1rem; }
+
+        .loading { text-align:center; padding:3rem; }
+        .loading-spinner { display:inline-block; width:40px; height:40px; border:4px solid rgba(255,107,53,0.2); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="logo">
+        <h1>COACHING</h1>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;letter-spacing:1px;">PORTAL DEL ATLETA</p>
+    </div>
+    <nav><ul class="nav-menu">
+        <li class="nav-item"><a href="athlete-dashboard.html" class="nav-link"><span class="nav-icon">🏠</span> Mi Dashboard</a></li>
+        <li class="nav-item"><a href="athlete-calendar.html" class="nav-link active"><span class="nav-icon">📅</span> Calendario</a></li>
+        <li class="nav-item"><a href="athlete-history.html" class="nav-link"><span class="nav-icon">📊</span> Mi Historial</a></li>
+        <li class="nav-item"><a href="athlete-mood.html" class="nav-link"><span class="nav-icon">🎭</span> Mi Estado de Ánimo</a></li>
+    </ul></nav>
+</aside>
+
+<header class="header">
+    <div class="header-left">
+        <button class="back-btn" onclick="history.back()">← Volver</button>
+        <div>
+            <h2 id="pageTitle">Workouts del Día</h2>
+            <div class="header-date" id="headerDate"></div>
+        </div>
+    </div>
+    <div class="header-right" style="display:flex;align-items:center;gap:1rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+            <div style="text-align:right;">
+                <div id="headerName" style="font-size:0.88rem;font-weight:600;color:#e2e8f0;">Cargando...</div>
+                <div style="font-size:0.72rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;">Atleta</div>
+            </div>
+            <div id="headerAvatar" style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#FF6B35,#e04a1e);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.95rem;color:#fff;">A</div>
+        </div>
+        <button onclick="logout()" style="padding:0.5rem 1rem;background:none;border:1px solid rgba(255,255,255,0.1);color:#94a3b8;border-radius:8px;cursor:pointer;font-size:0.8rem;transition:all 0.2s;font-family:'Work Sans',sans-serif;" onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='#94a3b8'">Cerrar sesión</button>
+    </div>
+</header>
+
+<main class="main">
+    <div class="workouts-list" id="workoutsList">
+        <div class="loading"><div class="loading-spinner"></div></div>
+    </div>
+</main>
+
+<script>
+const API_URL = 'http://localhost:8000/api/v1';
+const authToken = localStorage.getItem('authToken');
+
+if (!authToken) window.location.href = 'login-connected.html';
+
+const urlParams = new URLSearchParams(window.location.search);
+const selectedDate = urlParams.get('date');
+
+if (!selectedDate) {
+    alert('No se especificó una fecha');
+    window.location.href = 'athlete-calendar.html';
+}
+
+// Mostrar fecha en el header
+const date = new Date(selectedDate + 'T00:00:00');
+document.getElementById('headerDate').textContent = date.toLocaleDateString('es-ES', { 
+    weekday:'long', day:'numeric', month:'long', year:'numeric' 
+});
+
+// Load user info
+fetch(`${API_URL}/me`, { headers: authHeaders() })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const u = data.data.user;
+            document.getElementById('headerName').textContent = u.full_name || u.email;
+            document.getElementById('headerAvatar').textContent = (u.first_name || u.email)[0].toUpperCase();
+        }
+    });
+
+// Load workouts for the day
+loadDayWorkouts();
+
+function loadDayWorkouts() {
+    fetch(`${API_URL}/my/assignments?date_from=${selectedDate}&date_to=${selectedDate}`, {
+        headers: authHeaders()
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const assignments = data.data?.assignments || [];
+            renderWorkouts(assignments);
+        } else {
+            document.getElementById('workoutsList').innerHTML = 
+                '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Error al cargar workouts</p></div>';
+        }
+    })
+    .catch(e => {
+        console.error(e);
+        document.getElementById('workoutsList').innerHTML = 
+            '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Error de conexión</p></div>';
+    });
+}
+
+function renderWorkouts(assignments) {
+    const list = document.getElementById('workoutsList');
+    
+    if (!assignments.length) {
+        list.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">🎉</div>
+                <p>No hay workouts programados para este día</p>
+                <button class="btn btn-outline" onclick="history.back()" style="margin-top:1rem;max-width:200px;margin-left:auto;margin-right:auto;">Volver al calendario</button>
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = assignments.map(a => {
+        const w = a.workout || {};
+        const done = a.is_completed;
+        
+        return `
+            <div class="workout-card ${done?'completed':''}" onclick="goWorkout(${a.id})">
+                <div class="card-header">
+                    <div class="card-title">${w.name || 'Workout'}</div>
+                    ${done ? '<span class="badge badge-done">✅ Completado</span>' : 
+                     (a.priority === 'high' ? '<span class="badge badge-high">⚠️ Alta prioridad</span>' : 
+                      '<span class="badge badge-pending">📋 Pendiente</span>')}
+                </div>
+                
+                <div class="card-meta">
+                    <span>📋 ${w.type || 'Custom'}</span>
+                    <span>⚡ ${w.difficulty || 'Intermedia'}</span>
+                    ${w.estimated_duration_minutes ? `<span>⏱️ ${w.estimated_duration_minutes} min</span>` : ''}
+                </div>
+                
+                ${a.notes ? `<div class="card-notes">📝 ${a.notes}</div>` : ''}
+                
+                <div class="card-actions">
+                    ${done ? 
+                        `<button class="btn btn-done" disabled>✅ Completado</button>` :
+                        `<button class="btn btn-primary" onclick="event.stopPropagation(); goWorkout(${a.id}, true)">▶️ Empezar</button>
+                         <button class="btn btn-outline" onclick="event.stopPropagation(); goWorkout(${a.id})">Ver detalles</button>`
+                    }
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function goWorkout(id, start = false) {
+    const params = new URLSearchParams();
+    params.set('id', id);
+    params.set('date', selectedDate);
+    if (start) params.set('start', 'true');
+    window.location.href = `athlete-workout-view.html?${params.toString()}`;
+}
+
+function logout() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('cloudework_user');
+    window.location.href = 'login-connected.html';
+}
+
+function authHeaders() {
+    return {
+        'Authorization': `Bearer ${authToken}`,
+        'Accept': 'application/json'
+    };
+}
+</script>
+</body>
+</html>

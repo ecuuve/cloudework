@@ -425,8 +425,7 @@
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="logo">
-            <h1>COACHING</h1>
-        </div>
+            <h1>COACHING</h1><p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;letter-spacing:1px;">PORTAL DEL COACH</p></div>
         <nav>
                         <ul class="nav-menu">
                 <li class="nav-item">
@@ -672,48 +671,57 @@
 
                     // Mostrar sections (piezas)
                     if (workout.sections && workout.sections.length > 0) {
-                        detailsHTML += `<div class="workout-detail"><h4>🔷 Piezas del Workout</h4>`;
+                        detailsHTML += `<div class="workout-detail"><h4>🔷 Secciones del Workout</h4>`;
+                        
+                        const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
                         
                         workout.sections.forEach((section, idx) => {
+                            const letter = letters[idx] || (idx + 1);
+                            const params = section.parameters || {};
+                            
+                            // Construir info de parámetros
+                            let paramsText = '';
+                            if (params.time_cap) paramsText += ` • Time Cap: ${params.time_cap} min`;
+                            if (params.rounds) paramsText += ` • ${params.rounds} rounds`;
+                            if (params.duration) paramsText += ` • ${params.duration} min`;
+                            if (params.sets) paramsText += ` • ${params.sets} sets`;
+                            if (params.reps) paramsText += ` • ${params.reps}`;
+                            if (params.work_sec && params.rest_sec) paramsText += ` • ${params.work_sec}seg/${params.rest_sec}seg`;
+                            
+                            // Badges
+                            let badges = '';
+                            if (section.is_benchmark) badges += '<span style="background:#007bff;color:white;padding:0.2rem 0.5rem;border-radius:12px;font-size:0.7rem;margin-left:0.5rem;">📊 BENCHMARK</span>';
+                            if (section.is_hero) badges += '<span style="background:#dc3545;color:white;padding:0.2rem 0.5rem;border-radius:12px;font-size:0.7rem;margin-left:0.5rem;">🎖️ HERO</span>';
+                            
                             detailsHTML += `
                                 <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
                                     <h5 style="color: var(--primary); margin-bottom: 0.75rem;">
-                                        Pieza ${idx + 1}: ${section.title || 'Sin título'} 
-                                        <span style="color: var(--text-gray); font-size: 0.9rem; font-weight: normal;">(${section.type})</span>
+                                        <span style="display:inline-block;width:28px;height:28px;background:var(--primary);color:white;border-radius:50%;text-align:center;line-height:28px;margin-right:0.5rem;font-family:'Oswald',sans-serif;">${letter}</span>
+                                        ${section.name || 'Sin nombre'} 
+                                        <span style="color: var(--text-gray); font-size: 0.85rem; font-weight: normal;">${section.section_type}${paramsText}</span>
+                                        ${badges}
                                     </h5>
-                            `;
-                            
-                            if (section.exercises && section.exercises.length > 0) {
-                                section.exercises.forEach((ex, exIdx) => {
-                                    detailsHTML += `
-                                        <div style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 6px; margin-bottom: 0.5rem;">
-                                            <div style="font-weight: 600; margin-bottom: 0.25rem;">💪 ${ex.name}</div>
-                                            <div style="color: var(--text-gray); font-size: 0.9rem;">
-                                                <strong>Estructura:</strong> ${ex.structure || 'ninguna'}
-                                                ${ex.sets ? ` • ${ex.sets} sets` : ''}
-                                                ${ex.reps ? ` • ${ex.reps} reps` : ''}
-                                                ${ex.duration ? ` • ${ex.duration}` : ''}
-                                                ${ex.weight ? ` • ${ex.weight}` : ''}
-                                                ${ex.rest ? ` • Descanso: ${ex.rest}` : ''}
+                                    ${section.description ? `<div style="white-space:pre-wrap;color:#e2e8f0;line-height:1.6;font-size:0.9rem;margin-top:0.5rem;">${section.description}</div>` : '<p style="color: var(--text-gray); font-style: italic;">Sin contenido</p>'}
+                                    ${section.video_url ? `
+                                        <div style="margin-top:0.75rem;">
+                                            <button onclick="toggleVideo('video-${idx}')" style="background:var(--primary);color:white;border:none;padding:0.5rem 1rem;border-radius:6px;cursor:pointer;font-size:0.9rem;">
+                                                ▶️ Ver video demo
+                                            </button>
+                                            <div id="video-${idx}" style="display:none;margin-top:0.75rem;border-radius:8px;overflow:hidden;">
+                                                <iframe width="100%" height="315" src="${getEmbedUrl(section.video_url)}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                                             </div>
-                                            ${ex.video_url ? `<div style="margin-top: 0.5rem;"><a href="${ex.video_url}" target="_blank" style="color: var(--primary); font-size: 0.9rem;">🎬 Ver video</a></div>` : ''}
-                                            ${ex.notes ? `<div style="color: var(--text-gray); margin-top: 0.5rem; font-size: 0.85rem;">📝 ${ex.notes}</div>` : ''}
                                         </div>
-                                    `;
-                                });
-                            } else {
-                                detailsHTML += `<p style="color: var(--text-gray); font-style: italic;">Sin ejercicios definidos</p>`;
-                            }
-                            
-                            detailsHTML += `</div>`;
+                                    ` : ''}
+                                </div>
+                            `;
                         });
                         
                         detailsHTML += `</div>`;
                     } else {
                         detailsHTML += `
                             <div class="workout-detail">
-                                <h4>🔷 Piezas del Workout</h4>
-                                <p style="color: var(--text-gray); font-style: italic;">Este workout no tiene piezas definidas</p>
+                                <h4>🔷 Secciones del Workout</h4>
+                                <p style="color: var(--text-gray); font-style: italic;">Este workout no tiene secciones definidas</p>
                             </div>
                         `;
                     }
@@ -899,7 +907,36 @@
                 showAlert('Error al asignar workout', 'error');
             }
         }
-    </script>
+    function getEmbedUrl(url) {
+    // Convertir URLs de YouTube a formato embed
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        let videoId = '';
+        if (url.includes('youtu.be/')) {
+            videoId = url.split('youtu.be/')[1].split('?')[0];
+        } else if (url.includes('youtube.com')) {
+            const urlParams = new URLSearchParams(url.split('?')[1]);
+            videoId = urlParams.get('v');
+        }
+        return `https://www.youtube.com/embed/${videoId}`;
+    }
+    // Vimeo
+    if (url.includes('vimeo.com')) {
+        const videoId = url.split('vimeo.com/')[1].split('?')[0];
+        return `https://player.vimeo.com/video/${videoId}`;
+    }
+    return url;
+}
+
+function toggleVideo(videoId) {
+    const videoDiv = document.getElementById(videoId);
+    if (videoDiv.style.display === 'none') {
+        videoDiv.style.display = 'block';
+    } else {
+        videoDiv.style.display = 'none';
+    }
+}
+
+</script>
     <!-- Assignment Modal -->
     <div id="assignModal" class="modal">
         <div class="modal-content">

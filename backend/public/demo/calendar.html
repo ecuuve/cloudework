@@ -223,8 +223,7 @@
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="logo">
-            <h1>COACHING</h1>
-        </div>
+            <h1>COACHING</h1><p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;letter-spacing:1px;">PORTAL DEL COACH</p></div>
         <nav>
             <ul class="nav-menu">
                 <li class="nav-item">
@@ -470,6 +469,12 @@
             // TODO: Implement view assignment details
             alert('Ver asignación #' + id);
         }
-    </script>
+    
+function logout() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('cloudework_user');
+    window.location.href = 'login-connected.html';
+}
+</script>
 </body>
 </html>

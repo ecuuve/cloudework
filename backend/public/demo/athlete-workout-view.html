@@ -298,7 +298,16 @@ function renderWorkout() {
                             ${ex.weight ? `<span>⚖️ ${ex.weight}</span>` : ''}
                         </div>
                         ${ex.notes ? `<div class="ex-notes">📝 ${ex.notes}</div>` : ''}
-                        ${ex.video_url ? `<div class="ex-video"><a href="${ex.video_url}" target="_blank">🎬 Ver video</a></div>` : ''}
+                        ${ex.video_url ? `
+                            <div class="ex-video">
+                                <button onclick="toggleVideo('video-ex-${sectionIdx}-${exIdx}')" style="background:var(--primary);color:white;border:none;padding:0.4rem 0.8rem;border-radius:6px;cursor:pointer;font-size:0.85rem;margin-top:0.5rem;">
+                                    🎬 Ver video
+                                </button>
+                                <div id="video-ex-${sectionIdx}-${exIdx}" style="display:none;margin-top:0.75rem;border-radius:8px;overflow:hidden;">
+                                    <iframe width="100%" height="250" src="${getEmbedUrl(ex.video_url)}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                </div>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
             `).join('')}
@@ -438,6 +447,41 @@ async function submitResult() {
 function goBack() { const d = urlParams.get('date'); window.location.href = d ? `athlete-dashboard.html?date=${d}` : 'athlete-dashboard.html'; }
 function showToast(msg, error=false) { const t=document.getElementById('toast'); t.textContent=(error?'❌ ':'✅ ')+msg; t.className='toast show'+(error?' error':''); setTimeout(()=>t.className='toast',3000); }
 function authHeaders() { return {'Authorization':`Bearer ${authToken}`,'Accept':'application/json'}; }
+
+function logout() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('cloudework_user');
+    window.location.href = 'login-connected.html';
+}
+function getEmbedUrl(url) {
+    // Convertir URLs de YouTube a formato embed
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        let videoId = '';
+        if (url.includes('youtu.be/')) {
+            videoId = url.split('youtu.be/')[1].split('?')[0];
+        } else if (url.includes('youtube.com')) {
+            const urlParams = new URLSearchParams(url.split('?')[1]);
+            videoId = urlParams.get('v');
+        }
+        return `https://www.youtube.com/embed/${videoId}`;
+    }
+    // Vimeo
+    if (url.includes('vimeo.com')) {
+        const videoId = url.split('vimeo.com/')[1].split('?')[0];
+        return `https://player.vimeo.com/video/${videoId}`;
+    }
+    return url;
+}
+
+function toggleVideo(videoId) {
+    const videoDiv = document.getElementById(videoId);
+    if (videoDiv.style.display === 'none') {
+        videoDiv.style.display = 'block';
+    } else {
+        videoDiv.style.display = 'none';
+    }
+}
+
 </script>
 </body>
 </html>
