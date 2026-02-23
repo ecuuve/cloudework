@@ -24,6 +24,7 @@ class WorkoutResult extends Model
         'notes',
         'is_pr',
         'video_url',
+        'section_results',
     ];
 
     protected function casts(): array
@@ -37,12 +38,18 @@ class WorkoutResult extends Model
             'weight_used' => 'array',
             'feeling_rating' => 'integer',
             'is_pr' => 'boolean',
+            'section_results' => 'array',
         ];
     }
 
     public function assignment()
     {
         return $this->belongsTo(WorkoutAssignment::class);
+    }
+
+    public function workoutAssignment()
+    {
+        return $this->assignment();
     }
 
     public function athlete()
@@ -77,7 +84,7 @@ class WorkoutResult extends Model
         return $query->where('rx_or_scaled', 'rx');
     }
 
-	public function scopeCompletedBetween($query, $startDate, $endDate)
+    public function scopeCompletedBetween($query, $startDate, $endDate)
     {
         return $query->whereBetween('completed_at', [$startDate, $endDate]);
     }

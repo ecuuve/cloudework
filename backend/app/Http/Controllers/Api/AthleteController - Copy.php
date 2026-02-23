@@ -565,6 +565,11 @@ class AthleteController extends Controller
     /**
      * Get dashboard statistics for the authenticated athlete
      */
+
+    /**
+     * Get dashboard statistics for the authenticated athlete
+     * SAFE VERSION - Handles missing data gracefully
+     */
     public function myStats(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -579,24 +584,28 @@ class AthleteController extends Controller
         $athlete = $user->athlete;
         $now = now();
         
+        // Check if WorkoutResult model exists
+        $hasResults = class_exists('App\Models\WorkoutResult');
+        $hasPRs = class_exists('App\Models\PersonalRecord');
+        
         // Total workouts completed
-        $totalWorkouts = $athlete->results()->count();
+        $totalWorkouts = $hasResults ? $athlete->results()->count() : 0;
         
         // Total PRs
-        $totalPRs = $athlete->personalRecords()->count();
+        $totalPRs = $hasPRs ? $athlete->personalRecords()->count() : 0;
         
         // Current streak (consecutive days with workouts)
-        $currentStreak = $this->calculateStreak($athlete);
+        $currentStreak = $hasResults ? $this->calculateStreakSafe($athlete) : 0;
         
         // Longest streak
-        $longestStreak = $this->calculateLongestStreak($athlete);
+        $longestStreak = $hasResults ? $this->calculateLongestStreakSafe($athlete) : 0;
         
         // This week stats
         $weekStart = $now->copy()->startOfWeek();
         $weekEnd = $now->copy()->endOfWeek();
-        $weekWorkouts = $athlete->results()
+        $weekWorkouts = $hasResults ? $athlete->results()
             ->whereBetween('completed_at', [$weekStart, $weekEnd])
-            ->count();
+            ->count() : 0;
         $weekAssignments = $athlete->assignments()
             ->whereBetween('scheduled_date', [$weekStart, $weekEnd])
             ->count();
@@ -607,65 +616,86 @@ class AthleteController extends Controller
         // This month stats
         $monthStart = $now->copy()->startOfMonth();
         $monthEnd = $now->copy()->endOfMonth();
-        $monthWorkouts = $athlete->results()
+        $monthWorkouts = $hasResults ? $athlete->results()
             ->whereBetween('completed_at', [$monthStart, $monthEnd])
-            ->count();
-        $monthPRs = $athlete->personalRecords()
+            ->count() : 0;
+        $monthPRs = $hasPRs ? $athlete->personalRecords()
             ->whereBetween('created_at', [$monthStart, $monthEnd])
-            ->count();
+            ->count() : 0;
         
         // Average workout time (in minutes)
-        $avgTime = $athlete->results()
+        $avgTime = $hasResults ? $athlete->results()
             ->whereNotNull('time_seconds')
-            ->avg('time_seconds');
+            ->avg('time_seconds') : null;
         $avgTimeMinutes = $avgTime ? round($avgTime / 60, 1) : 0;
         
         // RX rate (percentage of RX workouts)
-        $rxCount = $athlete->results()->where('rx_or_scaled', 'rx')->count();
+        $rxCount = $hasResults ? $athlete->results()->where('rx_or_scaled', 'rx')->count() : 0;
         $rxRate = $totalWorkouts > 0 
             ? round(($rxCount / $totalWorkouts) * 100) 
             : 0;
         
         // Average feeling rating
-        $avgFeeling = $athlete->results()
+        $avgFeeling = $hasResults ? $athlete->results()
             ->whereNotNull('feeling_rating')
-            ->avg('feeling_rating');
+            ->avg('feeling_rating') : null;
         $avgFeelingRounded = $avgFeeling ? round($avgFeeling, 1) : 0;
         
         // Most common workout types
-        $workoutTypes = $athlete->results()
-            ->with('workoutAssignment.workout')
-            ->get()
-            ->pluck('workoutAssignment.workout.workout_type')
-            ->filter()
-            ->countBy()
-            ->sortDesc()
-            ->take(3)
-            ->keys()
-            ->toArray();
+        $workoutTypes = [];
+        if ($hasResults) {
+            try {
+                $workoutTypes = $athlete->results()
+                    ->with('workoutAssignment.workout')
+                    ->get()
+                    ->pluck('workoutAssignment.workout.workout_type')
+                    ->filter()
+                    ->countBy()
+                    ->sortDesc()
+                    ->take(3)
+                    ->keys()
+                    ->toArray();
+            } catch (\Exception $e) {
+                // If relationship fails, return empty array
+                $workoutTypes = [];
+            }
+        }
         
-        // Recent PRs (last 5)
-        $recentPRs = $athlete->personalRecords()
-            ->with('workoutResult.workoutAssignment.workout')
-            ->latest()
-            ->take(5)
-            ->get()
-            ->map(function ($pr) {
-                return [
-                    'workout_name' => $pr->workoutResult->workoutAssignment->workout->name ?? 'Unknown',
-                    'metric_type' => $pr->metric_type,
-                    'metric_value' => $pr->metric_value,
-                    'achieved_at' => $pr->created_at->format('Y-m-d'),
-                ];
-            });
+        // Recent PRs (last 5) - CORREGIDO
+        $recentPRs = [];
+        if ($hasPRs) {
+            try {
+                $prs = $athlete->personalRecords()
+                    ->latest('achieved_at')
+                    ->take(5)
+                    ->get();
+                
+                foreach ($prs as $pr) {
+                    // Usar movement_name del PR directamente
+                    $workoutName = $pr->movement_name ?? 'Workout';
+                    
+                    $recentPRs[] = [
+                        'workout_name' => $workoutName,
+                        'movement_name' => $pr->movement_name,
+                        'record_type' => $pr->record_type,
+                        'value' => $pr->value,
+                        'unit' => $pr->unit,
+                        'achieved_at' => $pr->achieved_at ? $pr->achieved_at->format('Y-m-d') : null,
+                    ];
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error loading recent PRs: ' . $e->getMessage());
+                $recentPRs = [];
+            }
+        }
         
         // Weekly activity (last 7 days with counts)
         $weeklyActivity = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = $now->copy()->subDays($i);
-            $count = $athlete->results()
+            $count = $hasResults ? $athlete->results()
                 ->whereDate('completed_at', $date)
-                ->count();
+                ->count() : 0;
             $weeklyActivity[] = [
                 'date' => $date->format('Y-m-d'),
                 'day' => $date->format('D'),
@@ -706,75 +736,153 @@ class AthleteController extends Controller
     }
     
     /**
-     * Calculate current workout streak
+     * Calculate current workout streak (SAFE VERSION)
      */
-    private function calculateStreak($athlete): int
+    private function calculateStreakSafe($athlete): int
     {
-        $streak = 0;
-        $date = now()->startOfDay();
-        
-        while (true) {
-            $hasWorkout = $athlete->results()
-                ->whereDate('completed_at', $date)
-                ->exists();
+        try {
+            $streak = 0;
+            $date = now()->startOfDay();
             
-            if ($hasWorkout) {
-                $streak++;
-                $date->subDay();
-            } else {
-                // Allow one rest day
-                $previousDay = $date->copy()->subDay();
-                $hasPreviousWorkout = $athlete->results()
-                    ->whereDate('completed_at', $previousDay)
+            while (true) {
+                $hasWorkout = $athlete->results()
+                    ->whereDate('completed_at', $date)
                     ->exists();
                 
-                if ($hasPreviousWorkout && $streak > 0) {
-                    $date->subDays(2);
+                if ($hasWorkout) {
+                    $streak++;
+                    $date->subDay();
                 } else {
+                    // Allow one rest day
+                    $previousDay = $date->copy()->subDay();
+                    $hasPreviousWorkout = $athlete->results()
+                        ->whereDate('completed_at', $previousDay)
+                        ->exists();
+                    
+                    if ($hasPreviousWorkout && $streak > 0) {
+                        $date->subDays(2);
+                    } else {
+                        break;
+                    }
+                }
+                
+                // Prevent infinite loop
+                if ($date->diffInDays(now()) > 365) {
                     break;
                 }
             }
             
-            // Prevent infinite loop
-            if ($date->diffInDays(now()) > 365) {
-                break;
-            }
+            return $streak;
+        } catch (\Exception $e) {
+            return 0;
         }
-        
-        return $streak;
     }
     
     /**
-     * Calculate longest workout streak
+     * Calculate longest workout streak (SAFE VERSION)
      */
-    private function calculateLongestStreak($athlete): int
+    private function calculateLongestStreakSafe($athlete): int
     {
-        $results = $athlete->results()
-            ->whereNotNull('completed_at')
-            ->orderBy('completed_at')
-            ->get()
-            ->pluck('completed_at')
-            ->map(fn($date) => $date->startOfDay())
-            ->unique();
-        
-        if ($results->isEmpty()) {
+        try {
+            $results = $athlete->results()
+                ->orderBy('completed_at')
+                ->get()
+                ->pluck('completed_at')
+                ->map(fn($date) => $date->startOfDay())
+                ->unique();
+            
+            if ($results->isEmpty()) {
+                return 0;
+            }
+            
+            $longestStreak = 1;
+            $currentStreak = 1;
+            
+            for ($i = 1; $i < $results->count(); $i++) {
+                $diff = $results[$i]->diffInDays($results[$i - 1]);
+                
+                if ($diff <= 1) {
+                    $currentStreak++;
+                    $longestStreak = max($longestStreak, $currentStreak);
+                } else {
+                    $currentStreak = 1;
+                }
+            }
+            
+            return $longestStreak;
+        } catch (\Exception $e) {
             return 0;
         }
-        
-        $longestStreak = 1;
-        $currentStreak = 1;
-        
-        for ($i = 1; $i < $results->count(); $i++) {
-            $diff = $results[$i]->diffInDays($results[$i - 1]);
-            
-            if ($diff <= 1) {
-                $currentStreak++;
-                $longestStreak = max($longestStreak, $currentStreak);
-            } else {
-                $currentStreak = 1;
-            }
-        }
-        
-        return $longestStreak;
     }
+    /**
+     * Repeat a workout: create a new assignment for today with the same workout
+     * This allows athletes to redo benchmark workouts and track their history
+     */
+    public function repeatWorkout(Request $request, $id): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user->athlete) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only athletes can access this endpoint',
+            ], 403);
+        }
+
+        // Find the original assignment
+        $originalAssignment = $user->athlete->assignments()
+            ->with(['workout'])
+            ->find($id);
+
+        if (!$originalAssignment) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Assignment not found',
+            ], 404);
+        }
+
+        $today = now()->toDateString();
+
+        // Check if there's already an assignment for this workout today (without result)
+        $existingToday = $user->athlete->assignments()
+            ->where('workout_id', $originalAssignment->workout_id)
+            ->where('scheduled_date', $today)
+            ->whereNull('result') // No result yet = available to use
+            ->first();
+
+        // Use the existing one or create a new one
+        if ($existingToday) {
+            $newAssignment = $existingToday;
+        } else {
+            $newAssignment = \App\Models\WorkoutAssignment::create([
+                'athlete_id'     => $user->athlete->id,
+                'workout_id'     => $originalAssignment->workout_id,
+                'scheduled_date' => $today,
+                'is_completed'   => false,
+                'priority'       => $originalAssignment->priority ?? 'normal',
+                'notes'          => 'Repetición de benchmark - ' . ($originalAssignment->workout->name ?? 'Workout'),
+            ]);
+            $newAssignment->load('workout');
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Workout listo para repetir hoy',
+            'data' => [
+                'assignment' => [
+                    'id'             => $newAssignment->id,
+                    'workout_id'     => $newAssignment->workout_id,
+                    'scheduled_date' => $today,
+                    'workout' => [
+                        'id'         => $newAssignment->workout->id ?? null,
+                        'name'       => $newAssignment->workout->name ?? 'Workout',
+                        'type'       => $newAssignment->workout->workout_type ?? '',
+                        'difficulty' => $newAssignment->workout->difficulty_level ?? '',
+                        'sections'   => $newAssignment->workout->sections ?? [],
+                    ],
+                ],
+            ],
+        ]);
+    }
+
 }

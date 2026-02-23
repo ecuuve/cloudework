@@ -3,458 +3,475 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Workout - CLOUDEWORK</title>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Workout - COACHING</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         :root {
             --primary:#FF6B35; --dark:#1A1A2E; --dark-light:#16213E;
             --card-bg:rgba(255,255,255,0.05); --card-border:rgba(255,255,255,0.1);
-            --success:#10b981; --warning:#f59e0b; --danger:#ef4444;
-            --text-muted:#94a3b8; --text-main:#e2e8f0;
+            --success:#10b981; --text-muted:#94a3b8; --text-main:#e2e8f0;
         }
-        body {
-            overflow-x: hidden; font-family:'Work Sans',sans-serif; background:linear-gradient(135deg,var(--dark) 0%,var(--dark-light) 100%); min-height:100vh; color:var(--text-main); }
-
-        /* TOP BAR */
-        .topbar { position:fixed; top:0; left:0; right:0; height:60px; background:rgba(15,23,42,0.85); border-bottom:1px solid var(--card-border); display:flex; align-items:center; justify-content:space-between; padding:0 1.5rem; z-index:100; }
-        .topbar-left { display:flex; align-items:center; gap:1rem; }
-        .back-btn { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.85rem; display:flex; align-items:center; gap:0.4rem; transition:color 0.2s; font-family:inherit; }
-        .back-btn:hover { color:var(--primary); }
-        .topbar-title { font-family:'Oswald',sans-serif; font-size:1.1rem; color:var(--text-main); }
-        .topbar-badge { font-size:0.68rem; font-weight:600; text-transform:uppercase; padding:0.18rem 0.5rem; border-radius:20px; background:rgba(245,158,11,0.15); color:var(--warning); }
-        .topbar-badge.done { background:rgba(16,185,129,0.15); color:var(--success); }
-
-        /* MAIN */
-        .main { max-width: 820px; margin: 0 auto; padding: 5rem 1.5rem 2rem; }
-
-        /* TIMER BLOCK */
-        .timer-block { background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:1.75rem; text-align:center; margin-bottom:1.5rem; }
-        .timer-display { font-family:'Oswald',sans-serif; font-size:3.8rem; color:var(--primary); letter-spacing:2px; margin-bottom:0.75rem; line-height:1; }
-        .timer-display.running { color:var(--success); }
-        .timer-controls { display:flex; gap:0.75rem; justify-content:center; }
-        .btn { padding:0.6rem 1.4rem; border:none; border-radius:8px; font-weight:600; font-size:0.82rem; cursor:pointer; transition:all 0.2s; font-family:'Work Sans',sans-serif; }
-        .btn-primary { background:var(--primary); color:#fff; }
-        .btn-primary:hover { background:#e05a24; }
-        .btn-ghost { background:rgba(255,255,255,0.08); color:var(--text-muted); }
-        .btn-ghost:hover { background:rgba(255,255,255,0.14); color:#fff; }
-        .btn-success { background:var(--success); color:#fff; }
-        .btn-success:hover { background:#059669; }
-        .btn-success:disabled { opacity:0.4; cursor:default; }
-
-        /* WORKOUT INFO */
-        .workout-info { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem; }
-        .info-tag { font-size:0.78rem; color:var(--text-muted); background:rgba(0,0,0,0.25); padding:0.3rem 0.7rem; border-radius:20px; }
-
-        /* PROGRESS BAR */
-        .progress-bar-wrap { margin-bottom:1.5rem; }
-        .progress-label { display:flex; justify-content:space-between; font-size:0.76rem; color:var(--text-muted); margin-bottom:0.4rem; }
-        .progress-bar { height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
-        .progress-fill { height:100%; background:linear-gradient(90deg,var(--primary),var(--success)); border-radius:3px; transition:width 0.4s ease; }
-
-        /* SECTIONS */
-        .section-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px; padding:1.25rem; margin-bottom:1rem; }
-        .section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.9rem; }
-        .section-title { font-family:'Oswald',sans-serif; font-size:1rem; color:var(--primary); }
-        .section-type { font-size:0.7rem; color:var(--text-muted); background:rgba(255,107,53,0.12); padding:0.15rem 0.45rem; border-radius:10px; text-transform:uppercase; }
-        .section-progress { font-size:0.72rem; color:var(--text-muted); }
-
-        /* EXERCISE ITEM */
-        .exercise-item { display:flex; gap:0.9rem; align-items:flex-start; background:rgba(0,0,0,0.2); border-radius:10px; padding:0.85rem; margin-bottom:0.55rem; transition:all 0.2s; cursor:pointer; border:1px solid transparent; }
-        .exercise-item:hover { border-color:rgba(255,107,53,0.2); }
-        .exercise-item.checked { background:rgba(16,185,129,0.08); border-color:rgba(16,185,129,0.25); }
-
-        .ex-checkbox { width:26px; height:26px; border-radius:50%; border:2px solid var(--card-border); background:transparent; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all 0.2s; cursor:pointer; margin-top:2px; }
-        .ex-checkbox.checked { background:var(--success); border-color:var(--success); }
-        .ex-checkbox.checked::after { content:'✓'; color:#fff; font-size:0.85rem; font-weight:700; }
-
-        .ex-content { flex:1; min-width:0; }
-        .ex-name { font-weight:600; font-size:0.92rem; color:var(--text-main); margin-bottom:0.3rem; }
-        .exercise-item.checked .ex-name { color:var(--success); text-decoration:line-through; opacity:0.7; }
-        .ex-details { font-size:0.76rem; color:var(--text-muted); display:flex; gap:0.75rem; flex-wrap:wrap; }
-        .ex-details span { display:flex; align-items:center; gap:0.2rem; }
-        .ex-notes { font-size:0.72rem; color:var(--text-muted); margin-top:0.3rem; font-style:italic; }
-        .ex-video { font-size:0.72rem; color:var(--primary); margin-top:0.25rem; }
-        .ex-video a { color:var(--primary); text-decoration:none; }
-        .ex-video a:hover { text-decoration:underline; }
-
-        /* RESULT FORM (modal overlay) */
-        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:200; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
-        .modal-overlay.show { opacity:1; pointer-events:auto; }
-        .modal { background:#1e293b; border-radius:18px; padding:2rem; width:90%; max-width:480px; max-height:85vh; overflow-y:auto; border:1px solid rgba(255,255,255,0.1); }
-        .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; }
-        .modal-header h3 { font-family:'Oswald',sans-serif; font-size:1.3rem; color:var(--primary); }
-        .modal-close { background:none; border:none; color:var(--text-muted); font-size:1.4rem; cursor:pointer; }
-        .modal-close:hover { color:#fff; }
-
-        .form-row { margin-bottom:1.1rem; }
-        .form-label { font-size:0.78rem; color:var(--text-muted); margin-bottom:0.3rem; display:block; text-transform:uppercase; letter-spacing:0.5px; }
-        .form-input {
-            width:100%; padding:0.6rem 0.75rem; background:#1e293b; border:1px solid rgba(255,255,255,0.15);
-            border-radius:8px; color:#f1f5f9; font-size:0.9rem; font-family:inherit;
-            transition:border-color 0.2s;
-        }
-        .form-input:focus { outline:none; border-color:var(--primary); }
-        .form-input::placeholder { color:var(--text-muted); }
-        select.form-input { background:#1e293b !important; color:#f1f5f9 !important; }
-        select.form-input option { background:#1e293b; color:#f1f5f9; }
-
-        .form-row-duo { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
-
-        /* STARS */
-        .stars { display:flex; gap:0.3rem; padding:0.2rem 0; }
-        .star { font-size:1.6rem; cursor:pointer; color:rgba(255,255,255,0.15); transition:all 0.15s; user-select:none; }
-        .star:hover, .star.active { color:var(--warning); }
-        .stars-label { display:flex; justify-content:space-between; font-size:0.68rem; color:var(--text-muted); margin-top:0.2rem; }
-
-        .modal-actions { display:flex; gap:0.75rem; margin-top:1.5rem; }
-        .modal-actions .btn { flex:1; padding:0.7rem; font-size:0.85rem; }
-
-        /* TOAST */
-        .toast { position:fixed; bottom:1.5rem; right:1.5rem; background:#1e293b; color:#fff; padding:0.9rem 1.4rem; border-radius:12px; font-size:0.85rem; box-shadow:0 8px 24px rgba(0,0,0,0.35); transform:translateY(120%); transition:transform 0.35s cubic-bezier(.4,0,.2,1); z-index:300; border-left:4px solid var(--success); }
-        .toast.show { transform:translateY(0); }
-        .toast.error { border-left-color:var(--danger); }
+        body { font-family:'Work Sans',sans-serif; background:linear-gradient(135deg,var(--dark) 0%,var(--dark-light) 100%); min-height:100vh; color:var(--text-main); }
+        
+        .header { background:rgba(15,23,42,0.9); border-bottom:1px solid var(--card-border); padding:1rem 1.5rem; position:sticky; top:0; z-index:100; }
+        .header-content { max-width:900px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; }
+        .back-btn { background:none; border:1px solid var(--card-border); color:var(--text-muted); padding:0.5rem 1rem; border-radius:8px; cursor:pointer; text-decoration:none; font-size:0.85rem; }
+        .back-btn:hover { border-color:var(--primary); color:var(--primary); }
+        .workout-title { font-family:'Oswald',sans-serif; font-size:1.4rem; color:var(--primary); }
+        
+        .container { max-width:900px; margin:0 auto; padding:1.5rem; }
+        
+        .section-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px; padding:1.5rem; margin-bottom:1.5rem; }
+        .section-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid var(--card-border); }
+        .section-letter { width:45px; height:45px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Oswald',sans-serif; font-size:1.4rem; font-weight:700; flex-shrink:0; }
+        .section-info { flex:1; margin:0 1rem; }
+        .section-name { font-family:'Oswald',sans-serif; font-size:1.2rem; margin-bottom:0.25rem; }
+        .section-type { font-size:0.85rem; color:var(--text-muted); }
+        .section-check { width:32px; height:32px; border:2px solid var(--card-border); border-radius:50%; cursor:pointer; transition:all 0.2s; position:relative; flex-shrink:0; }
+        .section-check.checked { background:var(--success); border-color:var(--success); }
+        .section-check.checked::after { content:'✓'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#fff; font-weight:700; font-size:1.1rem; }
+        
+        .section-badges { display:flex; gap:0.5rem; margin-bottom:0.75rem; }
+        .badge { font-size:0.7rem; font-weight:600; padding:0.25rem 0.6rem; border-radius:12px; }
+        .badge-benchmark { background:rgba(0,123,255,0.15); color:#007bff; }
+        .badge-hero { background:rgba(220,53,69,0.15); color:#dc3545; }
+        
+        .timer-section { background:rgba(255,107,53,0.1); border:1px solid rgba(255,107,53,0.3); border-radius:10px; padding:1rem; margin-bottom:1rem; text-align:center; }
+        .timer-display { font-family:'Oswald',sans-serif; font-size:2.5rem; color:var(--primary); margin-bottom:0.75rem; }
+        .timer-buttons { display:flex; gap:0.75rem; justify-content:center; }
+        .timer-btn { padding:0.6rem 1.2rem; border:none; border-radius:8px; font-weight:600; cursor:pointer; transition:all 0.2s; font-size:0.9rem; }
+        .btn-start { background:var(--primary); color:#fff; }
+        .btn-start:hover { background:#e05a24; }
+        .btn-reset { background:var(--card-bg); color:var(--text-muted); border:1px solid var(--card-border); }
+        .btn-reset:hover { border-color:var(--primary); color:var(--primary); }
+        
+        .section-content { color:var(--text-main); white-space:pre-wrap; line-height:1.7; margin-bottom:1rem; font-size:0.95rem; }
+        
+        .video-container { margin:1rem 0; }
+        .video-btn { background:var(--primary); color:white; border:none; padding:0.6rem 1.2rem; border-radius:8px; cursor:pointer; font-size:0.9rem; transition:all 0.2s; }
+        .video-btn:hover { background:#e05a24; }
+        .video-embed { margin-top:1rem; border-radius:10px; overflow:hidden; }
+        
+        .results-box { background:rgba(0,0,0,0.2); border:1px solid var(--card-border); border-radius:10px; padding:1rem; margin-top:1rem; }
+        .results-label { font-size:0.85rem; color:var(--text-muted); margin-bottom:0.5rem; font-weight:500; }
+        .results-input { width:100%; background:rgba(0,0,0,0.3); border:1px solid var(--card-border); border-radius:8px; padding:0.75rem; color:var(--text-main); font-family:inherit; resize:vertical; min-height:60px; }
+        .results-input:focus { outline:none; border-color:var(--primary); }
+        
+        .save-section-btn { width:100%; background:var(--primary); color:#fff; border:none; padding:0.9rem; border-radius:8px; font-size:1rem; font-weight:600; cursor:pointer; transition:all 0.2s; margin-top:1rem; }
+        .save-section-btn:hover { background:#e05a24; }
+        .save-section-btn.saved { background:var(--success); }
+        
+        .finish-btn { width:100%; background:var(--success); color:#fff; border:none; padding:1.2rem; border-radius:10px; font-size:1.1rem; font-weight:700; cursor:pointer; transition:all 0.2s; margin-top:2rem; }
+        .finish-btn:hover { background:#0ea376; }
+        
+        .coach-notes { background:rgba(255,107,53,0.1); border:1px solid rgba(255,107,53,0.3); border-radius:10px; padding:1rem; margin-bottom:1.5rem; }
+        .coach-notes-title { font-weight:600; margin-bottom:0.5rem; color:var(--primary); }
     </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
-<div class="topbar">
-    <div class="topbar-left">
-        <button class="back-btn" onclick="goBack()">← Volver</button>
-        <div>
-            <span class="topbar-title" id="topTitle">Cargando...</span>
-            <span class="topbar-badge" id="topBadge">Pendiente</span>
-        </div>
+<div class="header">
+    <div class="header-content">
+        <a href="javascript:history.back()" class="back-btn">← Volver</a>
+        <div class="workout-title" id="workoutTitle">Cargando...</div>
     </div>
 </div>
 
-<!-- MAIN -->
-<div class="main">
-
-    <!-- TIMER -->
-    <div class="timer-block">
-        <div class="timer-display" id="timerDisplay">00:00</div>
-        <div class="timer-controls">
-            <button class="btn btn-primary" id="startBtn" onclick="toggleTimer()">▶️ Iniciar</button>
-            <button class="btn btn-ghost" onclick="resetTimer()">🔄 Reset</button>
-        </div>
-    </div>
-
-    <!-- INFO TAGS -->
-    <div class="workout-info" id="workoutInfo"></div>
-
-    <!-- PROGRESO -->
-    <div class="progress-bar-wrap">
-        <div class="progress-label"><span>Ejercicios completados</span><span id="progressText">0 / 0</span></div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-    </div>
-
-    <!-- SECCIONES + EJERCICIOS -->
-    <div id="workoutContent"></div>
-
-    <!-- BOTÓN FINALIZAR -->
-    <div style="text-align:center; margin-top:1.5rem; padding-bottom:2rem;">
-        <button class="btn btn-success" id="finishBtn" onclick="openResultModal()" style="padding:0.85rem 2.5rem; font-size:0.95rem;">
-            ✅ Finalizar Workout
-        </button>
-    </div>
+<div class="container">
+    <div id="coachNotesContainer"></div>
+    <div id="sectionsContainer"></div>
 </div>
-
-<!-- MODAL DE RESULTADOS -->
-<div class="modal-overlay" id="modalOverlay">
-    <div class="modal">
-        <div class="modal-header">
-            <h3>📋 Registrar Resultado</h3>
-            <button class="modal-close" onclick="closeResultModal()">×</button>
-        </div>
-
-        <div class="form-row">
-            <label class="form-label">Tiempo Total</label>
-            <input type="text" class="form-input" id="resultTime" readonly placeholder="00:00">
-        </div>
-
-        <div class="form-row-duo">
-            <div class="form-row">
-                <label class="form-label">Rounds Completados</label>
-                <input type="number" class="form-input" id="resultRounds" placeholder="0" min="0">
-            </div>
-            <div class="form-row">
-                <label class="form-label">Modalidad</label>
-                <select class="form-input" id="resultRxScaled">
-                    <option value="rx">RX (sin modificar)</option>
-                    <option value="scaled">Scaled (modificado)</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="form-row">
-            <label class="form-label">¿Cómo te fue? <span style="color:var(--text-muted); font-weight:400; text-transform:none; letter-spacing:0;">(selecciona)</span></label>
-            <div class="stars" id="starsContainer">
-                <span class="star" data-val="1" onclick="setFeeling(1)">★</span>
-                <span class="star" data-val="2" onclick="setFeeling(2)">★</span>
-                <span class="star" data-val="3" onclick="setFeeling(3)">★</span>
-                <span class="star" data-val="4" onclick="setFeeling(4)">★</span>
-                <span class="star" data-val="5" onclick="setFeeling(5)">★</span>
-            </div>
-            <div class="stars-label"><span>Muy difícil</span><span>Perfecto</span></div>
-        </div>
-
-        <div class="form-row">
-            <label class="form-label">Notas (opcional)</label>
-            <textarea class="form-input" id="resultNotes" placeholder="Como te fue, qué modificaste..." rows="2" style="resize:vertical; border-radius:8px;"></textarea>
-        </div>
-
-        <div class="modal-actions">
-            <button class="btn btn-ghost" onclick="closeResultModal()">Cancelar</button>
-            <button class="btn btn-success" onclick="submitResult()">Guardar Resultado</button>
-        </div>
-    </div>
-</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast">Mensaje</div>
 
 <script>
 const API_URL = 'http://localhost:8000/api/v1';
 const authToken = localStorage.getItem('authToken');
+
+if (!authToken) window.location.href = 'login-connected.html';
+
 const urlParams = new URLSearchParams(window.location.search);
 const assignmentId = urlParams.get('id');
+const selectedDate = urlParams.get('date');
 
-if (!authToken || !assignmentId) window.location.href = 'athlete-dashboard.html';
+let workoutData = null;
+let sectionTimers = {}; // { sectionIndex: { startTime, elapsed, interval } }
+let sectionResults = {}; // { sectionIndex: { completed, time, result } }
 
-// Timer state
-let timerSecs = 0, timerInterval = null, isRunning = false;
-
-// Workout state
-let assignment = null;
-let exerciseChecks = {}; // { sectionIdx_exIdx: true/false }
-let totalExercises = 0;
-let checkedCount = 0;
-let feelingRating = 0;
+const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
 
 loadWorkout();
 
 async function loadWorkout() {
     try {
-        const res = await fetch(`${API_URL}/my/assignments/${assignmentId}`, { headers: authHeaders() });
-        const data = await res.json();
-        if (!data.success) { showToast('No se encontró el workout', true); return; }
+        const response = await fetch(`${API_URL}/my/assignments/${assignmentId}`, {
+            headers: authHeaders()
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            workoutData = data.data.assignment;
+            
+            // Cargar resultados guardados si existen
+            await loadSavedResults();
+            
+            renderWorkout();
+        } else {
+            alert('Error al cargar el workout');
+            history.back();
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Error de conexión');
+        history.back();
+    }
+}
 
-        assignment = data.data.assignment || data.data;
-        renderWorkout();
-
-        // Auto-start si viene con ?start=true
-        if (urlParams.get('start') === 'true') toggleTimer();
-
-    } catch(e) { console.error(e); showToast('Error al cargar workout', true); }
+async function loadSavedResults() {
+    try {
+        const response = await fetch(`${API_URL}/results?assignment_id=${assignmentId}`, {
+            headers: authHeaders()
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.data.results && data.data.results.length > 0) {
+            const savedResult = data.data.results[0];
+            
+            // Cargar section_results guardados
+            if (savedResult.section_results) {
+                Object.keys(savedResult.section_results).forEach(idx => {
+                    const sectionData = savedResult.section_results[idx];
+                    sectionResults[idx] = {
+                        completed: sectionData.completed,
+                        time_seconds: sectionData.time_seconds,
+                        result: sectionData.result,
+                        saved: true
+                    };
+                    
+                    // Restaurar timer elapsed
+                    if (sectionData.time_seconds > 0) {
+                        sectionTimers[idx] = {
+                            startTime: null,
+                            elapsed: sectionData.time_seconds * 1000,
+                            interval: null
+                        };
+                    }
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error loading saved results:', error);
+        // No hacer nada, continuar sin resultados guardados
+    }
 }
 
 function renderWorkout() {
-    const w = assignment.workout || {};
-    document.getElementById('topTitle').textContent = w.name || 'Workout';
-
-    if (assignment.is_completed) {
-        document.getElementById('topBadge').textContent = 'Completado';
-        document.getElementById('topBadge').className = 'topbar-badge done';
-        document.getElementById('finishBtn').disabled = true;
-        document.getElementById('finishBtn').style.opacity = '0.4';
-        document.getElementById('finishBtn').textContent = '✅ Ya completado';
-    }
-
-    // Info tags
-    document.getElementById('workoutInfo').innerHTML = [
-        w.workout_type || w.type ? `<span class="info-tag">📋 ${w.workout_type||w.type}</span>` : '',
-        w.difficulty_level || w.difficulty ? `<span class="info-tag">⚡ ${w.difficulty_level||w.difficulty}</span>` : '',
-        assignment.scheduled_date ? `<span class="info-tag">📅 ${new Date(assignment.scheduled_date).toLocaleDateString('es-ES',{day:'numeric',month:'long'})}</span>` : '',
-        assignment.notes ? `<span class="info-tag">📝 ${assignment.notes}</span>` : ''
-    ].join('');
-
-    // Secciones + ejercicios
-    const sections = w.sections || [];
-    totalExercises = 0;
-    sections.forEach((sec, si) => { (sec.exercises||[]).forEach(() => totalExercises++); });
-
-    document.getElementById('workoutContent').innerHTML = sections.map((sec, si) => {
-        const exercises = sec.exercises || [];
-        return `<div class="section-card">
-            <div class="section-header">
-                <div>
-                    <span class="section-title">${sec.title || `Pieza ${si+1}`}</span>
-                    ${sec.type ? `<span class="section-type" style="margin-left:0.5rem;">${sec.type}</span>` : ''}
-                </div>
-                <span class="section-progress" id="secProg_${si}">${exercises.length} ejercicios</span>
+    const workout = workoutData.workout;
+    
+    document.getElementById('workoutTitle').textContent = workout.name;
+    
+    // Coach notes
+    if (workout.description) {
+        document.getElementById('coachNotesContainer').innerHTML = `
+            <div class="coach-notes">
+                <div class="coach-notes-title">📝 Notas del Coach:</div>
+                <div style="white-space:pre-wrap;">${workout.description}</div>
             </div>
-            ${exercises.map((ex, ei) => `
-                <div class="exercise-item" id="exItem_${si}_${ei}" onclick="toggleExercise(${si},${ei})">
-                    <div class="ex-checkbox" id="exCheck_${si}_${ei}"></div>
-                    <div class="ex-content">
-                        <div class="ex-name">${ex.name || 'Ejercicio'}</div>
-                        <div class="ex-details">
-                            ${ex.sets ? `<span>🔁 ${ex.sets} sets</span>` : ''}
-                            ${ex.reps ? `<span>💪 ${ex.reps} reps</span>` : ''}
-                            ${ex.duration ? `<span>⏱️ ${ex.duration}</span>` : ''}
-                            ${ex.rest ? `<span>😴 Desc: ${ex.rest}</span>` : ''}
-                            ${ex.weight ? `<span>⚖️ ${ex.weight}</span>` : ''}
-                        </div>
-                        ${ex.notes ? `<div class="ex-notes">📝 ${ex.notes}</div>` : ''}
-                        ${ex.video_url ? `
-                            <div class="ex-video">
-                                <button onclick="toggleVideo('video-ex-${sectionIdx}-${exIdx}')" style="background:var(--primary);color:white;border:none;padding:0.4rem 0.8rem;border-radius:6px;cursor:pointer;font-size:0.85rem;margin-top:0.5rem;">
-                                    🎬 Ver video
-                                </button>
-                                <div id="video-ex-${sectionIdx}-${exIdx}" style="display:none;margin-top:0.75rem;border-radius:8px;overflow:hidden;">
-                                    <iframe width="100%" height="250" src="${getEmbedUrl(ex.video_url)}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                                </div>
-                            </div>
-                        ` : ''}
+        `;
+    }
+    
+    // Progress bar
+    const sections = workout.sections || [];
+    const completedCount = Object.keys(sectionResults).filter(k => sectionResults[k].saved).length;
+    const totalCount = sections.length;
+    const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+    
+    const progressBarHtml = `
+        <div style="background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+                <span style="font-weight:600;">Progreso de la Sesión</span>
+                <span style="color:var(--primary);font-weight:700;">${completedCount}/${totalCount} secciones</span>
+            </div>
+            <div style="width:100%;height:12px;background:rgba(0,0,0,0.3);border-radius:6px;overflow:hidden;">
+                <div style="width:${progressPercent}%;height:100%;background:linear-gradient(90deg,var(--primary),var(--success));transition:width 0.3s;"></div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('coachNotesContainer').insertAdjacentHTML('beforeend', progressBarHtml);
+    
+    // Sections
+    const container = document.getElementById('sectionsContainer');
+    
+    container.innerHTML = sections.map((section, idx) => {
+        const letter = letters[idx] || (idx + 1);
+        const params = section.parameters || {};
+        
+        // Construir info de parámetros
+        let paramsText = '';
+        if (params.time_cap) paramsText += ` • Time Cap: ${params.time_cap} min`;
+        if (params.rounds) paramsText += ` • ${params.rounds} rounds`;
+        if (params.duration) paramsText += ` • ${params.duration} min`;
+        if (params.sets) paramsText += ` • ${params.sets} sets`;
+        if (params.reps) paramsText += ` • ${params.reps}`;
+        if (params.work_sec && params.rest_sec) paramsText += ` • ${params.work_sec}seg/${params.rest_sec}seg`;
+        
+        // Datos guardados
+        const savedData = sectionResults[idx] || {};
+        const isSaved = savedData.saved || false;
+        const savedResult = savedData.result || '';
+        
+        return `
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-letter">${letter}</div>
+                    <div class="section-info">
+                        <div class="section-name">${section.name || 'Sección ' + (idx + 1)}</div>
+                        <div class="section-type">${section.section_type}${paramsText}</div>
+                    </div>
+                    <div class="section-check ${isSaved ? 'checked' : ''}" id="check-${idx}"></div>
+                </div>
+                
+                ${section.is_benchmark || section.is_hero ? `
+                    <div class="section-badges">
+                        ${section.is_benchmark ? '<span class="badge badge-benchmark">📊 BENCHMARK</span>' : ''}
+                        ${section.is_hero ? '<span class="badge badge-hero">🎖️ HERO WOD</span>' : ''}
+                    </div>
+                ` : ''}
+                
+                <div class="timer-section">
+                    <div class="timer-display" id="timer-${idx}">00:00</div>
+                    <div class="timer-buttons">
+                        <button class="timer-btn btn-start" id="start-btn-${idx}" onclick="toggleTimer(${idx})">▶️ Iniciar</button>
+                        <button class="timer-btn btn-reset" onclick="resetTimer(${idx})">🔄 Reset</button>
                     </div>
                 </div>
-            `).join('')}
-        </div>`;
+                
+                ${section.description ? `<div class="section-content">${section.description}</div>` : ''}
+                
+                ${section.video_url ? `
+                    <div class="video-container">
+                        <button class="video-btn" onclick="toggleVideo(${idx})">▶️ Ver video demo</button>
+                        <div id="video-${idx}" style="display:none;" class="video-embed">
+                            <iframe width="100%" height="350" src="${getEmbedUrl(section.video_url)}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div class="results-box">
+                    <div class="results-label">📊 Resultados</div>
+                    <textarea class="results-input" id="result-${idx}" placeholder="Tiempo, reps, peso, notas..."
+                              onchange="saveResultLocal(${idx}, this.value)">${savedResult}</textarea>
+                </div>
+                
+                <button class="save-section-btn ${isSaved ? 'saved' : ''}" id="save-btn-${idx}" onclick="saveSection(${idx})">
+                    ${isSaved ? 'Actualizar Sección' : '💾 Guardar Sección'}
+                </button>
+            </div>
+        `;
     }).join('');
-
-    updateProgress();
-}
-
-/* ─── CHECKBOX EXERCISES ─── */
-function toggleExercise(si, ei) {
-    const key = `${si}_${ei}`;
-    exerciseChecks[key] = !exerciseChecks[key];
-
-    const item = document.getElementById(`exItem_${si}_${ei}`);
-    const check = document.getElementById(`exCheck_${si}_${ei}`);
-
-    if (exerciseChecks[key]) {
-        item.classList.add('checked');
-        check.classList.add('checked');
-        checkedCount++;
-    } else {
-        item.classList.remove('checked');
-        check.classList.remove('checked');
-        checkedCount--;
-    }
-    updateProgress();
-}
-
-function updateProgress() {
-    const pct = totalExercises > 0 ? Math.round((checkedCount / totalExercises) * 100) : 0;
-    document.getElementById('progressFill').style.width = pct + '%';
-    document.getElementById('progressText').textContent = `${checkedCount} / ${totalExercises}`;
-}
-
-/* ─── TIMER ─── */
-function toggleTimer() {
-    if (isRunning) {
-        clearInterval(timerInterval);
-        document.getElementById('startBtn').innerHTML = '▶️ Continuar';
-        document.getElementById('timerDisplay').classList.remove('running');
-    } else {
-        timerInterval = setInterval(() => { timerSecs++; updateTimer(); }, 1000);
-        document.getElementById('startBtn').innerHTML = '⏸️ Pausar';
-        document.getElementById('timerDisplay').classList.add('running');
-    }
-    isRunning = !isRunning;
-}
-
-function resetTimer() {
-    clearInterval(timerInterval);
-    timerSecs = 0; isRunning = false;
-    updateTimer();
-    document.getElementById('startBtn').innerHTML = '▶️ Iniciar';
-    document.getElementById('timerDisplay').classList.remove('running');
-}
-
-function updateTimer() {
-    const m = Math.floor(timerSecs/60), s = timerSecs%60;
-    document.getElementById('timerDisplay').textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-}
-
-/* ─── MODAL RESULTADOS ─── */
-function openResultModal() {
-    // Parar timer
-    if (isRunning) toggleTimer();
-
-    const m = Math.floor(timerSecs/60), s = timerSecs%60;
-    document.getElementById('resultTime').value = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-    document.getElementById('modalOverlay').classList.add('show');
-}
-
-function closeResultModal() {
-    document.getElementById('modalOverlay').classList.remove('show');
-}
-
-/* ─── STARS (feeling) ─── */
-function setFeeling(val) {
-    feelingRating = val;
-    document.querySelectorAll('.star').forEach(s => {
-        s.classList.toggle('active', parseInt(s.dataset.val) <= val);
+    
+    // Actualizar displays de timer con valores guardados
+    sections.forEach((section, idx) => {
+        if (sectionTimers[idx] && sectionTimers[idx].elapsed > 0) {
+            const totalSeconds = Math.floor(sectionTimers[idx].elapsed / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            const display = document.getElementById(`timer-${idx}`);
+            if (display) {
+                display.textContent = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+            }
+        }
     });
 }
 
-/* ─── SUBMIT RESULT ─── */
-async function submitResult() {
-    try {
-        const rounds = document.getElementById('resultRounds').value;
-        const rxScaled = document.getElementById('resultRxScaled').value;
-        const notes = document.getElementById('resultNotes').value;
-
-        const payload = {
-            assignment_id: parseInt(assignmentId),
-            completed_at: new Date().toISOString(),
-            time_seconds: timerSecs || null,
-            rounds_completed: rounds ? parseInt(rounds) : null,
-            rx_or_scaled: rxScaled,
-            feeling_rating: feelingRating || null,
-            notes: notes || null
-        };
-
-        const res = await fetch(`${API_URL}/results`, {
-            method: 'POST',
-            headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-            closeResultModal();
-            showToast(data.message || '¡Workout completado!');
-
-            // Actualizar UI
-            document.getElementById('topBadge').textContent = 'Completado';
-            document.getElementById('topBadge').className = 'topbar-badge done';
-            document.getElementById('finishBtn').disabled = true;
-            document.getElementById('finishBtn').style.opacity = '0.4';
-            document.getElementById('finishBtn').textContent = '✅ Ya completado';
-
-            // Redirigir al dashboard después de 2s
-            const returnDate = urlParams.get('date');
-            const redirectUrl = returnDate 
-                ? `athlete-dashboard.html?refresh=true&date=${returnDate}`
-                : 'athlete-dashboard.html?refresh=true';
-            setTimeout(() => { window.location.href = redirectUrl; }, 2200);
-        } else {
-            showToast(data.message || 'Error al guardar', true);
-        }
-    } catch(e) {
-        console.error(e);
-        showToast('Error al guardar resultado', true);
+// TIMER POR SECCIÓN
+function toggleTimer(idx) {
+    if (!sectionTimers[idx]) {
+        sectionTimers[idx] = { startTime: null, elapsed: 0, interval: null };
+    }
+    
+    const timer = sectionTimers[idx];
+    const btn = document.getElementById(`start-btn-${idx}`);
+    
+    if (timer.interval) {
+        // Pausar
+        clearInterval(timer.interval);
+        timer.interval = null;
+        btn.innerHTML = '▶️ Continuar';
+    } else {
+        // Iniciar/Continuar
+        timer.startTime = Date.now() - timer.elapsed;
+        timer.interval = setInterval(() => updateTimerDisplay(idx), 100);
+        btn.innerHTML = '⏸️ Pausar';
     }
 }
 
-/* ─── HELPERS ─── */
-function goBack() { const d = urlParams.get('date'); window.location.href = d ? `athlete-dashboard.html?date=${d}` : 'athlete-dashboard.html'; }
-function showToast(msg, error=false) { const t=document.getElementById('toast'); t.textContent=(error?'❌ ':'✅ ')+msg; t.className='toast show'+(error?' error':''); setTimeout(()=>t.className='toast',3000); }
-function authHeaders() { return {'Authorization':`Bearer ${authToken}`,'Accept':'application/json'}; }
-
-function logout() {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('cloudework_user');
-    window.location.href = 'login-connected.html';
+function resetTimer(idx) {
+    if (sectionTimers[idx]) {
+        clearInterval(sectionTimers[idx].interval);
+        sectionTimers[idx] = { startTime: null, elapsed: 0, interval: null };
+    }
+    document.getElementById(`timer-${idx}`).textContent = '00:00';
+    document.getElementById(`start-btn-${idx}`).innerHTML = '▶️ Iniciar';
 }
+
+function updateTimerDisplay(idx) {
+    const timer = sectionTimers[idx];
+    if (!timer || !timer.startTime) return;
+    
+    timer.elapsed = Date.now() - timer.startTime;
+    const totalSeconds = Math.floor(timer.elapsed / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    
+    document.getElementById(`timer-${idx}`).textContent = 
+        String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+}
+
+function saveResultLocal(idx, value) {
+    if (!sectionResults[idx]) sectionResults[idx] = {};
+    sectionResults[idx].result = value;
+    
+    // Guardar tiempo del timer
+    if (sectionTimers[idx]) {
+        sectionResults[idx].time_seconds = Math.floor(sectionTimers[idx].elapsed / 1000);
+    }
+}
+
+async function saveSection(idx) {
+    // Pausar el timer si está corriendo
+    if (sectionTimers[idx]?.interval) {
+        toggleTimer(idx);
+    }
+    
+    // Preparar datos de la sección
+    const timeSeconds = sectionTimers[idx] ? Math.floor(sectionTimers[idx].elapsed / 1000) : 0;
+    const result = document.getElementById(`result-${idx}`).value;
+    
+    const sectionData = {
+        section_index: idx,
+        time_seconds: timeSeconds,
+        result: result || null,
+        completed: true
+    };
+    
+    try {
+        const btn = document.getElementById(`save-btn-${idx}`);
+        const check = document.getElementById(`check-${idx}`);
+        
+        btn.disabled = true;
+        btn.textContent = 'Guardando...';
+        
+        const response = await fetch(`${API_URL}/results/section`, {
+            method: 'POST',
+            headers: {
+                ...authHeaders(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                workout_assignment_id: assignmentId,
+                section_data: sectionData
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Marcar como guardado
+            btn.classList.add('saved');
+            btn.textContent = 'Guardado';
+            check.classList.add('checked');
+            
+            // Guardar en memoria local
+            if (!sectionResults[idx]) sectionResults[idx] = {};
+            sectionResults[idx].completed = true;
+            sectionResults[idx].saved = true;
+            
+            // Actualizar progress bar
+            updateProgressBar();
+            
+            // Verificar si todas las secciones están completadas
+            await checkAutoComplete();
+            
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.textContent = '💾 Actualizar Sección';
+            }, 2000);
+        } else {
+            btn.disabled = false;
+            btn.textContent = '💾 Guardar Sección';
+            alert('Error: ' + (data.message || 'No se pudo guardar'));
+        }
+    } catch (error) {
+        console.error(error);
+        document.getElementById(`save-btn-${idx}`).disabled = false;
+        document.getElementById(`save-btn-${idx}`).textContent = '💾 Guardar Sección';
+        alert('Error de conexión');
+    }
+}
+
+async function checkAutoComplete() {
+    const totalSections = workoutData.workout.sections.length;
+    const completedSections = Object.keys(sectionResults).filter(k => sectionResults[k].saved).length;
+    
+    if (completedSections === totalSections) {
+        // Todas las secciones completadas - marcar workout como completado automáticamente
+        try {
+            const response = await fetch(`${API_URL}/results/complete`, {
+                method: 'POST',
+                headers: {
+                    ...authHeaders(),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    workout_assignment_id: assignmentId
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Mostrar mensaje de éxito
+                const returnDate = selectedDate || new Date().toISOString().split('T')[0];
+                
+                if (confirm('✅ ¡Workout completado! ¿Volver al calendario?')) {
+                    window.location.href = `athlete-day-view.html?date=${returnDate}`;
+                }
+            }
+        } catch (error) {
+            console.error('Error auto-completing workout:', error);
+        }
+    }
+}
+
+function updateProgressBar() {
+    const totalSections = workoutData.workout.sections.length;
+    const completedSections = Object.keys(sectionResults).filter(k => sectionResults[k].saved).length;
+    const progressPercent = totalSections > 0 ? Math.round((completedSections / totalSections) * 100) : 0;
+    
+    const progressBar = document.querySelector('[style*="linear-gradient(90deg,var(--primary),var(--success))"]');
+    const progressText = progressBar?.parentElement?.parentElement?.querySelector('[style*="font-weight:700"]');
+    
+    if (progressBar) {
+        progressBar.style.width = progressPercent + '%';
+    }
+    if (progressText) {
+        progressText.textContent = `${completedSections}/${totalSections} secciones`;
+    }
+}
+
+function toggleVideo(idx) {
+    const videoDiv = document.getElementById(`video-${idx}`);
+    if (videoDiv.style.display === 'none') {
+        videoDiv.style.display = 'block';
+    } else {
+        videoDiv.style.display = 'none';
+    }
+}
+
 function getEmbedUrl(url) {
-    // Convertir URLs de YouTube a formato embed
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
         let videoId = '';
         if (url.includes('youtu.be/')) {
@@ -465,7 +482,6 @@ function getEmbedUrl(url) {
         }
         return `https://www.youtube.com/embed/${videoId}`;
     }
-    // Vimeo
     if (url.includes('vimeo.com')) {
         const videoId = url.split('vimeo.com/')[1].split('?')[0];
         return `https://player.vimeo.com/video/${videoId}`;
@@ -473,15 +489,12 @@ function getEmbedUrl(url) {
     return url;
 }
 
-function toggleVideo(videoId) {
-    const videoDiv = document.getElementById(videoId);
-    if (videoDiv.style.display === 'none') {
-        videoDiv.style.display = 'block';
-    } else {
-        videoDiv.style.display = 'none';
-    }
+function authHeaders() {
+    return {
+        'Authorization': `Bearer ${authToken}`,
+        'Accept': 'application/json'
+    };
 }
-
 </script>
 </body>
 </html>

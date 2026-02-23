@@ -106,6 +106,8 @@
         .btn-outline { background:transparent; color:var(--text-muted); border:1px solid var(--card-border); }
         .btn-outline:hover { border-color:var(--primary); color:var(--primary); }
         .btn-done { background:var(--success); color:#fff; opacity:0.7; cursor:default; }
+        .btn-success { background:var(--success); color:#fff; }
+        .btn-success:hover { background:#0ea376; }
 
         .empty-state { text-align:center; padding:2.5rem 1rem; color:var(--text-muted); }
         .empty-state .empty-icon { font-size:2.8rem; margin-bottom:0.75rem; }
@@ -273,10 +275,10 @@ async function loadAll() {
                 titleEl.innerHTML = `📅 Workouts del ${fecha}`;
             }
         }
-        renderTodayWorkouts(assignData.success ? (assignData.data.assignments || []) : []);
+        await renderTodayWorkouts(assignData.success ? (assignData.data.assignments || []) : []);
     } catch(e) {
         console.warn('/my/assignments falló:', e.message);
-        renderTodayWorkouts([]);
+        await renderTodayWorkouts([]);
     }
 }
 
@@ -364,23 +366,85 @@ function renderRecentPRs(prs) {
 }
 
 
-function renderTodayWorkouts(assignments) {
-    console.log("🎯 renderTodayWorkouts llamado con:", assignments);
-    console.log("🎯 Tipo:", typeof assignments, "| Es array:", Array.isArray(assignments), "| Length:", assignments?.length);
+async function renderTodayWorkouts(assignments) {
+    console.log("renderTodayWorkouts llamado con:", assignments);
     if (!assignments.length) {
         document.getElementById('todayWorkouts').innerHTML = '<div class="empty-state"><div class="empty-icon">🎉</div><p>No tienes workouts para hoy. ¡Descansa!</p></div>';
         return;
     }
+    
+    // Obtener resultados para todos los assignments
+    const assignmentIds = assignments.map(a => a.id);
+    const resultsMap = await fetchResultsForAssignments(assignmentIds);
+    
     document.getElementById('todayWorkouts').innerHTML = assignments.map(a => {
         const w = a.workout || {};
         const done = a.is_completed;
-        return `<div class="workout-card ${done?'completed':''}" onclick="goWorkout(${a.id})">
+        
+        // Calcular progreso de secciones
+        const totalSections = (w.sections || []).length;
+        const result = resultsMap[a.id];
+        const sectionResults = result?.section_results || {};
+        const completedSections = Object.keys(sectionResults).filter(k => sectionResults[k].completed).length;
+        const progressPercent = totalSections > 0 ? Math.round((completedSections / totalSections) * 100) : 0;
+        
+        // Progress bar solo si hay progreso parcial
+        const showProgress = totalSections > 0 && completedSections > 0 && completedSections < totalSections;
+        
+        return `<div class="workout-card ${done?'completed':''}${showProgress?' in-progress':''}" onclick="goWorkout(${a.id})">
             <div class="card-top"><div class="card-name">${w.name||'Workout'}</div>${done?'<span class="badge badge-done">Completado</span>':(a.priority==='high'?'<span class="badge badge-high">Alta</span>':'<span class="badge badge-pending">Pendiente</span>')}</div>
             <div class="card-meta"><span>📋 ${w.type||'Custom'}</span><span>⚡ ${w.difficulty||'Intermedia'}</span></div>
+            ${showProgress ? `
+                <div style="margin:0.75rem 0;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                        <span style="font-size:0.85rem;color:var(--text-muted);">Progreso</span>
+                        <span style="font-size:0.85rem;font-weight:600;color:var(--primary);">${completedSections}/${totalSections} secciones</span>
+                    </div>
+                    <div style="width:100%;height:8px;background:rgba(0,0,0,0.2);border-radius:4px;overflow:hidden;">
+                        <div style="width:${progressPercent}%;height:100%;background:linear-gradient(90deg,var(--primary),var(--success));transition:width 0.3s;"></div>
+                    </div>
+                </div>
+            ` : ''}
             ${a.notes?`<div class="card-notes">📝 ${a.notes}</div>`:''}
-            <div class="card-actions">${done?`<button class="btn btn-done" disabled>✅ Completado</button>`:`<button class="btn btn-primary" onclick="event.stopPropagation(); goWorkout(${a.id},true)">▶️ Empezar</button><button class="btn btn-outline" onclick="event.stopPropagation(); goWorkout(${a.id})">Ver detalles</button>`}</div>
+            <div class="card-actions">
+                ${done 
+                    ? `<button class="btn btn-success" onclick="event.stopPropagation(); goWorkout(${a.id})">👁️ Ver detalles</button>` 
+                    : `<button class="btn btn-primary" onclick="event.stopPropagation(); goWorkout(${a.id},true)">▶️ ${showProgress ? 'Continuar' : 'Empezar'}</button>`
+                }
+            </div>
         </div>`;
     }).join('');
+}
+
+async function fetchResultsForAssignments(assignmentIds) {
+    const resultsMap = {};
+    try {
+        const promises = assignmentIds.map(async (id) => {
+            try {
+                // Timeout de 3 segundos por request
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
+                
+                const response = await fetch(`${API_URL}/results?assignment_id=${id}`, { 
+                    headers: authHeaders(),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                
+                const data = await response.json();
+                if (data.success && data.data.results && data.data.results.length > 0) {
+                    resultsMap[id] = data.data.results[0];
+                }
+            } catch (e) {
+                // Si falla o hace timeout, simplemente no agregamos resultados para este assignment
+                console.warn(`Error fetching results for assignment ${id}:`, e.message);
+            }
+        });
+        await Promise.all(promises);
+    } catch (error) {
+        console.error('Error fetching results:', error);
+    }
+    return resultsMap;
 }
 
 function goWorkout(id, start=false) {

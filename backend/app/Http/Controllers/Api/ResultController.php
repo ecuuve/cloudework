@@ -182,6 +182,10 @@ class ResultController extends Controller
         }
 
         // Filters
+        if ($request->has('assignment_id')) {
+            $query->where('assignment_id', $request->assignment_id);
+        }
+        
         if ($request->has('workout_id')) {
             $query->where('workout_id', $request->workout_id);
         }
@@ -216,7 +220,7 @@ class ResultController extends Controller
                     'name' => $result->workout->name,
                     'type' => $result->workout->workout_type,
                 ],
-                'completed_at' => $result->completed_at->format('Y-m-d H:i'),
+                'completed_at' => $result->completed_at?->format('Y-m-d H:i'),
                 'time_seconds' => $result->time_seconds,
                 'formatted_time' => $result->formatted_time,
                 'rounds_completed' => $result->rounds_completed,
@@ -227,6 +231,7 @@ class ResultController extends Controller
                 'is_pr' => $result->is_pr,
                 'notes' => $result->notes,
                 'video_url' => $result->video_url,
+                'section_results' => $result->section_results,
             ];
         });
 
@@ -549,5 +554,124 @@ class ResultController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Guardar resultado de una sección individual
+     */
+    public function saveSection(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'workout_assignment_id' => 'required|integer|exists:workout_assignments,id',
+            'section_data' => 'required|array',
+            'section_data.section_index' => 'required|integer',
+            'section_data.time_seconds' => 'nullable|integer',
+            'section_data.result' => 'nullable|string',
+            'section_data.completed' => 'required|boolean',
+        ]);
+
+        $athlete = $request->user()->athlete;
+        $assignment = WorkoutAssignment::find($validated['workout_assignment_id']);
+
+        if (!$assignment || $assignment->athlete_id !== $athlete->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Assignment not found or unauthorized',
+            ], 403);
+        }
+
+        // Buscar o crear el resultado del workout
+        $result = WorkoutResult::firstOrCreate(
+            [
+                'assignment_id' => $assignment->id,
+                'athlete_id' => $athlete->id,
+            ],
+            [
+                'workout_id' => $assignment->workout_id,
+                'time_seconds' => 0,
+                'rx_or_scaled' => 'rx',
+                'section_results' => [],
+                'completed_at' => null,
+            ]
+        );
+
+        // Actualizar section_results
+        $sectionResults = $result->section_results ?? [];
+        $sectionIndex = $validated['section_data']['section_index'];
+        
+        $sectionResults[$sectionIndex] = [
+            'completed' => $validated['section_data']['completed'],
+            'time_seconds' => $validated['section_data']['time_seconds'] ?? 0,
+            'result' => $validated['section_data']['result'] ?? null,
+            'saved_at' => now()->toISOString(),
+        ];
+
+        // Calcular tiempo total sumando todas las secciones
+        $totalTime = 0;
+        foreach ($sectionResults as $sec) {
+            $totalTime += $sec['time_seconds'] ?? 0;
+        }
+
+        $result->section_results = $sectionResults;
+        $result->time_seconds = $totalTime;
+        $result->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Section saved successfully',
+            'data' => [
+                'result_id' => $result->id,
+                'total_time' => $totalTime,
+            ],
+        ]);
+    }
+
+    /**
+     * Marcar workout como completado
+     */
+    public function completeWorkout(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'workout_assignment_id' => 'required|integer|exists:workout_assignments,id',
+        ]);
+
+        $athlete = $request->user()->athlete;
+        $assignment = WorkoutAssignment::find($validated['workout_assignment_id']);
+
+        if (!$assignment || $assignment->athlete_id !== $athlete->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Assignment not found or unauthorized',
+            ], 403);
+        }
+
+        // Buscar el resultado
+        $result = WorkoutResult::where('assignment_id', $assignment->id)
+            ->where('athlete_id', $athlete->id)
+            ->first();
+
+        if (!$result) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No sections saved yet. Save at least one section first.',
+            ], 400);
+        }
+
+        // Marcar assignment como completado
+        $assignment->is_completed = true;
+        $assignment->save();
+
+        // Actualizar fecha de completado en resultado
+        $result->completed_at = now();
+        $result->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Workout completed successfully',
+            'data' => [
+                'result_id' => $result->id,
+                'completed_at' => $result->completed_at->toISOString(),
+            ],
+        ]);
     }
 }

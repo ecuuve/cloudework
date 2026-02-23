@@ -74,9 +74,11 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Results
     Route::get('/v1/results', [ResultController::class, 'index']);
+    Route::post('/v1/results/section', [ResultController::class, 'saveSection']);
+    Route::post('/v1/results/complete', [ResultController::class, 'completeWorkout']);
+    Route::get('/v1/results/workout/{workoutId}/history', [ResultController::class, 'workoutHistory']);
     Route::post('/v1/results', [ResultController::class, 'store']);
     Route::put('/v1/results/{result}', [ResultController::class, 'update']);
-    Route::get('/v1/results/workout/{workoutId}/history', [ResultController::class, 'workoutHistory']);
     Route::get('/v1/personal-records', [ResultController::class, 'personalRecords']);
     
     // Analytics
