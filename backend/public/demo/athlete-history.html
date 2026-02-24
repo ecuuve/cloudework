@@ -325,7 +325,7 @@ function renderHistory(results) {
         const timeDisplay = r.formatted_time || formatTime(r.time_seconds) || '─';
 
         return `
-        <div class="history-item" onclick="goWorkout(${r.assignment_id})" style="cursor:pointer;">
+        <div class="history-item" onclick="goWorkoutHistory(${r.workout_id || w.id})" style="cursor:pointer;">
             <div class="h-check ${isPR?'pr':''}">${isPR?'🏆':'✓'}</div>
             <div class="h-info">
                 <div class="h-name">${w.name||'Workout'}</div>
@@ -406,6 +406,12 @@ function showToast(msg, error=false) {
 function goWorkout(assignmentId) {
     if (assignmentId) {
         window.location.href = `athlete-workout-view.html?id=${assignmentId}`;
+    }
+}
+
+function goWorkoutHistory(workoutId) {
+    if (workoutId) {
+        window.location.href = `athlete-workout-history.html?workout_id=${workoutId}`;
     }
 }
 </script>

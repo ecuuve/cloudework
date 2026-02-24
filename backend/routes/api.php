@@ -44,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/v1/my/assignments', [AthleteController::class, 'myAssignments']);
     Route::get('/v1/my/assignments/{id}', [AthleteController::class, 'myAssignment']);
     Route::post('/v1/my/assignments/{id}/repeat', [AthleteController::class, 'repeatWorkout']);
+    Route::post('/v1/my/self-assign', [AthleteController::class, 'selfAssignWorkout']);
     
     // Athletes CRUD
     Route::get('/v1/athletes', [AthleteController::class, 'index']);

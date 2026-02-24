@@ -39,14 +39,6 @@
 
         .main { margin-left:250px; margin-top:64px; padding:1.75rem 2rem; max-width:1600px; }
 
-        .banner { background:linear-gradient(135deg,rgba(255,107,53,0.15),rgba(255,107,53,0.05)); border:1px solid rgba(255,107,53,0.25); border-radius:14px; padding:1.5rem 2rem; display:flex; align-items:center; gap:2rem; margin-bottom:2rem; position:relative; overflow:hidden; }
-        .banner::before { content:''; position:absolute; top:0; right:0; width:200px; height:200px; background:radial-gradient(circle, rgba(255,107,53,0.15) 0%, transparent 70%); border-radius:50%; }
-        .banner-icon { font-size:3rem; z-index:1; }
-        .banner-text { flex:1; z-index:1; }
-        .banner-text h3 { font-size:1.3rem; color:var(--primary); margin-bottom:4px; font-family:'Oswald',sans-serif; }
-        .banner-text p { font-size:0.9rem; color:var(--text-muted); }
-        .banner-streak { font-size:2.5rem; font-weight:700; color:var(--primary); font-family:'Oswald',sans-serif; z-index:1; }
-
         .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1.2rem; margin-bottom:2rem; }
         .kpi-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:12px; padding:1.25rem; transition:all 0.25s; position:relative; overflow:hidden; }
         .kpi-card::before { content:''; position:absolute; top:0; left:0; width:4px; height:100%; background:var(--primary); opacity:0; transition:opacity 0.25s; }
@@ -58,6 +50,8 @@
         .kpi-icon.primary { background:rgba(255,107,53,0.15); color:var(--primary); }
         .kpi-icon.info { background:rgba(59,130,246,0.15); color:var(--info); }
         .kpi-icon.warning { background:rgba(245,158,11,0.15); color:var(--warning); }
+        .kpi-card.streak-card { background:linear-gradient(135deg,rgba(255,107,53,0.15),rgba(255,107,53,0.05)); border-color:rgba(255,107,53,0.25); }
+        .kpi-card.streak-card .kpi-value { color:var(--primary); }
         .kpi-label { font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; font-weight:600; }
         .kpi-value { font-size:2rem; font-weight:700; color:var(--text-main); font-family:'Oswald',sans-serif; line-height:1; margin-bottom:0.4rem; }
         .kpi-meta { font-size:0.75rem; color:var(--text-muted); }
@@ -68,15 +62,15 @@
         .week-chart { display:grid; grid-template-columns:repeat(7,1fr); gap:0.75rem; }
         .day-bar { text-align:center; }
         .day-label { font-size:0.7rem; color:var(--text-muted); margin-bottom:0.5rem; text-transform:uppercase; font-weight:600; }
-        .bar-container { height:120px; display:flex; align-items:flex-end; justify-content:center; }
+        .bar-container { height:60px; display:flex; align-items:flex-end; justify-content:center; }
         .bar { width:100%; max-width:60px; background:linear-gradient(to top, var(--primary), rgba(255,107,53,0.6)); border-radius:6px 6px 0 0; transition:all 0.3s; position:relative; }
         .bar:hover { transform:scaleY(1.05); filter:brightness(1.2); }
         .bar-value { position:absolute; top:-1.5rem; left:50%; transform:translateX(-50%); font-size:0.85rem; font-weight:600; color:var(--text-main); }
         .bar.empty { background:var(--card-border); opacity:0.3; }
 
         .pr-list { display:flex; flex-direction:column; gap:0.75rem; }
-        .pr-item { display:flex; align-items:center; gap:1rem; padding:0.75rem; background:rgba(255,255,255,0.03); border-radius:8px; border:1px solid var(--card-border); transition:all 0.2s; }
-        .pr-item:hover { background:rgba(255,255,255,0.06); border-color:rgba(255,107,53,0.3); }
+        .pr-item { display:flex; align-items:center; gap:1rem; padding:0.75rem; background:rgba(255,255,255,0.03); border-radius:8px; border:1px solid var(--card-border); transition:all 0.2s; cursor:pointer; }
+        .pr-item:hover { background:rgba(255,255,255,0.06); border-color:rgba(255,107,53,0.3); transform:translateX(4px); }
         .pr-trophy { font-size:1.5rem; }
         .pr-info { flex:1; }
         .pr-name { font-weight:600; font-size:0.9rem; color:var(--text-main); margin-bottom:2px; }
@@ -106,8 +100,6 @@
         .btn-outline { background:transparent; color:var(--text-muted); border:1px solid var(--card-border); }
         .btn-outline:hover { border-color:var(--primary); color:var(--primary); }
         .btn-done { background:var(--success); color:#fff; opacity:0.7; cursor:default; }
-        .btn-success { background:var(--success); color:#fff; }
-        .btn-success:hover { background:#0ea376; }
 
         .empty-state { text-align:center; padding:2.5rem 1rem; color:var(--text-muted); }
         .empty-state .empty-icon { font-size:2.8rem; margin-bottom:0.75rem; }
@@ -145,10 +137,6 @@
 </header>
 
 <main class="main">
-    <div class="banner" id="motivationBanner">
-        <div class="loading"><div class="loading-spinner"></div></div>
-    </div>
-
     <div class="kpi-grid" id="kpiGrid">
         <div class="loading"><div class="loading-spinner"></div></div>
     </div>
@@ -173,7 +161,7 @@
 
     <div class="chart-section">
         <div class="section-header">
-            <div class="section-title" id="workoutsTitle">🎯 Mis Workouts de Hoy</div>
+            <div class="section-title" id="workoutsTitle">🎯 Próximo Workout</div>
         </div>
         <div class="workouts-grid" id="todayWorkouts">
             <div class="loading"><div class="loading-spinner"></div></div>
@@ -255,68 +243,83 @@ async function loadAll() {
         renderRecentPRs([]);
     }
 
-    // ── 3. Workouts del día ────────────────────────────────────────────────
+    // ── 3. Próximo Workout ─────────────────────────────────────────────────
     try {
-        const dayFmt   = fmt(activeDate);
-        console.log('📡 Fetching assignments para fecha:', dayFmt);
-        const assignRes  = await fetch(`${API_URL}/my/assignments?scheduled_date=${dayFmt}`, { headers: authHeaders() });
-        console.log('📡 Response status:', assignRes.status);
+        console.log('📡 Fetching próximo workout');
+        const today = fmt(new Date());
+        
+        // Obtener todos los assignments futuros (desde hoy en adelante)
+        const assignRes = await fetch(`${API_URL}/my/assignments`, { headers: authHeaders() });
         const assignData = await assignRes.json();
-        console.log('📦 Assignments data completo:', JSON.stringify(assignData, null, 2));
-        console.log('📦 Cantidad de assignments:', (assignData.data?.assignments || []).length);
-
-        const titleEl = document.getElementById('workoutsTitle');
-        if (titleEl) {
-            const isToday = dayFmt === fmt(new Date());
-            if (isToday) {
-                titleEl.textContent = '🎯 Mis Workouts de Hoy';
-            } else {
-                const fecha = activeDate.toLocaleDateString('es-ES', {weekday:'long', day:'numeric', month:'long'});
-                titleEl.innerHTML = `📅 Workouts del ${fecha}`;
+        
+        if (assignData.success) {
+            const allAssignments = assignData.data.assignments || [];
+            
+            // Filtrar solo los que son de hoy en adelante y no completados
+            const futureAssignments = allAssignments
+                .filter(a => !a.is_completed && a.scheduled_date >= today)
+                .sort((a, b) => a.scheduled_date.localeCompare(b.scheduled_date));
+            
+            // Tomar solo el primero (el más próximo)
+            const nextAssignment = futureAssignments.length > 0 ? [futureAssignments[0]] : [];
+            
+            const titleEl = document.getElementById('workoutsTitle');
+            if (titleEl && nextAssignment.length > 0) {
+                const fecha = new Date(nextAssignment[0].scheduled_date + 'T00:00:00');
+                const isToday = nextAssignment[0].scheduled_date === today;
+                
+                if (isToday) {
+                    titleEl.textContent = '🎯 Próximo Workout - Hoy';
+                } else {
+                    const fechaStr = fecha.toLocaleDateString('es-ES', {weekday:'long', day:'numeric', month:'long'});
+                    titleEl.innerHTML = `🎯 Próximo Workout - ${fechaStr}`;
+                }
+            } else if (titleEl) {
+                titleEl.textContent = '🎯 Próximo Workout';
             }
+            
+            await renderTodayWorkouts(nextAssignment);
+        } else {
+            await renderTodayWorkouts([]);
         }
-        await renderTodayWorkouts(assignData.success ? (assignData.data.assignments || []) : []);
     } catch(e) {
         console.warn('/my/assignments falló:', e.message);
         await renderTodayWorkouts([]);
     }
 }
 
+
 function renderBanner(stats) {
-    const s = (stats && stats.overview) ? (stats.overview.current_streak || 0) : 0;
-    let icon, title, sub;
-    if (s >= 7)      { icon='🔥'; title=`${s} días de streak!`; sub='Estás imparable. Sigue así.'; }
-    else if (s >= 3) { icon='⚡'; title=`Streak de ${s} días`; sub='Vas muy bien, mantén el ritmo.'; }
-    else if (s === 0){ icon='🎯'; title='Comienza tu streak'; sub='Completa un workout hoy.'; }
-    else             { icon='💪'; title=`Día ${s} de tu streak`; sub='Cada día cuenta.'; }
-    
-    document.getElementById('motivationBanner').innerHTML = `
-        <div class="banner-icon">${icon}</div>
-        <div class="banner-text"><h3>${title}</h3><p>${sub}</p></div>
-        <div class="banner-streak">${s}</div>
-    `;
+    // Función vacía - el streak ahora es un KPI
 }
 
 function renderKPIs(stats) {
-    // Guard: si no hay stats, mostrar zeros
     if (!stats || !stats.overview) {
         document.getElementById('kpiGrid').innerHTML =
             '<div style="text-align:center;padding:2rem;color:var(--text-muted);">📊 Completa tu primer workout para ver estadísticas</div>';
         return;
     }
+    
+    const s = stats.overview.current_streak || 0;
+    let streakIcon, streakLabel, streakMeta;
+    if (s >= 7)      { streakIcon='🔥'; streakLabel=`${s} días de streak!`; streakMeta='Estás imparable'; }
+    else if (s >= 3) { streakIcon='⚡'; streakLabel=`Streak de ${s} días`; streakMeta='Vas muy bien'; }
+    else if (s === 0){ streakIcon='🎯'; streakLabel='Comienza tu streak'; streakMeta='Completa un workout'; }
+    else             { streakIcon='💪'; streakLabel=`Día ${s} de tu streak`; streakMeta='Cada día cuenta'; }
+    
     const kpis = [
+        { icon:streakIcon, color:'primary', label:streakLabel, value:s, meta:streakMeta, isStreak:true },
         { icon:'💪', color:'success', label:'Total Workouts', value:stats.overview.total_workouts, meta:`Esta semana: ${stats.this_week.workouts_completed}` },
         { icon:'🏆', color:'primary', label:'Personal Records', value:stats.overview.total_prs, meta:`Este mes: ${stats.this_month.prs_achieved}` },
         { icon:'📊', color:'info', label:'Tasa de Completación', value:`${stats.this_week.completion_rate}%`, meta:'Esta semana' },
         { icon:'⏱️', color:'warning', label:'Tiempo Promedio', value:`${stats.performance.avg_workout_time_minutes}`, meta:'minutos' },
         { icon:'⚡', color:'primary', label:'Tasa RX', value:`${stats.performance.rx_rate}%`, meta:'Workouts en RX' },
         { icon:'😊', color:'success', label:'Sentimiento Promedio', value:stats.performance.avg_feeling_rating.toFixed(1), meta:'de 5 estrellas' },
-        { icon:'🔥', color:'warning', label:'Mejor Streak', value:stats.overview.longest_streak, meta:'días consecutivos' },
         { icon:'📅', color:'info', label:'Este Mes', value:stats.this_month.workouts_completed, meta:'workouts completados' },
     ];
 
     document.getElementById('kpiGrid').innerHTML = kpis.map(k => `
-        <div class="kpi-card">
+        <div class="kpi-card ${k.isStreak ? 'streak-card' : ''}">
             <div class="kpi-header">
                 <div class="kpi-icon ${k.color}">${k.icon}</div>
             </div>
@@ -349,31 +352,31 @@ function renderRecentPRs(prs) {
     const el = document.getElementById('prList');
     if (!el) return;
     
-    // Aceptar tanto array directo como objeto con recent_prs
-    const prsList = Array.isArray(prs) ? prs : (prs?.recent_prs || []);
+    const prArray = Array.isArray(prs) ? prs : (prs?.recent_prs || []);
     
-    if (!prsList || prsList.length === 0) {
-        el.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);font-size:0.85rem;">🏆<br>Aún no tienes récords personales.<br>¡Sigue entrenando!</div>';
+    if (!prArray.length) {
+        el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:0.9rem;">🏆 Aún no tienes récords personales</div>';
         return;
     }
     
-    el.innerHTML = prsList.slice(0,5).map(pr => 
-        `<div style="padding:0.75rem 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-            <div style="font-weight:600;margin-bottom:0.25rem;">${pr.workout_name || pr.movement_name || 'Workout'}</div>
-            <div style="font-size:0.8rem;color:var(--text-muted);">${pr.metric_value || pr.value} ${pr.metric_type || pr.unit || ''} · ${pr.achieved_at || ''}</div>
-        </div>`
-    ).join('');
+    el.innerHTML = prArray.map(pr => `
+        <div class="pr-item" onclick="goToWorkoutHistory(${pr.workout_id})">
+            <div style="flex:1;">
+                <div style="font-weight:600;margin-bottom:0.25rem;">${pr.workout_name || 'Workout'}</div>
+                <div style="font-size:0.75rem;color:var(--text-muted);">${pr.metric_type || 'PR'} • ${pr.achieved_at || 'Sin fecha'}</div>
+            </div>
+            <div style="font-weight:700;color:var(--primary);font-size:1.1rem;">${pr.metric_value || 'N/A'}</div>
+        </div>
+    `).join('');
 }
 
-
 async function renderTodayWorkouts(assignments) {
-    console.log("renderTodayWorkouts llamado con:", assignments);
+    console.log("🎯 renderTodayWorkouts llamado con:", assignments);
     if (!assignments.length) {
-        document.getElementById('todayWorkouts').innerHTML = '<div class="empty-state"><div class="empty-icon">🎉</div><p>No tienes workouts para hoy. ¡Descansa!</p></div>';
+        document.getElementById('todayWorkouts').innerHTML = '<div class="empty-state"><div class="empty-icon">🎉</div><p>No tienes workouts programados próximamente</p></div>';
         return;
     }
     
-    // Obtener resultados para todos los assignments
     const assignmentIds = assignments.map(a => a.id);
     const resultsMap = await fetchResultsForAssignments(assignmentIds);
     
@@ -381,14 +384,11 @@ async function renderTodayWorkouts(assignments) {
         const w = a.workout || {};
         const done = a.is_completed;
         
-        // Calcular progreso de secciones
         const totalSections = (w.sections || []).length;
         const result = resultsMap[a.id];
         const sectionResults = result?.section_results || {};
         const completedSections = Object.keys(sectionResults).filter(k => sectionResults[k].completed).length;
         const progressPercent = totalSections > 0 ? Math.round((completedSections / totalSections) * 100) : 0;
-        
-        // Progress bar solo si hay progreso parcial
         const showProgress = totalSections > 0 && completedSections > 0 && completedSections < totalSections;
         
         return `<div class="workout-card ${done?'completed':''}${showProgress?' in-progress':''}" onclick="goWorkout(${a.id})">
@@ -421,7 +421,6 @@ async function fetchResultsForAssignments(assignmentIds) {
     try {
         const promises = assignmentIds.map(async (id) => {
             try {
-                // Timeout de 3 segundos por request
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 3000);
                 
@@ -436,7 +435,6 @@ async function fetchResultsForAssignments(assignmentIds) {
                     resultsMap[id] = data.data.results[0];
                 }
             } catch (e) {
-                // Si falla o hace timeout, simplemente no agregamos resultados para este assignment
                 console.warn(`Error fetching results for assignment ${id}:`, e.message);
             }
         });
@@ -451,6 +449,15 @@ function goWorkout(id, start=false) {
     const dateParam = selectedDate ? `&date=${selectedDate}` : '';
     window.location.href = `athlete-workout-view.html?id=${id}${start?'&start=true':''}${dateParam}`;
 }
+
+function goToWorkoutHistory(workoutId) {
+    if (!workoutId || workoutId === 'undefined') {
+        console.warn('No workout_id disponible');
+        return;
+    }
+    window.location.href = `athlete-workout-history.html?workout_id=${workoutId}`;
+}
+
 function logout() { localStorage.removeItem('authToken'); localStorage.removeItem('cloudework_user'); window.location.href = 'login-connected.html'; }
 function authHeaders() { return {'Authorization':`Bearer ${authToken}`,'Accept':'application/json'}; }
 function fmt(d) { return d.toISOString().split('T')[0]; }

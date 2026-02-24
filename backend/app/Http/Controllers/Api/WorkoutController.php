@@ -207,7 +207,7 @@ class WorkoutController extends Controller
     /**
      * Display the specified workout.
      */
-    public function show(Request $request, int $id): JsonResponse
+    public function show(Request $request, string|int $id): JsonResponse
     {
         $coach = $request->user()->coach;
 

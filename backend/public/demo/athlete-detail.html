@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Atleta | CloudeWork</title>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary:#1a1d29; --bg-secondary:#252936; --card-bg:#2d3142; --card-border:rgba(255,255,255,0.08);
+            --text-main:#e2e8f0; --text-muted:#94a3b8; --primary:#FF6B35; --success:#10b981; --info:#3b82f6; --warning:#f59e0b;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Work Sans',sans-serif; background:var(--bg-primary); color:var(--text-main); line-height:1.6; }
+        
+        .header { background:var(--bg-secondary); border-bottom:1px solid var(--card-border); padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .header-left h2 { font-family:'Oswald',sans-serif; font-size:1.5rem; }
+        .btn { padding:0.5rem 1rem; border:none; border-radius:8px; font-weight:600; cursor:pointer; transition:all 0.2s; font-size:0.9rem; font-family:inherit; }
+        .btn-primary { background:var(--primary); color:#fff; }
+        .btn-primary:hover { background:#e05a24; }
+        .btn-outline { background:transparent; border:1px solid var(--card-border); color:var(--text-muted); }
+        .btn-outline:hover { border-color:var(--primary); color:var(--primary); }
+        
+        .main { max-width:1200px; margin:2rem auto; padding:0 2rem; }
+        .profile-header { background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px; padding:2rem; margin-bottom:2rem; display:flex; gap:2rem; align-items:start; }
+        .avatar { width:100px; height:100px; border-radius:50%; background:linear-gradient(135deg,var(--primary),#e04a1e); display:flex; align-items:center; justify-content:center; font-size:2.5rem; font-weight:700; color:#fff; }
+        .profile-info { flex:1; }
+        .profile-name { font-size:2rem; font-weight:700; font-family:'Oswald',sans-serif; margin-bottom:0.5rem; }
+        .profile-email { color:var(--text-muted); margin-bottom:1rem; }
+        .profile-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1rem; margin-top:1.5rem; }
+        .stat-item { text-align:center; }
+        .stat-value { font-size:1.8rem; font-weight:700; color:var(--primary); font-family:'Oswald',sans-serif; }
+        .stat-label { font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; }
+        
+        .section { background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px; padding:1.5rem; margin-bottom:1.5rem; }
+        .section-title { font-size:1.2rem; font-weight:600; margin-bottom:1rem; font-family:'Oswald',sans-serif; }
+        .info-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1.5rem; }
+        .info-item { }
+        .info-label { font-size:0.8rem; color:var(--text-muted); margin-bottom:0.3rem; text-transform:uppercase; }
+        .info-value { font-weight:600; }
+        
+        .badge { padding:0.25rem 0.75rem; border-radius:6px; font-size:0.75rem; font-weight:600; display:inline-block; }
+        .badge-success { background:rgba(16,185,129,0.15); color:var(--success); }
+        .badge-warning { background:rgba(245,158,11,0.15); color:var(--warning); }
+        
+        .loading { text-align:center; padding:3rem; }
+        .loading-spinner { width:40px; height:40px; border:3px solid rgba(255,107,53,0.2); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; display:inline-block; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-left">
+        <h2>👤 Detalle del Atleta</h2>
+    </div>
+    <div style="display:flex;gap:1rem;">
+        <button class="btn btn-primary" onclick="editAthlete()">✏️ Editar</button>
+        <button class="btn btn-outline" onclick="history.back()">← Volver</button>
+    </div>
+</div>
+
+<main class="main">
+    <div id="content">
+        <div class="loading"><div class="loading-spinner"></div></div>
+    </div>
+</main>
+
+<script>
+const API_URL = 'http://localhost:8000/api';
+const authToken = localStorage.getItem('authToken');
+const urlParams = new URLSearchParams(window.location.search);
+const athleteId = urlParams.get('id');
+
+if (!authToken || !athleteId) {
+    window.location.href = 'login-connected.html';
+}
+
+loadAthleteDetail();
+
+async function loadAthleteDetail() {
+    try {
+        const response = await fetch(`${API_URL}/v1/athletes/${athleteId}`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Accept': 'application/json'
+            }
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            renderAthleteDetail(data.data.athlete);
+        } else {
+            document.getElementById('content').innerHTML = '<p style="text-align:center;color:var(--text-muted);">Error al cargar datos del atleta</p>';
+        }
+    } catch(e) {
+        console.error('Error:', e);
+        document.getElementById('content').innerHTML = '<p style="text-align:center;color:var(--text-muted);">Error de conexión</p>';
+    }
+}
+
+function renderAthleteDetail(athlete) {
+    const user = athlete.user;
+    const stats = athlete.statistics || {};
+    const initials = (user.first_name?.[0] || '') + (user.last_name?.[0] || '');
+    
+    document.getElementById('content').innerHTML = `
+        <div class="profile-header">
+            <div class="avatar">${initials}</div>
+            <div class="profile-info">
+                <div class="profile-name">${user.full_name}</div>
+                <div class="profile-email">📧 ${user.email}</div>
+                <span class="badge ${athlete.status === 'active' ? 'badge-success' : 'badge-warning'}">
+                    ${athlete.status === 'active' ? 'Activo' : athlete.status === 'inactive' ? 'Inactivo' : 'En pausa'}
+                </span>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">${stats.total_workouts || 0}</div>
+                        <div class="stat-label">Workouts</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${stats.total_prs || 0}</div>
+                        <div class="stat-label">PRs</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${stats.current_streak || 0}</div>
+                        <div class="stat-label">Streak</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${stats.completion_rate || 0}%</div>
+                        <div class="stat-label">Completado</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">📋 Información Personal</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Teléfono</div>
+                    <div class="info-value">${user.phone || 'No especificado'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Fecha de Nacimiento</div>
+                    <div class="info-value">${athlete.date_of_birth || 'No especificado'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Edad</div>
+                    <div class="info-value">${athlete.age || 'N/A'} años</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Género</div>
+                    <div class="info-value">${athlete.gender || 'No especificado'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Altura</div>
+                    <div class="info-value">${athlete.height_cm ? athlete.height_cm + ' cm' : 'No especificado'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Peso</div>
+                    <div class="info-value">${athlete.weight_kg ? athlete.weight_kg + ' kg' : 'No especificado'}</div>
+                </div>
+            </div>
+        </div>
+        
+        ${athlete.goals ? `
+        <div class="section">
+            <div class="section-title">🎯 Objetivos</div>
+            <p style="white-space:pre-wrap;line-height:1.8;">${athlete.goals}</p>
+        </div>
+        ` : ''}
+        
+        ${athlete.medical_notes ? `
+        <div class="section">
+            <div class="section-title">🏥 Notas Médicas</div>
+            <p style="white-space:pre-wrap;line-height:1.8;color:var(--warning);">${athlete.medical_notes}</p>
+        </div>
+        ` : ''}
+        
+        <div class="section">
+            <div class="section-title">🚨 Contacto de Emergencia</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Nombre</div>
+                    <div class="info-value">${athlete.emergency_contact_name || 'No especificado'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Teléfono</div>
+                    <div class="info-value">${athlete.emergency_contact_phone || 'No especificado'}</div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function editAthlete() {
+    window.location.href = `athlete-edit.html?id=${athleteId}`;
+}
+</script>
+
+</body>
+</html>

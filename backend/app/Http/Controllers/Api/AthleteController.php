@@ -226,7 +226,7 @@ class AthleteController extends Controller
         }
 
         $athlete = $coach->athletes()
-            ->with(['user', 'personalRecords', 'groups'])
+            ->with(['user', 'personalRecords'])
             ->find($id);
 
         if (!$athlete) {
@@ -264,6 +264,50 @@ class AthleteController extends Controller
             ->limit(5)
             ->get();
 
+        // Calculate statistics
+        $totalWorkouts = \App\Models\WorkoutResult::where('athlete_id', $athlete->id)->count();
+        $totalPRs = $athlete->personalRecords()->count();
+        
+        $completedThisWeek = \App\Models\WorkoutAssignment::where('athlete_id', $athlete->id)
+            ->where('is_completed', true)
+            ->whereBetween('completed_at', [now()->startOfWeek(), now()->endOfWeek()])
+            ->count();
+            
+        $assignedThisWeek = \App\Models\WorkoutAssignment::where('athlete_id', $athlete->id)
+            ->whereBetween('scheduled_date', [now()->startOfWeek(), now()->endOfWeek()])
+            ->count();
+            
+        $completionRate = $assignedThisWeek > 0 ? round(($completedThisWeek / $assignedThisWeek) * 100) : 0;
+        
+        // Calculate current streak - simplified
+        $results = \App\Models\WorkoutAssignment::where('athlete_id', $athlete->id)
+            ->where('is_completed', true)
+            ->whereNotNull('completed_at')
+            ->orderBy('completed_at', 'desc')
+            ->pluck('completed_at');
+        
+        $currentStreak = 0;
+        if ($results->count() > 0) {
+            $today = now()->startOfDay();
+            $yesterday = now()->subDay()->startOfDay();
+            $lastCompleted = \Carbon\Carbon::parse($results->first())->startOfDay();
+            
+            if ($lastCompleted->equalTo($today) || $lastCompleted->equalTo($yesterday)) {
+                $currentStreak = 1;
+                for ($i = 1; $i < $results->count(); $i++) {
+                    $current = \Carbon\Carbon::parse($results[$i])->startOfDay();
+                    $previous = \Carbon\Carbon::parse($results[$i - 1])->startOfDay();
+                    $diff = $previous->diffInDays($current);
+                    
+                    if ($diff <= 1) {
+                        $currentStreak++;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -290,16 +334,11 @@ class AthleteController extends Controller
                     'status' => $athlete->status,
                     'start_date' => $athlete->start_date,
                     'statistics' => [
-                        'total_workouts' => $athlete->total_workouts,
-                        'total_prs' => $athlete->total_prs,
-                        'current_streak' => $athlete->current_streak,
-                        'completion_rate' => $athlete->completion_rate,
+                        'total_workouts' => $totalWorkouts,
+                        'total_prs' => $totalPRs,
+                        'current_streak' => $currentStreak,
+                        'completion_rate' => $completionRate,
                     ],
-                    'groups' => $athlete->groups->map(fn($g) => [
-                        'id' => $g->id,
-                        'name' => $g->name,
-                        'color' => $g->color,
-                    ]),
                     'recent_results' => $recentResults,
                     'recent_prs' => $recentPRs,
                     'created_at' => $athlete->created_at,
@@ -652,6 +691,7 @@ class AthleteController extends Controller
             ->get()
             ->map(function ($pr) {
                 return [
+                    'workout_id' => $pr->workoutResult->workoutAssignment->workout->id ?? null,
                     'workout_name' => $pr->workoutResult->workoutAssignment->workout->name ?? 'Unknown',
                     'metric_type' => $pr->metric_type,
                     'metric_value' => $pr->metric_value,
@@ -776,5 +816,71 @@ class AthleteController extends Controller
         }
         
         return $longestStreak;
+    }
+    
+    /**
+     * Allow athlete to self-assign a workout
+     */
+    public function selfAssignWorkout(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $athlete = $user->athlete;
+        
+        if (!$athlete) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only athletes can self-assign workouts',
+            ], 403);
+        }
+        
+        $validator = Validator::make($request->all(), [
+            'workout_id' => 'required|exists:workouts,id',
+            'scheduled_date' => 'nullable|date',
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+        
+        try {
+            // Create the assignment
+            $assignment = \App\Models\WorkoutAssignment::create([
+                'athlete_id' => $athlete->id,
+                'workout_id' => $request->workout_id,
+                'scheduled_date' => $request->scheduled_date ?? now()->toDateString(),
+                'assigned_by_coach_id' => $athlete->coach_id,
+                'priority' => 'medium',
+                'is_completed' => false,
+            ]);
+            
+            $assignment->load('workout');
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Workout asignado exitosamente',
+                'data' => [
+                    'assignment' => [
+                        'id' => $assignment->id,
+                        'workout_id' => $assignment->workout_id,
+                        'scheduled_date' => $assignment->scheduled_date,
+                        'workout' => [
+                            'id' => $assignment->workout->id,
+                            'name' => $assignment->workout->name,
+                        ],
+                    ],
+                ],
+            ], 201);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al asignar el workout',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }
