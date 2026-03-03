@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Atleta | CloudeWork</title>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary:#1a1d29; --bg-secondary:#252936; --card-bg:#2d3142; --card-border:rgba(255,255,255,0.08);
+            --text-main:#e2e8f0; --text-muted:#94a3b8; --primary:#FF6B35; --success:#10b981; --danger:#ef4444;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Work Sans',sans-serif; background:var(--bg-primary); color:var(--text-main); line-height:1.6; }
+        
+        .header { background:var(--bg-secondary); border-bottom:1px solid var(--card-border); padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .header h2 { font-family:'Oswald',sans-serif; font-size:1.5rem; }
+        .btn { padding:0.6rem 1.2rem; border:none; border-radius:8px; font-weight:600; cursor:pointer; transition:all 0.2s; font-size:0.9rem; font-family:inherit; }
+        .btn-primary { background:var(--primary); color:#fff; }
+        .btn-primary:hover { background:#e05a24; }
+        .btn-success { background:var(--success); color:#fff; }
+        .btn-success:hover { background:#0ea376; }
+        .btn-outline { background:transparent; border:1px solid var(--card-border); color:var(--text-muted); }
+        .btn-outline:hover { border-color:var(--primary); color:var(--primary); }
+        
+        .main { max-width:900px; margin:2rem auto; padding:0 2rem; }
+        .form-section { background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px; padding:2rem; margin-bottom:2rem; }
+        .section-title { font-size:1.3rem; font-weight:600; margin-bottom:1.5rem; font-family:'Oswald',sans-serif; }
+        
+        .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1.5rem; }
+        .form-group { }
+        .form-label { display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:0.5rem; font-weight:600; text-transform:uppercase; }
+        .form-input, .form-select, .form-textarea { width:100%; padding:0.75rem; background:rgba(0,0,0,0.2); border:1px solid var(--card-border); border-radius:8px; color:var(--text-main); font-family:inherit; font-size:0.95rem; transition:all 0.2s; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { outline:none; border-color:var(--primary); background:rgba(0,0,0,0.3); }
+        .form-textarea { min-height:120px; resize:vertical; }
+        
+        .form-actions { display:flex; gap:1rem; justify-content:flex-end; margin-top:2rem; }
+        
+        .alert { padding:1rem 1.5rem; border-radius:10px; margin-bottom:1.5rem; font-size:0.9rem; }
+        .alert-success { background:rgba(16,185,129,0.15); border:1px solid var(--success); color:#6ee7b7; }
+        .alert-error { background:rgba(239,68,68,0.15); border:1px solid var(--danger); color:#fca5a5; }
+        
+        .loading { text-align:center; padding:3rem; }
+        .loading-spinner { width:40px; height:40px; border:3px solid rgba(255,107,53,0.2); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; display:inline-block; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2>✏️ Editar Atleta</h2>
+    <button class="btn btn-outline" onclick="history.back()">← Cancelar</button>
+</div>
+
+<main class="main">
+    <div id="alertContainer"></div>
+    
+    <div id="formContainer">
+        <div class="loading"><div class="loading-spinner"></div></div>
+    </div>
+</main>
+
+<script>
+const API_URL = 'http://localhost:8000/api';
+const authToken = localStorage.getItem('authToken');
+const urlParams = new URLSearchParams(window.location.search);
+const athleteId = urlParams.get('id');
+
+if (!authToken || !athleteId) {
+    window.location.href = 'login-connected.html';
+}
+
+let athleteData = null;
+
+loadAthleteData();
+
+async function loadAthleteData() {
+    try {
+        const response = await fetch(`${API_URL}/v1/athletes/${athleteId}`, {
+            headers: authHeaders()
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            athleteData = data.data.athlete;
+            renderForm(athleteData);
+        } else {
+            showAlert('Error al cargar datos del atleta', 'error');
+        }
+    } catch(e) {
+        console.error('Error:', e);
+        showAlert('Error de conexión', 'error');
+    }
+}
+
+function renderForm(athlete) {
+    const user = athlete.user;
+    
+    document.getElementById('formContainer').innerHTML = `
+        <form id="editForm" onsubmit="saveAthlete(event)">
+            <div class="form-section">
+                <div class="section-title">👤 Datos Personales</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" class="form-input" id="first_name" value="${user.first_name || ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Apellido</label>
+                        <input type="text" class="form-input" id="last_name" value="${user.last_name || ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" id="email" value="${user.email || ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Teléfono</label>
+                        <input type="tel" class="form-input" id="phone" value="${user.phone || ''}">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <div class="section-title">📋 Información del Atleta</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Fecha de Nacimiento</label>
+                        <input type="date" class="form-input" id="date_of_birth" value="${athlete.date_of_birth || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Género</label>
+                        <select class="form-select" id="gender">
+                            <option value="">No especificado</option>
+                            <option value="male" ${athlete.gender === 'male' ? 'selected' : ''}>Masculino</option>
+                            <option value="female" ${athlete.gender === 'female' ? 'selected' : ''}>Femenino</option>
+                            <option value="other" ${athlete.gender === 'other' ? 'selected' : ''}>Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Altura (cm)</label>
+                        <input type="number" class="form-input" id="height_cm" value="${athlete.height_cm || ''}" min="0" max="300">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Peso (kg)</label>
+                        <input type="number" class="form-input" id="weight_kg" value="${athlete.weight_kg || ''}" min="0" max="500" step="0.1">
+                    </div>
+                    <div class="form-group" style="grid-column:1/-1;">
+                        <label class="form-label">Estado</label>
+                        <select class="form-select" id="status">
+                            <option value="active" ${athlete.status === 'active' ? 'selected' : ''}>Activo</option>
+                            <option value="inactive" ${athlete.status === 'inactive' ? 'selected' : ''}>Inactivo</option>
+                            <option value="paused" ${athlete.status === 'paused' ? 'selected' : ''}>En pausa</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <div class="section-title">🎯 Objetivos</div>
+                <div class="form-group">
+                    <textarea class="form-textarea" id="goals" placeholder="Describe los objetivos del atleta...">${athlete.goals || ''}</textarea>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <div class="section-title">🏥 Notas Médicas</div>
+                <div class="form-group">
+                    <textarea class="form-textarea" id="medical_notes" placeholder="Lesiones, condiciones médicas, alergias...">${athlete.medical_notes || ''}</textarea>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <div class="section-title">🚨 Contacto de Emergencia</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" class="form-input" id="emergency_contact_name" value="${athlete.emergency_contact_name || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Teléfono</label>
+                        <input type="tel" class="form-input" id="emergency_contact_phone" value="${athlete.emergency_contact_phone || ''}">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="history.back()">Cancelar</button>
+                <button type="submit" class="btn btn-success">💾 Guardar Cambios</button>
+            </div>
+        </form>
+    `;
+}
+
+async function saveAthlete(e) {
+    e.preventDefault();
+    
+    const formData = {
+        user: {
+            first_name: document.getElementById('first_name').value,
+            last_name: document.getElementById('last_name').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value || null,
+        },
+        date_of_birth: document.getElementById('date_of_birth').value || null,
+        gender: document.getElementById('gender').value || null,
+        height_cm: document.getElementById('height_cm').value || null,
+        weight_kg: document.getElementById('weight_kg').value || null,
+        status: document.getElementById('status').value,
+        goals: document.getElementById('goals').value || null,
+        medical_notes: document.getElementById('medical_notes').value || null,
+        emergency_contact_name: document.getElementById('emergency_contact_name').value || null,
+        emergency_contact_phone: document.getElementById('emergency_contact_phone').value || null,
+    };
+    
+    try {
+        const response = await fetch(`${API_URL}/v1/athletes/${athleteId}`, {
+            method: 'PUT',
+            headers: {
+                ...authHeaders(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showAlert('✅ Cambios guardados exitosamente', 'success');
+            setTimeout(() => {
+                window.location.href = `athlete-detail.html?id=${athleteId}`;
+            }, 1500);
+        } else {
+            showAlert('❌ ' + (data.message || 'Error al guardar'), 'error');
+        }
+    } catch(e) {
+        console.error('Error:', e);
+        showAlert('❌ Error de conexión', 'error');
+    }
+}
+
+function showAlert(message, type) {
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type}`;
+    alert.textContent = message;
+    
+    const container = document.getElementById('alertContainer');
+    container.innerHTML = '';
+    container.appendChild(alert);
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function authHeaders() {
+    return {
+        'Authorization': `Bearer ${authToken}`,
+        'Accept': 'application/json'
+    };
+}
+</script>
+
+</body>
+</html>
